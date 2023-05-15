@@ -37,6 +37,7 @@ from baseclasses.characterizations import (
 
 from baseclasses.chemical_energy import (
     CENOMESample, Electrode, Electrolyte, ElectroChemicalCell,
+    ElectroChemicalSetup, Environment,
     get_next_project_sample_number,
     CyclicVoltammetry,
     Chronoamperometry, ChronoamperometryMultiple,
@@ -103,6 +104,23 @@ class CE_NOME_Electrolyte(Electrolyte, EntryData):
                     "solvent"])))
 
 
+class CE_NOME_Environment(Environment, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'users',
+                'origin'],
+            properties=dict(
+                editable=dict(
+                    exclude=["chemical_composition_or_formulas"]),
+                order=[
+                    "name",
+                    "lab_id",
+                    "chemical_composition_or_formulas",
+                    "ph_value",
+                    "solvent"])))
+
+
 class CE_NOME_Chemical(Substance, EntryData):
     m_def = Section(
         a_eln=dict(hide=['users', 'origin']))
@@ -120,6 +138,21 @@ class CE_NOME_ElectroChemicalCell(ElectroChemicalCell, EntryData):
                 "reference_electrode",
                 "counter_electrode",
                 "electrolyte"
+            ])),
+    )
+
+
+class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
+    m_def = Section(
+        a_eln=dict(hide=['users', 'origin'],
+                   properties=dict(
+            order=[
+                "name",
+                "lab_id",
+                "chemical_composition_or_formulas",
+                "setup",
+                "reference_electrode",
+                "counter_electrode",
             ])),
     )
 
@@ -242,12 +275,10 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
                 order=[
                     "name",
                     "data_file",
-                    "working_electrode",
-                    "reference_electrode",
-                    "counter_electrode",
-                    "electrolyte",
-                    "electrochemical_cell",
-                    "samples"])),
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station"])),
         a_plot=[
             {
                 'label': 'Nyquist Plot',
@@ -285,12 +316,10 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy_Multiple(
                 order=[
                     "name",
                     "data_file",
-                    "working_electrode",
-                    "reference_electrode",
-                    "counter_electrode",
-                    "electrolyte",
-                    "electrochemical_cell",
-                    "samples"])),
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station"])),
     )
 
 
@@ -304,12 +333,10 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "working_electrode",
-                    "reference_electrode",
-                    "counter_electrode",
-                    "electrolyte",
-                    "electrochemical_cell",
-                    "samples"])),
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station"])),
         a_plot=[
             {
                 'label': 'Current over Voltage',
@@ -333,12 +360,10 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "working_electrode",
-                    "reference_electrode",
-                    "counter_electrode",
-                    "electrolyte",
-                    "electrochemical_cell",
-                    "samples"])), a_plot=[
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station"])), a_plot=[
             {
                 'label': 'Current', 'x': 'time', 'y': 'current', 'layout': {
                     'yaxis': {
@@ -356,12 +381,10 @@ class CE_NOME_Chronoamperometry_Multiple(ChronoamperometryMultiple, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "working_electrode",
-                    "reference_electrode",
-                    "counter_electrode",
-                    "electrolyte",
-                    "electrochemical_cell",
-                    "samples"])))
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station"])))
 
 
 class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
@@ -373,12 +396,10 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "working_electrode",
-                    "reference_electrode",
-                    "counter_electrode",
-                    "electrolyte",
-                    "electrochemical_cell",
-                    "samples"])), a_plot=[
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station"])), a_plot=[
             {
                 'label': 'Charge and current density',
                 'x': 'time',
@@ -402,12 +423,10 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "working_electrode",
-                    "reference_electrode",
-                    "counter_electrode",
-                    "electrolyte",
-                    "electrochemical_cell",
-                    "samples"])),
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station"])),
         a_plot=[
             {
                 'label': 'Voltage',
@@ -438,7 +457,7 @@ class CE_NOME_Process(ProcessOnSample, EntryData):
                     "name",
                     "data_file",
                     "batch",
-                    "samples"])))
+                    "station"])))
 
     data_file = Quantity(
         type=str,
