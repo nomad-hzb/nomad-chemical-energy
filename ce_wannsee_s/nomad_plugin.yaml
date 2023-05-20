@@ -1,0 +1,4 @@
+plugin_type: schema
+name: NOMAD schema for HZB CE-NOME plugin
+description: |
+  This is the collection of application schemas for the CE-NOME department at HZB.
