@@ -41,7 +41,7 @@ class Wannsee_D8_XRD_Bruker(XRD, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 "location",
                 "end_time",
@@ -78,7 +78,7 @@ class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 "location",
                 "end_time",
@@ -100,6 +100,16 @@ class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
                         "fixedrange": False},
                     'xaxis': {
                         "fixedrange": False}},
+            }, {
+                'label': 'Current Density over Voltage RHE',
+                'x': 'cycles/:/voltage_rhe',
+                'y': 'cycles/:/current_density',
+                'layout': {
+                    "showlegend": True,
+                    'yaxis': {
+                        "fixedrange": False},
+                    'xaxis': {
+                        "fixedrange": False}},
             }])
 
 
@@ -107,7 +117,7 @@ class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 "location",
                 "end_time",
@@ -129,7 +139,17 @@ class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
                         "fixedrange": False},
                     'xaxis': {
                         "fixedrange": False}},
-            }])
+            }, {
+                'label': 'Current Density over Voltage RHE',
+                'x': 'cycles/:/voltage_rhe',
+                'y': 'cycles/:/current_density',
+                'layout': {
+                    "showlegend": True,
+                    'yaxis': {
+                        "fixedrange": False},
+                    'xaxis': {
+                        "fixedrange": False}},
+            },])
 
 
 class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
@@ -137,7 +157,7 @@ class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users', "location", "end_time", "metadata_file", "station"],
             properties=dict(
                 order=[
@@ -177,7 +197,7 @@ class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users', "location", "end_time", "metadata_file", "station"],
             properties=dict(
                 order=[

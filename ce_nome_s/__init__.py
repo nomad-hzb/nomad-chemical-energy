@@ -35,6 +35,8 @@ from baseclasses.characterizations import (
     XASFluorescence, XASTransmission
 )
 
+from baseclasses.solar_energy import UVvisMeasurement
+
 from baseclasses.chemical_energy import (
     CENOMESample, Electrode, Electrolyte, ElectroChemicalCell,
     ElectroChemicalSetup, Environment,
@@ -67,8 +69,6 @@ class CE_NOME_Sample(CENOMESample, EntryData):
         a_eln=dict(
             hide=["users"],
             properties=dict(
-                editable=dict(
-                    exclude=["lab_id"]),
                 order=[
                     "name",
                     "lab_id", "chemical_composition_or_formulas",
@@ -255,7 +255,7 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users', "location", "end_time"],
             properties=dict(
                 order=[
@@ -269,7 +269,7 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users', "location", "end_time", "metadata_file"],
             properties=dict(
                 order=[
@@ -310,7 +310,7 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy_Multiple(
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users', "location", "end_time"],
             properties=dict(
                 order=[
@@ -327,7 +327,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users', "location", "end_time", "metadata_file"],
             properties=dict(
                 order=[
@@ -337,7 +337,17 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     "setup",
                     "samples",
                     "station"])),
-        a_plot=[
+        a_plot=[{
+            'label': 'Current Density over Voltage RHE',
+            'x': 'cycles/:/voltage_rhe',
+            'y': 'cycles/:/current_density',
+            'layout': {
+                "showlegend": True,
+                'yaxis': {
+                    "fixedrange": False},
+                'xaxis': {
+                    "fixedrange": False}},
+        },
             {
                 'label': 'Current over Voltage',
                 'x': 'cycles/:/voltage',
@@ -348,14 +358,14 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                         "fixedrange": False},
                     'xaxis': {
                         "fixedrange": False}},
-            }])
+        }])
 
 
 class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time", "metadata_file"],
+                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file"],
             properties=dict(
                 order=[
                     "name",
@@ -369,6 +379,13 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     'yaxis': {
                         "fixedrange": False}, 'xaxis': {
                         "fixedrange": False}}, "config": {
+                    "scrollZoom": True, 'staticPlot': False, }},
+            {
+                'label': 'Current Density', 'x': 'time',
+                'y': 'current_density', 'layout': {
+                    'yaxis': {
+                        "fixedrange": False}, 'xaxis': {
+                        "fixedrange": False}}, "config": {
                     "scrollZoom": True, 'staticPlot': False, }}])
 
 
@@ -376,7 +393,7 @@ class CE_NOME_Chronoamperometry_Multiple(ChronoamperometryMultiple, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"],
+                'lab_id', 'solution', 'users', "location", "end_time"],
             properties=dict(
                 order=[
                     "name",
@@ -391,7 +408,7 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time", "metadata_file"],
+                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file"],
             properties=dict(
                 order=[
                     "name",
@@ -417,7 +434,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users', "location", "end_time", "metadata_file"],
             properties=dict(
                 order=[
@@ -439,6 +456,20 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                         "fixedrange": False}},
             }])
 
+
+class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'solution',
+                'users',
+                'location',
+                'end_time'],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file",
+                    "samples"])))
 
 # %%####################################### Generic Entries
 

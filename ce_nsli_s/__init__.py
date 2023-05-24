@@ -136,7 +136,7 @@ class CE_NSLI_CyclicVoltammetry(CyclicVoltammetry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 "location",
                 "end_time",
@@ -161,7 +161,7 @@ class CE_NSLI_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 "location",
                 "end_time",
@@ -189,7 +189,7 @@ class CE_NSLI_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id',
+                'lab_id', 'solution',
                 'users',
                 "location",
                 "end_time",
@@ -214,14 +214,14 @@ class CE_NSLI_ConstantPotential(ConstantPotential, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]))
+                'lab_id', 'solution', 'users', "location", "end_time"]))
 
 
 class CE_NSLI_RamanSpectroscopy(Raman, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]),
+                'lab_id', 'solution', 'users', "location", "end_time"]),
         a_plot=[
             {
                 'label': 'Intensity',
@@ -250,7 +250,7 @@ class CE_NSLI_InfraredSpectroscopy(InfraredSpectroscopy, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]),
+                'lab_id', 'solution', 'users', "location", "end_time"]),
         a_plot=[
             {
                 'label': 'Absorbance',
@@ -264,49 +264,49 @@ class CE_NSLI_XAS(XAS, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]))
+                'lab_id', 'solution', 'users', "location", "end_time"]))
 
 
 class CE_NSLI_OpticalMicroscopy(OpticalMicorscopy, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]))
+                'lab_id', 'solution', 'users', "location", "end_time"]))
 
 
 class CE_NSLI_SEM(SEM, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]))
+                'lab_id', 'solution', 'users', "location", "end_time"]))
 
 
 class CE_NSLI_TEM(TEM, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]))
+                'lab_id', 'solution', 'users', "location", "end_time"]))
 
 
 class CE_NSLI_SXM(SXM, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]))
+                'lab_id', 'solution', 'users', "location", "end_time"]))
 
 
 class CE_NSLI_XPEEM(XPEEM, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]))
+                'lab_id', 'solution', 'users', "location", "end_time"]))
 
 
 class CE_NSLI_Photocurrent(PhotoCurrent, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]), a_plot=[
+                'lab_id', 'solution', 'users', "location", "end_time"]), a_plot=[
             {
                 'label': 'Energy', 'x': 'energy', 'y': 'voltage', 'layout': {
                     'yaxis': {
@@ -367,7 +367,7 @@ class CE_NSLI_SPV(SPV, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]),
+                'lab_id', 'solution', 'users', "location", "end_time"]),
         a_plot=[
             {
                 'label': 'Voltage',
