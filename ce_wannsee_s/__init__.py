@@ -52,7 +52,7 @@ class Wannsee_D8_XRD_Bruker(XRD, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "samples"])),
+                    "samples", "solution"])),
         a_plot=[
             {
                 'x': [

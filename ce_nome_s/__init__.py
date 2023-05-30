@@ -22,7 +22,7 @@ import numpy as np
 from nomad.metainfo import (
     Package,
     Quantity,
-    Section)
+    Section, SubSection)
 from nomad.datamodel.data import EntryData
 
 from nomad.datamodel.metainfo.eln import Substance
@@ -38,7 +38,7 @@ from baseclasses.characterizations import (
 from baseclasses.solar_energy import UVvisMeasurement
 
 from baseclasses.chemical_energy import (
-    CENOMESample, Electrode, Electrolyte, ElectroChemicalCell,
+    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell,
     ElectroChemicalSetup, Environment,
     get_next_project_sample_number,
     CyclicVoltammetry,
@@ -49,6 +49,7 @@ from baseclasses.chemical_energy import (
     ElectrochemicalImpedanceSpectroscopyMultiple,
     PreparationProtocol
 )
+
 
 m_package2 = Package(name='CE-NOME')
 
@@ -120,6 +121,9 @@ class CE_NOME_Environment(Environment, EntryData):
                     "ph_value",
                     "solvent"])))
 
+    environment_id = SubSection(
+        section_def=SampleIDCENOME)
+
 
 class CE_NOME_Chemical(Substance, EntryData):
     m_def = Section(
@@ -141,6 +145,9 @@ class CE_NOME_ElectroChemicalCell(ElectroChemicalCell, EntryData):
             ])),
     )
 
+    ecc_id = SubSection(
+        section_def=SampleIDCENOME)
+
 
 class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
     m_def = Section(
@@ -155,6 +162,9 @@ class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
                 "counter_electrode",
             ])),
     )
+
+    setup_id = SubSection(
+        section_def=SampleIDCENOME)
 
 
 class CE_NOME_Batch(CENOMESample, EntryData):
