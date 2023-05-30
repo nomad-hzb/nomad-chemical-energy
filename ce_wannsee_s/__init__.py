@@ -41,7 +41,7 @@ class Wannsee_D8_XRD_Bruker(XRD, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution',
+                'lab_id',
                 'users',
                 "location",
                 "end_time",
