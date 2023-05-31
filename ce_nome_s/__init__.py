@@ -47,7 +47,9 @@ from baseclasses.chemical_energy import (
     OpenCircuitVoltage,
     ElectrochemicalImpedanceSpectroscopy,
     ElectrochemicalImpedanceSpectroscopyMultiple,
-    PreparationProtocol
+    PreparationProtocol,
+    PhaseFluorometryOxygen,
+    PumpRateMeasurement
 )
 
 
@@ -480,6 +482,61 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
                     "name",
                     "data_file",
                     "samples"])))
+
+
+class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'solution',
+                'users',
+                'location',
+                'end_time'],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file", "environment",
+                    "setup",
+                    "samples", "electro_chemistry_measurement"
+                ])),
+        a_plot=[
+            {
+                'label': 'Oxygen',
+                'x': 'time',
+                'y': 'oxygen',
+                'layout': {
+                    'yaxis': {
+                        "fixedrange": False},
+                    'xaxis': {
+                        "fixedrange": False}},
+            }])
+
+
+class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'solution',
+                'users',
+                'location',
+                'end_time'],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file", "environment",
+                    "setup",
+                    "samples", "electro_chemistry_measurement"])),
+        a_plot=[
+            {
+                'label': 'Flow Rate Measured',
+                'x': 'time',
+                'y': ['flow_rate_measured', 'flow_rate_set'],
+                'layout': {
+                    'yaxis': {
+                        "fixedrange": False},
+                    'xaxis': {
+                        "fixedrange": False}},
+            }])
 
 # %%####################################### Generic Entries
 
