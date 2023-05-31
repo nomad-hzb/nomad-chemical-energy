@@ -338,7 +338,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", "end_time", "metadata_file"],
+                'users', "location", "end_time", "metadata_file", "voltage", "current", "current_density", "control", "charge"],
             properties=dict(
                 order=[
                     "name",
@@ -349,7 +349,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     "station"])),
         a_plot=[{
             'label': 'Current Density over Voltage RHE',
-            'x': 'cycles/:/voltage_rhe',
+            'x': 'cycles/:/voltage_rhe_compensated',
             'y': 'cycles/:/current_density',
             'layout': {
                 "showlegend": True,
