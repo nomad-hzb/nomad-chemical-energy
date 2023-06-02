@@ -79,7 +79,12 @@ class Wannsee_EM_M001_SEM_Merlin(SEM_Microscope_Merlin, EntryData):
         a_eln=dict(hide=['lab_id',
                          'users',
                          "location",
-                         "end_time",]))
+                         "end_time", "detector_data_folder", "external_sample_url"],
+                   properties=dict(
+                       order=[
+                           "name",
+                           "detector_data",
+                           "samples", "solution"])))
 
 
 # %%
