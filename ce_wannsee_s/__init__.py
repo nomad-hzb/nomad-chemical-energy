@@ -33,7 +33,7 @@ from baseclasses.chemical_energy import (
     ElectrochemicalImpedanceSpectroscopy,
 )
 
-from baseclasses.characterizations.microscops import (
+from baseclasses.characterizations.electron_microscopy import (
     SEM_Microscope_Merlin
 )
 
