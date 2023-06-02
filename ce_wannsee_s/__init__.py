@@ -33,10 +33,56 @@ from baseclasses.chemical_energy import (
     ElectrochemicalImpedanceSpectroscopy,
 )
 
+from baseclasses.characterizations.microscops import (
+    SEM_Microscope_Merlin
+)
+
 m_package2 = Package(name='ce-wannsee')
 
 
 # %% ####################### Entities
+
+# %% Microscopy
+
+# class Wannsee_EM_M013_TEM_Imaging_lambda750(TEM_lambda750k, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['lab_id', 'author', 'user']))
+
+
+# class Wannsee_EM_M013_TEM_Imaging_GatamUS1000(TEM_Gatam_US1000, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['lab_id', 'author', 'user']))
+
+
+# class Wannsee_EM_M013_TEM_Scanning_HAADE(TEM_HAADE, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['lab_id', 'author', 'user']))
+
+
+# class Wannsee_EM_M013_TEM_Scanning_EDX(TEM_EDX, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['lab_id', 'author', 'user']))
+
+
+# class Wannsee_EM_M013_TEM_Session(TEM_Session, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['lab_id', 'author', 'user']))
+
+
+# class Wannsee_EM_M013_TEM_Configuration(TEMMicroscopeConfiguration, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['lab_id', 'author', 'user']))
+
+
+class Wannsee_EM_M001_SEM_Merlin(SEM_Microscope_Merlin, EntryData):
+    m_def = Section(
+        a_eln=dict(hide=['lab_id',
+                         'users',
+                         "location",
+                         "end_time",]))
+
+
+# %%
 class Wannsee_D8_XRD_Bruker(XRD, EntryData):
     m_def = Section(
         a_eln=dict(
