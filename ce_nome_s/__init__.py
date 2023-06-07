@@ -340,7 +340,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", "end_time", "metadata_file", "voltage", "current", "current_density", "control", "charge"],
+                'users', "location", "end_time", "metadata_file", "voltage", "current", "current_density", "charge_density", "control", "charge"],
             properties=dict(
                 order=[
                     "name",
@@ -348,7 +348,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     "environment",
                     "setup",
                     "samples",
-                    "station"])),
+                    "station", "voltage_shift", "resistance"])),
         a_plot=[{
             'label': 'Current Density over Voltage RHE',
             'x': 'cycles/:/voltage_rhe_compensated',
@@ -377,7 +377,7 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file"],
+                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file", "charge_density", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -385,7 +385,7 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     "environment",
                     "setup",
                     "samples",
-                    "station"])), a_plot=[
+                    "station", "voltage_shift", "resistance"])), a_plot=[
             {
                 'label': 'Current', 'x': 'time', 'y': 'current', 'layout': {
                     'yaxis': {
@@ -413,14 +413,14 @@ class CE_NOME_Chronoamperometry_Multiple(ChronoamperometryMultiple, EntryData):
                     "environment",
                     "setup",
                     "samples",
-                    "station"])))
+                    "station", "voltage_shift", "resistance"])))
 
 
 class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file"],
+                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file", "charge_density", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -428,7 +428,7 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                     "environment",
                     "setup",
                     "samples",
-                    "station"])), a_plot=[
+                    "station", "voltage_shift", "resistance"])), a_plot=[
             {
                 'label': 'Charge and current density',
                 'x': 'time',
@@ -447,7 +447,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", "end_time", "metadata_file"],
+                'users', "location", "end_time", "metadata_file", "charge_density", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -455,7 +455,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                     "environment",
                     "setup",
                     "samples",
-                    "station"])),
+                    "station", "voltage_shift", "resistance"])),
         a_plot=[
             {
                 'label': 'Voltage',
