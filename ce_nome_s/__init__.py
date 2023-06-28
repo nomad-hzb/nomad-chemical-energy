@@ -17,6 +17,7 @@
 #
 
 import numpy as np
+import os
 
 # from nomad.units import ureg
 from nomad.metainfo import (
@@ -42,27 +43,19 @@ from baseclasses.chemical_energy import (
     ElectroChemicalSetup, Environment,
     get_next_project_sample_number,
     CyclicVoltammetry,
-    Chronoamperometry, ChronoamperometryMultiple,
+    Chronoamperometry,
     Chronocoulometry,
     OpenCircuitVoltage,
     ElectrochemicalImpedanceSpectroscopy,
-    ElectrochemicalImpedanceSpectroscopyMultiple,
     PreparationProtocol,
     PhaseFluorometryOxygen,
     PumpRateMeasurement
 )
 
+from baseclasses.helper.utilities import create_archive
 
 m_package2 = Package(name='CE-NOME')
 
-
-def create_archive(entity, archive, file_name):
-    import json
-    if not archive.m_context.raw_path_exists(file_name):
-        entity_entry = entity.m_to_dict(with_root_def=True)
-        with archive.m_context.raw_file(file_name, 'w') as outfile:
-            json.dump({"data": entity_entry}, outfile)
-        archive.m_context.process_updated_raw_file(file_name)
 
 # %% ####################### Entities
 
@@ -262,6 +255,17 @@ class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
                     "data_file",
                     "samples"])))
 
+    def normalize(self, archive, logger):
+        if self.data_file:
+            if os.path.splitext(self.data_file)[-1] == ".dat":
+                with archive.m_context.raw_file(self.data_file) as f:
+                    from baseclasses.helpers.file_parser.xas_parser import get_xas_data
+                    data, dateline = get_xas_data(f)
+                from baseclasses.helpers.archive_builder.xas_archive import get_xas_archive
+                get_xas_archive(data, dateline, self)
+
+        super(Bessy2_KMC2_XASFluorescence, self).normalize(archive, logger)
+
 
 class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
     m_def = Section(
@@ -274,6 +278,16 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
                     "name",
                     "data_file",
                     "samples"])))
+
+    def normalize(self, archive, logger):
+        if self.data_file:
+            if os.path.splitext(self.data_file)[-1] == ".dat":
+                with archive.m_context.raw_file(self.data_file) as f:
+                    from baseclasses.helpers.file_parser.xas_parser import get_xas_data
+                    data, dateline = get_xas_data(f)
+                from baseclasses.helpers.archive_builder.xas_archive import get_xas_archive
+                get_xas_archive(data, dateline, self)
+        super(Bessy2_KMC2_XASTransmission, self).normalize(archive, logger)
 
 
 class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
@@ -316,23 +330,39 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
         ]
     )
 
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+                if os.path.splitext(self.data_file)[-1] == ".DTA":
+                    from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.gamry_archive import get_eis_properties, get_eis_data, get_meta_data
+                    metadata, data = get_header_and_data(filename=f.name)
+                    data = data[0]
+                    get_eis_data(data, self)
+                    get_meta_data(metadata, self)
+                    if "EISPOT" in metadata["TAG"] and self.properties is None:
+                        self.properties = get_eis_properties(
+                            metadata)
+        super(CE_NOME_ElectrochemicalImpedanceSpectroscopy,
+              self).normalize(archive, logger)
 
-class CE_NOME_ElectrochemicalImpedanceSpectroscopy_Multiple(
-        ElectrochemicalImpedanceSpectroscopyMultiple, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id', 'solution',
-                'users', "location", "end_time"],
-            properties=dict(
-                order=[
-                    "name",
-                    "data_file",
-                    "environment",
-                    "setup",
-                    "samples",
-                    "station"])),
-    )
+
+# class CE_NOME_ElectrochemicalImpedanceSpectroscopy_Multiple(
+#         ElectrochemicalImpedanceSpectroscopyMultiple, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id', 'solution',
+#                 'users', "location", "end_time"],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "data_file",
+#                     "environment",
+#                     "setup",
+#                     "samples",
+#                     "station"])),
+#     )
 
 
 class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
@@ -372,6 +402,19 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                         "fixedrange": False}},
         }])
 
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+                if os.path.splitext(self.data_file)[-1] == ".DTA" and self.cycles is None:
+                    from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.gamry_archive import get_cv_properties, get_voltammetry_archive
+                    metadata, data = get_header_and_data(filename=f.name)
+                    get_voltammetry_archive(data, metadata, self)
+                    if metadata["TAG"] in ["CV", "COLLECT"] and self.properties is None:
+                        self.properties = get_cv_properties(metadata)
+
+        super(CE_NOME_CyclicVoltammetry, self).normalize(archive, logger)
+
 
 class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
@@ -400,20 +443,34 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                         "fixedrange": False}}, "config": {
                     "scrollZoom": True, 'staticPlot': False, }}])
 
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+                if os.path.splitext(self.data_file)[-1] == ".DTA" and self.cycles is None:
+                    from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.gamry_archive import get_ca_properties, get_voltammetry_archive
+                    metadata, data = get_header_and_data(filename=f.name)
+                    if "RINGCURVE" in metadata:
+                        data = [metadata["RINGCURVE"]]
+                    get_voltammetry_archive(data, metadata, self)
+                    if metadata["TAG"] in ["CHRONOA", "COLLECT"] and self.properties is None:
+                        self.properties = get_ca_properties(metadata)
+        super(CE_NOME_Chronoamperometry, self).normalize(archive, logger)
 
-class CE_NOME_Chronoamperometry_Multiple(ChronoamperometryMultiple, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id', 'solution', 'users', "location", "end_time"],
-            properties=dict(
-                order=[
-                    "name",
-                    "data_file",
-                    "environment",
-                    "setup",
-                    "samples",
-                    "station", "voltage_shift", "resistance"])))
+
+# class CE_NOME_Chronoamperometry_Multiple(ChronoamperometryMultiple, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id', 'solution', 'users', "location", "end_time"],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "data_file",
+#                     "environment",
+#                     "setup",
+#                     "samples",
+#                     "station", "voltage_shift", "resistance"])))
 
 
 class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
@@ -440,6 +497,18 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                      'xaxis': {
                          "fixedrange": False}},
             }])
+
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+                if os.path.splitext(self.data_file)[-1] == ".DTA" and self.cycles is None:
+                    from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.gamry_archive import get_cc_properties, get_voltammetry_archive
+                    metadata, data = get_header_and_data(filename=f.name)
+                    get_voltammetry_archive(data, metadata, self)
+                    if "CHRONOC" in metadata["TAG"] and self.properties is None:
+                        self.properties = get_cc_properties(metadata)
+        super(CE_NOME_Chronocoulometry, self).normalize(archive, logger)
 
 
 class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
@@ -468,6 +537,18 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                         "fixedrange": False}},
             }])
 
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+                if os.path.splitext(self.data_file)[-1] == ".DTA" and self.cycles is None:
+                    from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.gamry_archive import get_ocv_properties, get_voltammetry_archive
+                    metadata, data = get_header_and_data(filename=f.name)
+                    get_voltammetry_archive(data, metadata, self)
+                    if "CORPOT" in metadata["TAG"] and self.properties is None:
+                        self.properties = get_ocv_properties(metadata)
+        super(CE_NOME_OpenCircuitVoltage, self).normalize(archive, logger)
+
 
 class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
     m_def = Section(
@@ -482,6 +563,24 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
                     "name",
                     "data_file",
                     "samples"])))
+
+    def normalize(self, archive, logger):
+        import pandas as pd
+        measurements = []
+        for data_file in self.data_file:
+            with archive.m_context.raw_file(data_file) as f:
+                file_name = f.name
+            datetime_object = None
+            if os.path.splitext(data_file)[-1] != ".ABS":
+                continue
+            data = pd.read_csv(
+                file_name, delimiter='  ', header=None, skiprows=2)
+            from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
+            measurements.append(get_uvvis_archive(
+                data, datetime_object, data_file))
+        self.measurements = measurements
+
+        super(CE_NOME_UVvismeasurement, self).normalize(archive, logger)
 
 
 class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
@@ -511,6 +610,21 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
                         "fixedrange": False}},
             }])
 
+    def normalize(self, archive, logger):
+        if self.data_file:
+            try:
+                with archive.m_context.raw_file(self.data_file) as f:
+                    if os.path.splitext(self.data_file)[-1] == ".csv":
+                        from baseclasses.helper.file_parser.pfo_parser import get_pfo_measurement_csv
+                        from baseclasses.helper.archive_builder.pfo_archive import get_pfo_archive
+                        data = get_pfo_measurement_csv(f)
+                        get_pfo_archive(data, self)
+
+            except Exception as e:
+                logger.error(e)
+
+        super(CE_NOME_PhaseFluorometryOxygen, self).normalize(archive, logger)
+
 
 class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
     m_def = Section(
@@ -537,6 +651,20 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
                     'xaxis': {
                         "fixedrange": False}},
             }])
+
+    def normalize(self, archive, logger):
+        if self.data_file:
+            try:
+                with archive.m_context.raw_file(self.data_file) as f:
+                    if os.path.splitext(self.data_file)[-1] == ".csv":
+                        from baseclasses.helper.file_parser.pumprate_parser import get_pump_rate_measurement_csv
+                        from baseclasses.helper.archive_builder.pumprate_archive import get_pump_rate_archive
+                        data = get_pump_rate_measurement_csv(f)
+                        get_pump_rate_archive(data, self)
+
+            except Exception as e:
+                logger.error(e)
+        super(CE_NOME_PumpRateMeasurement, self).normalize(archive, logger)
 
 # %%####################################### Generic Entries
 
