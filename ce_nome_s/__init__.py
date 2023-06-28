@@ -259,9 +259,9 @@ class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
         if self.data_file:
             if os.path.splitext(self.data_file)[-1] == ".dat":
                 with archive.m_context.raw_file(self.data_file) as f:
-                    from baseclasses.helpers.file_parser.xas_parser import get_xas_data
+                    from baseclasses.helper.file_parser.xas_parser import get_xas_data
                     data, dateline = get_xas_data(f)
-                from baseclasses.helpers.archive_builder.xas_archive import get_xas_archive
+                from baseclasses.helper.archive_builder.xas_archive import get_xas_archive
                 get_xas_archive(data, dateline, self)
 
         super(Bessy2_KMC2_XASFluorescence, self).normalize(archive, logger)
@@ -283,9 +283,9 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
         if self.data_file:
             if os.path.splitext(self.data_file)[-1] == ".dat":
                 with archive.m_context.raw_file(self.data_file) as f:
-                    from baseclasses.helpers.file_parser.xas_parser import get_xas_data
+                    from baseclasses.helper.file_parser.xas_parser import get_xas_data
                     data, dateline = get_xas_data(f)
-                from baseclasses.helpers.archive_builder.xas_archive import get_xas_archive
+                from baseclasses.helper.archive_builder.xas_archive import get_xas_archive
                 get_xas_archive(data, dateline, self)
         super(Bessy2_KMC2_XASTransmission, self).normalize(archive, logger)
 
@@ -341,8 +341,7 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
                     get_eis_data(data, self)
                     get_meta_data(metadata, self)
                     if "EISPOT" in metadata["TAG"] and self.properties is None:
-                        self.properties = get_eis_properties(
-                            metadata)
+                        self.properties = get_eis_properties(metadata)
         super(CE_NOME_ElectrochemicalImpedanceSpectroscopy,
               self).normalize(archive, logger)
 
@@ -405,7 +404,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file) as f:
-                if os.path.splitext(self.data_file)[-1] == ".DTA" and self.cycles is None:
+                if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cv_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
@@ -446,7 +445,7 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file) as f:
-                if os.path.splitext(self.data_file)[-1] == ".DTA" and self.cycles is None:
+                if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_ca_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
@@ -501,7 +500,7 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file) as f:
-                if os.path.splitext(self.data_file)[-1] == ".DTA" and self.cycles is None:
+                if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cc_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
@@ -540,7 +539,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file) as f:
-                if os.path.splitext(self.data_file)[-1] == ".DTA" and self.cycles is None:
+                if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_ocv_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
