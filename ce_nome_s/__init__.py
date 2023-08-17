@@ -44,6 +44,7 @@ from baseclasses.chemical_energy import (
     get_next_project_sample_number,
     CyclicVoltammetry,
     Chronoamperometry,
+    Chronopotentiometry,
     Chronocoulometry,
     OpenCircuitVoltage,
     ElectrochemicalImpedanceSpectroscopy,
@@ -455,6 +456,40 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     if metadata["TAG"] in ["CHRONOA", "COLLECT"] and self.properties is None:
                         self.properties = get_ca_properties(metadata)
         super(CE_NOME_Chronoamperometry, self).normalize(archive, logger)
+
+
+class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file", "charge_density", "control", "cycles"],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file",
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station", "voltage_shift", "resistance"])), a_plot=[
+            {
+                'label': 'Current', 'x': 'time', 'y': 'voltage', 'layout': {
+                    'yaxis': {
+                        "fixedrange": False}, 'xaxis': {
+                        "fixedrange": False}}, "config": {
+                    "scrollZoom": True, 'staticPlot': False, }},
+        ])
+
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+                if os.path.splitext(self.data_file)[-1] == ".DTA":
+                    from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.gamry_archive import get_cp_properties, get_voltammetry_archive
+                    metadata, data = get_header_and_data(filename=f.name)
+                    get_voltammetry_archive(data, metadata, self)
+                    if metadata["TAG"] in ["CHRONOP"] and self.properties is None:
+                        self.properties = get_cp_properties(metadata)
+        super(CE_NOME_Chronopotentiometry, self).normalize(archive, logger)
 
 
 # class CE_NOME_Chronoamperometry_Multiple(ChronoamperometryMultiple, EntryData):
