@@ -84,21 +84,21 @@ class CE_NOME_Electrode(Electrode, EntryData):
     )
 
 
-class CE_NOME_Electrolyte(Electrolyte, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'users',
-                'origin', "elemental_composition", "components"],
-            properties=dict(
-                editable=dict(
-                    exclude=["chemical_composition_or_formulas"]),
-                order=[
-                    "name",
-                    "lab_id",
-                    "chemical_composition_or_formulas",
-                    "ph_value",
-                    "solvent"])))
+# class CE_NOME_Electrolyte(Electrolyte, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'users',
+#                 'origin', "elemental_composition", "components"],
+#             properties=dict(
+#                 editable=dict(
+#                     exclude=["chemical_composition_or_formulas"]),
+#                 order=[
+#                     "name",
+#                     "lab_id",
+#                     "chemical_composition_or_formulas",
+#                     "ph_value",
+#                     "solvent"])))
 
 
 class CE_NOME_Environment(Environment, EntryData):
@@ -126,23 +126,23 @@ class CE_NOME_Chemical(Substance, EntryData):
         a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"]))
 
 
-class CE_NOME_ElectroChemicalCell(ElectroChemicalCell, EntryData):
-    m_def = Section(
-        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
-                   properties=dict(
-            order=[
-                "name",
-                "lab_id",
-                "chemical_composition_or_formulas",
-                "working_electrode",
-                "reference_electrode",
-                "counter_electrode",
-                "electrolyte"
-            ])),
-    )
+# class CE_NOME_ElectroChemicalCell(ElectroChemicalCell, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
+#                    properties=dict(
+#             order=[
+#                 "name",
+#                 "lab_id",
+#                 "chemical_composition_or_formulas",
+#                 "working_electrode",
+#                 "reference_electrode",
+#                 "counter_electrode",
+#                 "electrolyte"
+#             ])),
+#     )
 
-    ecc_id = SubSection(
-        section_def=SampleIDCENOME)
+#     ecc_id = SubSection(
+#         section_def=SampleIDCENOME)
 
 
 class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
