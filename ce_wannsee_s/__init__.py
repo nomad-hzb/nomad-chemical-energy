@@ -81,7 +81,7 @@ class Wannsee_EM_M001_SEM_Merlin(SEM_Microscope_Merlin, EntryData):
         a_eln=dict(hide=['lab_id',
                          'users',
                          "location",
-                         "end_time", "detector_data_folder", "external_sample_url"],
+                         'end_time',  'steps', 'instruments', 'results', "detector_data_folder", "external_sample_url"],
                    properties=dict(
                        order=[
                            "name",
@@ -97,7 +97,7 @@ class Wannsee_D8_XRD_Bruker(XRD, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                "end_time",
+                'end_time',  'steps', 'instruments', 'results',  'steps', 'instruments', 'results',
                 "metadata_file",
                 "shifted_data",
                 "identifier"],
@@ -134,7 +134,7 @@ class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
                 'lab_id', 'solution',
                 'users',
                 "location",
-                "end_time",
+                'end_time',  'steps', 'instruments', 'results',
                 "metadata_file", "station",  "voltage", "current",
                 "current_density", "charge_density", "control", "charge",
                 "time", "voltage_rhe_uncompensated",
@@ -192,7 +192,7 @@ class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
                 'lab_id', 'solution',
                 'users',
                 "location",
-                "end_time",
+                'end_time',  'steps', 'instruments', 'results',
                 "metadata_file", "station",  "voltage", "current",
                 "current_density", "charge_density", "control", "charge",
                 "time", "voltage_rhe_uncompensated",
@@ -251,7 +251,7 @@ class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", "end_time", "metadata_file", "station"],
+                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "station"],
             properties=dict(
                 order=[
                     "name",
@@ -313,7 +313,7 @@ class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", "end_time", "metadata_file", "station"],
+                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "station"],
             properties=dict(
                 order=[
                     "name",

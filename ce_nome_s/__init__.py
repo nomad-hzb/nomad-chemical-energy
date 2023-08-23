@@ -29,7 +29,7 @@ from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.eln import Substance
 
 from baseclasses import (
-    ProcessOnSample, MeasurementOnSample, Deposition
+    BaseProcess, BaseMeasurement, Deposition
 )
 
 from baseclasses.characterizations import (
@@ -48,7 +48,7 @@ from baseclasses.chemical_energy import (
     Chronocoulometry,
     OpenCircuitVoltage,
     ElectrochemicalImpedanceSpectroscopy,
-    PreparationProtocol,
+    # PreparationProtocol,
     PhaseFluorometryOxygen,
     PumpRateMeasurement
 )
@@ -64,7 +64,7 @@ m_package2 = Package(name='CE-NOME')
 class CE_NOME_Sample(CENOMESample, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=["users"],
+            hide=["users", "elemental_composition", "components"],
             properties=dict(
                 order=[
                     "name",
@@ -75,7 +75,7 @@ class CE_NOME_Sample(CENOMESample, EntryData):
 
 class CE_NOME_Electrode(Electrode, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin'],
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
                    properties=dict(
             order=[
                 "name", "lab_id",
@@ -89,7 +89,7 @@ class CE_NOME_Electrolyte(Electrolyte, EntryData):
         a_eln=dict(
             hide=[
                 'users',
-                'origin'],
+                'origin', "elemental_composition", "components"],
             properties=dict(
                 editable=dict(
                     exclude=["chemical_composition_or_formulas"]),
@@ -106,7 +106,7 @@ class CE_NOME_Environment(Environment, EntryData):
         a_eln=dict(
             hide=[
                 'users',
-                'origin'],
+                'origin', "elemental_composition", "components"],
             properties=dict(
                 editable=dict(
                     exclude=["chemical_composition_or_formulas"]),
@@ -123,12 +123,12 @@ class CE_NOME_Environment(Environment, EntryData):
 
 class CE_NOME_Chemical(Substance, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin']))
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"]))
 
 
 class CE_NOME_ElectroChemicalCell(ElectroChemicalCell, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin'],
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
                    properties=dict(
             order=[
                 "name",
@@ -147,7 +147,7 @@ class CE_NOME_ElectroChemicalCell(ElectroChemicalCell, EntryData):
 
 class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin'],
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
                    properties=dict(
             order=[
                 "name",
@@ -163,83 +163,83 @@ class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
         section_def=SampleIDCENOME)
 
 
-class CE_NOME_Batch(CENOMESample, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=['users'],
-            properties=dict(
-                order=[
-                    "name",
-                    "lab_id",
-                    "chemical_composition_or_formulas",
-                    "id_of_preparation_protocol",
-                    "number_of_samples",
-                    "create_samples"
-                ])))
+# class CE_NOME_Batch(CENOMESample, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=['users', "elemental_composition", "components"],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "lab_id",
+#                     "chemical_composition_or_formulas",
+#                     "id_of_preparation_protocol",
+#                     "number_of_samples",
+#                     "create_samples"
+#                 ])))
 
-    number_of_samples = Quantity(
-        type=np.dtype(np.int64),
-        default=0,
-        a_eln=dict(
-            component='NumberEditQuantity'
-        ))
+#     number_of_samples = Quantity(
+#         type=np.dtype(np.int64),
+#         default=0,
+#         a_eln=dict(
+#             component='NumberEditQuantity'
+#         ))
 
-    create_samples = Quantity(
-        type=bool,
-        default=False,
-        a_eln=dict(component='BoolEditQuantity')
-    )
+#     create_samples = Quantity(
+#         type=bool,
+#         default=False,
+#         a_eln=dict(component='BoolEditQuantity')
+#     )
 
-    def normalize(self, archive, logger):
-        super(CE_NOME_Batch, self).normalize(archive, logger)
+#     def normalize(self, archive, logger):
+#         super(CE_NOME_Batch, self).normalize(archive, logger)
 
-        if self.number_of_samples > 0 and self.create_samples:
-            self.create_samples = False
+#         if self.number_of_samples > 0 and self.create_samples:
+#             self.create_samples = False
 
-            from nomad.search import search
+#             from nomad.search import search
 
-            query = {
-                'results.eln.lab_ids': archive.results.eln.lab_ids[1]
-            }
+#             query = {
+#                 'results.eln.lab_ids': archive.results.eln.lab_ids[1]
+#             }
 
-            search_result = search(
-                owner='all',
-                query=query,
-                user_id=archive.metadata.main_author.user_id)
+#             search_result = search(
+#                 owner='all',
+#                 query=query,
+#                 user_id=archive.metadata.main_author.user_id)
 
-            next_project_sample_number = get_next_project_sample_number(
-                search_result.data, archive.metadata.entry_id)
+#             next_project_sample_number = get_next_project_sample_number(
+#                 search_result.data, archive.metadata.entry_id)
 
-            for sample_idx in range(self.number_of_samples):
-                ce_nome_sample = CE_NOME_Sample(
-                    origin=self.origin if self.origin is not None else None,
-                    chemical_composition_or_formulas=self.chemical_composition_or_formulas if self.chemical_composition_or_formulas is not None else None,
-                    sample_id=self.sample_id if self.sample_id is not None else None,
-                    id_of_preparation_protocol=self.id_of_preparation_protocol if self.id_of_preparation_protocol is not None else None,
-                    date_of_disposal=self.date_of_disposal if self.date_of_disposal is not None else None,
-                    components=self.components if self.components is not None else None,
-                    project_name_long=self.project_name_long if self.project_name_long is not None else None,
-                    datetime=self.datetime if self.datetime is not None else None,
-                    description=self.description if self.description is not None else None,
-                    name=f'{self.name} {next_project_sample_number + sample_idx}' if self.name is not None else None,
-                )
+#             for sample_idx in range(self.number_of_samples):
+#                 ce_nome_sample = CE_NOME_Sample(
+#                     origin=self.origin if self.origin is not None else None,
+#                     chemical_composition_or_formulas=self.chemical_composition_or_formulas if self.chemical_composition_or_formulas is not None else None,
+#                     sample_id=self.sample_id if self.sample_id is not None else None,
+#                     # id_of_preparation_protocol=self.id_of_preparation_protocol if self.id_of_preparation_protocol is not None else None,
+#                     date_of_disposal=self.date_of_disposal if self.date_of_disposal is not None else None,
+#                     components=self.components if self.components is not None else None,
+#                     project_name_long=self.project_name_long if self.project_name_long is not None else None,
+#                     datetime=self.datetime if self.datetime is not None else None,
+#                     description=self.description if self.description is not None else None,
+#                     name=f'{self.name} {next_project_sample_number + sample_idx}' if self.name is not None else None,
+#                 )
 
-                if ce_nome_sample.sample_id is not None:
-                    ce_nome_sample.sample_id.project_sample_number = next_project_sample_number + sample_idx
+#                 if ce_nome_sample.sample_id is not None:
+#                     ce_nome_sample.sample_id.project_sample_number = next_project_sample_number + sample_idx
 
-                file_name = f'{self.name.replace(" ","_")}_{next_project_sample_number+sample_idx}.archive.json'
-                create_archive(ce_nome_sample, archive, file_name)
+#                 file_name = f'{self.name.replace(" ","_")}_{next_project_sample_number+sample_idx}.archive.json'
+#                 create_archive(ce_nome_sample, archive, file_name)
 
 
-class CE_NOME_PreparationProtocol(PreparationProtocol, EntryData):
-    m_def = Section(
-        a_eln=dict(hide=['users'],
-                   properties=dict(
-            order=[
-                "name",
-                "data_file",
-                "lab_id"])),
-    )
+# class CE_NOME_PreparationProtocol(PreparationProtocol, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['users'],
+#                    properties=dict(
+#             order=[
+#                 "name",
+#                 "data_file",
+#                 "lab_id"])),
+#     )
 
 # %%####################################### Measurements
 
@@ -249,7 +249,7 @@ class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id',
-                'users', "location", "end_time"],
+                'users', "location", 'end_time',  'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -273,7 +273,7 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", "end_time"],
+                'users', "location", 'end_time',  'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -297,7 +297,7 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", "end_time", "metadata_file"],
+                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file"],
             properties=dict(
                 order=[
                     "name",
@@ -353,7 +353,7 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
 #         a_eln=dict(
 #             hide=[
 #                 'lab_id', 'solution',
-#                 'users', "location", "end_time"],
+#                 'users', "location", 'end_time',  'steps', 'instruments', 'results'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -370,7 +370,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", "end_time", "metadata_file", "voltage", "current", "current_density", "charge_density", "control", "charge"],
+                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "voltage", "current", "current_density", "charge_density", "control", "charge"],
             properties=dict(
                 order=[
                     "name",
@@ -420,7 +420,7 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file", "charge_density", "control", "cycles"],
+                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -462,7 +462,7 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file", "charge_density", "control", "cycles"],
+                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -496,7 +496,7 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
 #     m_def = Section(
 #         a_eln=dict(
 #             hide=[
-#                 'lab_id', 'solution', 'users', "location", "end_time"],
+#                 'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results'],
 #             properties=dict(
 #                 order=[
 #                     "name",
@@ -511,7 +511,7 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", "end_time", "metadata_file", "charge_density", "control", "cycles"],
+                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -550,7 +550,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", "end_time", "metadata_file", "charge_density", "control", "cycles"],
+                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -591,7 +591,7 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
                 'lab_id', 'solution',
                 'users',
                 'location',
-                'end_time'],
+                'end_time',  'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -624,7 +624,7 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
                 'lab_id', 'solution',
                 'users',
                 'location',
-                'end_time'],
+                'end_time',  'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -667,7 +667,7 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
                 'lab_id', 'solution',
                 'users',
                 'location',
-                'end_time'],
+                'end_time',  'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -703,7 +703,7 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
 # %%####################################### Generic Entries
 
 
-class CE_NOME_Process(ProcessOnSample, EntryData):
+class CE_NOME_Process(BaseProcess, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -711,7 +711,7 @@ class CE_NOME_Process(ProcessOnSample, EntryData):
                 'users',
                 "location",
                 "is_standard_process",
-                "end_time"],
+                'end_time',  'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -734,7 +734,7 @@ class CE_NOME_Deposition(Deposition, EntryData):
                 'users',
                 "is_standard_process",
                 "location",
-                "end_time"],
+                'end_time',  'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -750,11 +750,11 @@ class CE_NOME_Deposition(Deposition, EntryData):
         a_browser=dict(adaptor='RawFileAdaptor'))
 
 
-class CE_NOME_Measurement(MeasurementOnSample, EntryData):
+class CE_NOME_Measurement(BaseMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"],
+                'lab_id', 'users', "location", 'end_time',  'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
