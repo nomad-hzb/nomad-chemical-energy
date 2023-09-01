@@ -646,16 +646,21 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            try:
-                with archive.m_context.raw_file(self.data_file) as f:
-                    if os.path.splitext(self.data_file)[-1] == ".csv":
-                        from baseclasses.helper.file_parser.pfo_parser import get_pfo_measurement_csv
-                        from baseclasses.helper.archive_builder.pfo_archive import get_pfo_archive
-                        data = get_pfo_measurement_csv(f)
-                        get_pfo_archive(data, self)
+            # try:
+            with archive.m_context.raw_file(self.data_file) as f:
+                if os.path.splitext(self.data_file)[-1] == ".csv":
+                    from baseclasses.helper.file_parser.pfo_parser import get_pfo_measurement_csv
+                    from baseclasses.helper.archive_builder.pfo_archive import get_pfo_archive
+                    data = get_pfo_measurement_csv(f)
+                    get_pfo_archive(data, self)
+                if os.path.splitext(self.data_file)[-1] == ".xlsx":
+                    from baseclasses.helper.file_parser.pfo_parser import get_pfo_measurement_xlsx
+                    from baseclasses.helper.archive_builder.pfo_archive import get_pfo_archive_xlsx
+                    data = get_pfo_measurement_xlsx(f.name)
+                    get_pfo_archive_xlsx(data, self)
 
-            except Exception as e:
-                logger.error(e)
+            # except Exception as e:
+            #     logger.error(e)
 
         super(CE_NOME_PhaseFluorometryOxygen, self).normalize(archive, logger)
 
