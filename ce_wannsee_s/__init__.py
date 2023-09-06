@@ -26,7 +26,7 @@ from nomad.datamodel.data import EntryData
 
 
 from baseclasses.characterizations import (
-    XRD
+    XRD, XRDData
 )
 
 from baseclasses.chemical_energy import (
@@ -125,6 +125,49 @@ class Wannsee_D8_XRD_Bruker(XRD, EntryData):
     def normalize(self, archive, logger):
         self.identifier = "HZB_WANNSEE"
         super(Wannsee_D8_XRD_Bruker, self).normalize(archive, logger)
+
+
+class Wannsee_XRD_XY(XRD, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                "location",
+                'end_time',  'steps', 'instruments', 'results',  'steps', 'instruments', 'results',
+                "metadata_file",
+                "shifted_data",
+                "identifier"],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file",
+                    "samples", "solution"])),
+        a_plot=[
+            {
+                'x': [
+                    'data/angle'],
+                'y': [
+                    'data/intensity'],
+                'layout': {
+                    'yaxis': {
+                        "fixedrange": False,
+                        "title": "Counts"},
+                    'xaxis': {
+                        "fixedrange": False}}},
+        ])
+
+    def normalize(self, archive, logger):
+
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+
+                if os.path.splitext(self.data_file)[-1] == ".xy" and self.data is None:
+                    import pandas as pd
+                    data = pd.read_csv(f.name, sep="\t", header=None)
+                    print(data)
+                    self.data = XRDData(angle=data[0], intensity=data[1])
+        super(Wannsee_XRD_XY, self).normalize(archive, logger)
 
 
 class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
