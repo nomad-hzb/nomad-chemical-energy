@@ -164,7 +164,8 @@ class Wannsee_XRD_XY(XRD, EntryData):
 
                 if os.path.splitext(self.data_file)[-1] == ".xy" and self.data is None:
                     import pandas as pd
-                    data = pd.read_csv(f.name, sep="\t", header=None)
+                    skiprows = 1
+                    data = pd.read_csv(f.name, sep="\t", header=None, skiprows=skiprows)
                     print(data)
                     self.data = XRDData(angle=data[0], intensity=data[1])
         super(Wannsee_XRD_XY, self).normalize(archive, logger)
