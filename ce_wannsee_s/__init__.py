@@ -164,7 +164,7 @@ class Wannsee_XRD_XY(XRD, EntryData):
 
                 if os.path.splitext(self.data_file)[-1] == ".xy" and self.data is None:
                     import pandas as pd
-                    if "ID" in f.readline():
+                    if "Id" in f.readline():
                         skiprows = 1
                         data = pd.read_csv(f.name, sep=" ", header=None, skiprows=skiprows)
                     else:
