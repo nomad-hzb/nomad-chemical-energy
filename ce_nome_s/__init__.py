@@ -27,10 +27,13 @@ from nomad.metainfo import (
 from nomad.datamodel.data import EntryData
 
 from nomad.datamodel.metainfo.eln import Substance
-
+from nomad.datamodel.metainfo.basesections import PubChemPureSubstanceSection
 from baseclasses import (
-    BaseProcess, BaseMeasurement, Deposition
+    BaseProcess, BaseMeasurement
 )
+
+from baseclasses.design1 import Design
+from baseclasses.documentation_tool import DocumentationTool
 
 from baseclasses.characterizations import (
     XASFluorescence, XASTransmission
@@ -39,8 +42,8 @@ from baseclasses.characterizations import (
 from baseclasses.solar_energy import UVvisMeasurement
 
 from baseclasses.chemical_energy import (
-    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell,
-    ElectroChemicalSetup, Environment,
+    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties,
+    ElectroChemicalSetup, Environment, Purging, SubstanceWithConcentration,
     get_next_project_sample_number,
     CyclicVoltammetry,
     Chronoamperometry,
@@ -53,12 +56,15 @@ from baseclasses.chemical_energy import (
     PumpRateMeasurement
 )
 
-from baseclasses.helper.utilities import create_archive
+from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
 
 m_package2 = Package(name='CE-NOME')
 
 
 # %% ####################### Entities
+
+class CE_NOME_Design(Design, EntryData):
+    pass
 
 
 class CE_NOME_Sample(CENOMESample, EntryData):
@@ -106,7 +112,7 @@ class CE_NOME_Environment(Environment, EntryData):
         a_eln=dict(
             hide=[
                 'users',
-                'origin', "elemental_composition", "components"],
+                'origin', "elemental_composition", "components", "substrate"],
             properties=dict(
                 editable=dict(
                     exclude=["chemical_composition_or_formulas"]),
@@ -147,7 +153,7 @@ class CE_NOME_Chemical(Substance, EntryData):
 
 class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components", "substrate"],
                    properties=dict(
             order=[
                 "name",
@@ -240,6 +246,149 @@ class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
 #                 "data_file",
 #                 "lab_id"])),
 #     )
+
+def get_next_free_project_number(archive, entity_id):
+    from nomad.search import search
+    query = {'results.eln.lab_ids': entity_id}
+    search_result = search(owner='all', query=query,
+                           user_id=archive.metadata.main_author.user_id)
+    project_sample_numbers = []
+    for entry in search_result.data:
+        lab_ids = entry["results"]["eln"]["lab_ids"]
+        project_sample_numbers.extend([int(lab_id.split(
+            "_")[-1]) for lab_id in lab_ids if lab_id.split("_")[-1].isdigit()])
+    return max(project_sample_numbers) + 1 if project_sample_numbers else 0
+
+
+def get_project_number(path, file):
+    import json
+    with open(os.path.join(path, file)) as f:
+        d = json.load(f).get("data")
+    if "sample_id" in d:
+        return d["sample_id"]["project_sample_number"]
+    if "environment_id" in d:
+        return d["environment_id"]["project_sample_number"]
+    if "setup_id" in d:
+        return d["setup_id"]["project_sample_number"]
+
+
+class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            properties=dict(
+                order=[
+                    "name",
+                    "lab_id", "create_template", "create_entries", "data_file",
+                    "number_of_substances_per_env"])))
+
+    def normalize(self, archive, logger):
+        super(CE_NOME_DocumentationTool, self).normalize(archive, logger)
+        if self.create_entries and self.data_file:
+            if not self.lab_id:
+                logger.error(
+                    "no identifier information provided", normalizer=self.__class__.__name__,
+                    section='system')
+                return
+            self.create_entries = False
+            rewrite_json(["data", "create_entries"], archive, False)
+
+            with archive.m_context.raw_file(archive.metadata.mainfile) as f:
+                path = os.path.dirname(f.name)
+            import pandas as pd
+            # load data
+            xls = pd.ExcelFile(os.path.join(path, self.data_file))
+            samples = pd.read_excel(xls, 'samples').astype({'id': 'str'})
+            envs = pd.read_excel(xls, 'environments').astype({'id': 'str'})
+            setups = pd.read_excel(xls, 'setups').astype({'id': 'str'})
+
+            # prepare id
+            id_base = "_".join(self.lab_id.split("_")[:-1])
+            next_free_id = get_next_free_project_number(archive, id_base)
+            counter = 0
+
+            # samples
+            for idx, row in samples.iterrows():
+                try:
+                    sample_id = self.identifier.m_copy(deep=True)
+                    sample_id.project_sample_number = next_free_id + counter
+                    row["id"] = f"{self.lab_id}_{sample_id.project_sample_number:04d}"
+                    ce_nome_sample = CE_NOME_Sample(
+                        chemical_composition_or_formulas=row["chemical_composition_or_formula"],
+                        component_description=row["component_description"],
+                        origin=row["producer"],
+                        project_name_long=row["project_name_long"],
+                        description=row["description"],
+                        substrate=SubstrateProperties(substrate_type=row["substrate_type"],
+                                                      substrate_dimension=row["substrate_dimension"]),
+                        sample_id=sample_id
+                    )
+                    file_name = f"{archive.metadata.mainfile.replace('.archive.json','')}_sample_{idx}.archive.json"
+                    created = create_archive(ce_nome_sample, archive, file_name)
+                    samples.at[idx, "id"] = f"{id_base}_{get_project_number(path, file_name):04d}"
+
+                    if created:
+                        counter += 1
+                except Exception as e:
+                    logger.error(f"could not create row {idx} for samples",
+                                 normalizer=self.__class__.__name__, section='system')
+            # environments
+            for idx, row in envs.iterrows():
+                try:
+                    envs_id = self.identifier.m_copy(deep=True)
+                    envs_id.project_sample_number = next_free_id + counter
+                    row["id"] = f"{self.lab_id}_{envs_id.project_sample_number:04d}"
+                    ce_nome_envs = CE_NOME_Environment(
+                        ph_value=row["ph_value"],
+                        description=row["description"],
+                        solvent=PubChemPureSubstanceSection(
+                            name=row["solvent_name"], load_data=False) if not pd.isna(row[f"solvent_name"]) else None,
+                        purging=Purging(time=row["purging_time"], temperature=row["purging_temperature"],
+                                        gas=PubChemPureSubstanceSection(name=row["purging_gas_name"], load_data=False)) if not pd.isna(row[f"purging_gas_name"]) else None,
+                        substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(row[f"concentration_M_{i}"])*1000,
+                                                               concentration_g_per_l=row[f"concentration_g_per_l_{i}"],
+                                                               substance=PubChemPureSubstanceSection(name=row[f"substance_name_{i}"], load_data=False))
+                                    for i in range(self.number_of_substances_per_env) if not pd.isna(row[f"substance_name_{i}"])],
+                        environment_id=envs_id
+                    )
+
+                    file_name = f"{archive.metadata.mainfile.replace('.archive.json','')}_env_{idx}.archive.json"
+                    created = create_archive(ce_nome_envs, archive, file_name)
+                    envs.at[idx, "id"] = f"{id_base}_{get_project_number(path, file_name):04d}"
+
+                    if created:
+                        counter += 1
+                except Exception as e:
+                    logger.error(f"could not create row {idx} for environment",
+                                 normalizer=self.__class__.__name__, section='system')
+
+            # setups
+            for idx, row in setups.iterrows():
+                try:
+                    setup_id = self.identifier.m_copy(deep=True)
+                    setup_id.project_sample_number = next_free_id + counter
+                    row["id"] = f"{self.lab_id}_{setup_id.project_sample_number:04d}"
+                    ce_nome_setup = CE_NOME_ElectroChemicalSetup(
+                        setup=row["setup"],
+                        reference_electrode=find_sample_by_id(archive, row["reference_electrode"]),
+                        counter_electrode=find_sample_by_id(archive, row["counter_electrode"]),
+                        description=row["description"],
+                        setup_id=setup_id
+                    )
+
+                    file_name = f"{archive.metadata.mainfile.replace('.archive.json','')}_setup_{idx}.archive.json"
+                    created = create_archive(ce_nome_setup, archive, file_name)
+                    setups.at[idx, "id"] = f"{id_base}_{get_project_number(path, file_name):04d}"
+
+                    if created:
+                        counter += 1
+                except Exception as e:
+                    logger.error(f"could not create row {idx} for setups",
+                                 normalizer=self.__class__.__name__, section='system')
+
+            with pd.ExcelWriter(os.path.join(path, self.data_file)) as writer:
+                samples.to_excel(writer, sheet_name='samples', index=False)
+                envs.to_excel(writer, sheet_name='environments', index=False)
+                setups.to_excel(writer, sheet_name='setups', index=False)
 
 # %%####################################### Measurements
 
@@ -731,28 +880,28 @@ class CE_NOME_Process(BaseProcess, EntryData):
         a_browser=dict(adaptor='RawFileAdaptor'))
 
 
-class CE_NOME_Deposition(Deposition, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id',
-                'users',
-                "is_standard_process",
-                "location",
-                'end_time',  'steps', 'instruments', 'results'],
-            properties=dict(
-                order=[
-                    "name",
-                    "data_file",
-                    "function",
-                    "batch",
-                    "samples"])))
+# class CE_NOME_Deposition(WetChemicalDeposition, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id',
+#                 'users',
+#                 "is_standard_process",
+#                 "location",
+#                 'end_time',  'steps', 'instruments', 'results'],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "data_file",
+#                     "function",
+#                     "batch",
+#                     "samples"])))
 
-    data_file = Quantity(
-        type=str,
-        shape=['*'],
-        a_eln=dict(component='FileEditQuantity'),
-        a_browser=dict(adaptor='RawFileAdaptor'))
+#     data_file = Quantity(
+#         type=str,
+#         shape=['*'],
+#         a_eln=dict(component='FileEditQuantity'),
+#         a_browser=dict(adaptor='RawFileAdaptor'))
 
 
 class CE_NOME_Measurement(BaseMeasurement, EntryData):

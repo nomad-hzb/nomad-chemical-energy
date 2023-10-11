@@ -24,17 +24,11 @@ from nomad.metainfo import (
     Package,
     Quantity,
     SubSection,
-    Section)
+    Section,
+    Reference)
 from nomad.datamodel.data import EntryData
 
-
-from baseclasses import (
-    ProcessOnSample, MeasurementOnSample, Deposition
-)
-
-from baseclasses.chemical import (
-    Chemical
-)
+from baseclasses.solution import Solution
 
 from baseclasses.characterizations import (
     Raman,
@@ -47,13 +41,19 @@ from baseclasses.characterizations import (
     InfraredSpectroscopy
 )
 
+from baseclasses.characterizations import (
+    XRD, XRDData
+)
+from baseclasses.characterizations.electron_microscopy import (
+    SEM_Microscope_Merlin
+)
+
 
 from baseclasses.chemical_energy import (
-    Cleaning, SolutionCleaning,
+    Cleaning, SolutionCleaning, SubstrateProperties,
     DiamondSample,
     CENSLISample,
-    WaterBath,
-    Dropcast,
+    # WaterBath,
     CyclicVoltammetry,
     Chronoamperometry,
     OpenCircuitVoltage,
@@ -62,35 +62,114 @@ from baseclasses.chemical_energy import (
     ConstantPotential
 )
 
+from baseclasses.helper.utilities import create_archive
+
+from baseclasses.wet_chemical_deposition import (
+    DropCasting,
+    SpinCoating,
+    WetChemicalDeposition
+)
+
 m_package1 = Package(name='CE-NSLI')
 
 
-def create_archive(entity, archive, file_name):
-    import json
-    if not archive.m_context.raw_path_exists(file_name):
-        entity_entry = entity.m_to_dict(with_root_def=True)
-        with archive.m_context.raw_file(file_name, 'w') as outfile:
-            json.dump({"data": entity_entry}, outfile)
-        archive.m_context.process_updated_raw_file(file_name)
+def find_id(archive, lab_id, method):
+    from nomad.search import search
+    i = 1
+    while True:
+        next_lab_id = f"{lab_id}_{method}{i}"
+        query = {
+            'results.eln.lab_ids': next_lab_id
+        }
+        search_result = search(
+            owner='all',
+            query=query,
+            user_id=archive.metadata.main_author.user_id)
+        if len(search_result.data) == 0:
+            return next_lab_id
+        i += 1
 
+
+def assign_id(obj, archive, method):
+    if not obj.lab_id and obj.solution and obj.solution[0].solution and obj.solution[0].solution.lab_id:
+        obj.lab_id = find_id(archive, obj.solution[0].solution.lab_id, method)
+
+
+def get_processes(archive, entry_id, lab_id):
+    from nomad.search import search
+    from nomad.app.v1.models import MetadataPagination
+    from nomad import files
+    import baseclasses
+    import inspect
+
+    # search for all archives referencing this archive
+    query = {
+        'entry_references.target_entry_id': entry_id,
+    }
+    pagination = MetadataPagination()
+    pagination.page_size = 100
+    search_result = search(owner='all', query=query, pagination=pagination,
+                           user_id=archive.metadata.main_author.user_id)
+    processes = []
+    for res in search_result.data:
+        with files.UploadFiles.get(upload_id=res["upload_id"]).read_archive(entry_id=res["entry_id"]) as archive:
+            entry_id = res["entry_id"]
+            entry_data = archive[entry_id]["data"]
+            if "lab_id" in entry_data and entry_data.get("lab_id").startswith(lab_id):
+                processes.append((entry_data.get("lab_id"), entry_data.get("name")))
+    return sorted(processes, key=lambda pair: pair[0])
 # %% ####################### Entities
 
 
-class CE_NSLI_Chemical(Chemical, EntryData):
+class CE_NSLI_Solution(Solution, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'users']))
+        a_eln=dict(
+            hide=[
+                'users', 'components', 'elemental_composition', "method", "temperature", "time", "speed", "solvent_ratio"],
+            properties=dict(
+                order=[
+                    "name",
+                    "create_overview",
+                    "overview"
+                ],
+            )))
 
-
-class CE_NSLI_Graphene(Chemical, EntryData):
-    m_def = Section(
-        a_eln=dict(hide=['lab_id', 'users']))
-
-
-class CE_NSLI_Sample(CENSLISample, EntryData):
-    m_def = Section(
-        a_eln=dict(hide=['users']),
-        label_quantity='sample_id'
+    create_overview = Quantity(
+        type=bool,
+        default=False,
+        a_eln=dict(component='ButtonEditQuantity')
     )
+
+    overview = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'))
+
+    def normalize(self, archive, logger):
+        super(CE_NSLI_Solution, self).normalize(archive, logger)
+
+        if self.create_overview and self.lab_id:
+            self.create_overview = False
+
+            data = [[p[0], p[1]] for p in get_processes(archive,  archive.entry_id, self.lab_id)]
+            import pandas as pd
+            df = pd.DataFrame(data, columns=["process_id", "process_name"])
+            export_file_name = f"list_of_sample_preparations_{self.lab_id}.csv"
+            with archive.m_context.raw_file(export_file_name, 'w') as outfile:
+                df.to_csv(outfile.name)
+            self.overview = export_file_name
+
+
+# class CE_NSLI_Graphene(Chemical, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['lab_id', 'users']))
+
+
+# class CE_NSLI_Sample(CENSLISample, EntryData):
+#     m_def = Section(
+#         a_eln=dict(hide=['users', 'components', 'elemental_composition']),
+#         label_quantity='sample_id'
+#     )
 
 
 class CE_NSLI_DiamondSample(DiamondSample, EntryData):
@@ -102,32 +181,122 @@ class CE_NSLI_DiamondSample(DiamondSample, EntryData):
 # %% ####################### Cleaning
 
 
-class CE_NSLI_UltrasoniceBath(Cleaning, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id', 'users', "location", "end_time"]))
+# class CE_NSLI_UltrasoniceBath(Cleaning, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id', 'users', "location", "end_time"]))
 
-    cleaning = SubSection(
-        section_def=SolutionCleaning, repeats=True)
+#     cleaning = SubSection(
+#         section_def=SolutionCleaning, repeats=True)
 
 
 # %% ##################### Layer Deposition
 
 
-class CE_NSLI_WaterBath(WaterBath, EntryData):
+# class CE_NSLI_WaterBath(WaterBath, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id', 'users', "location", "end_time"]))
+
+
+class CE_NSLI_DropCasting(DropCasting, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]))
+                'users',
+                'end_time',  'steps', 'instruments', 'results', "samples",
+                "positon_in_experimental_plan", "present", "batch", "layer"],
+            properties=dict(
+                order=[
+                    "name", "location",
+                    "datetime",
+                    "solution", "substrate", "properties",
+                    "quenching",
+                    "annealing", "sintering"])))
+
+    substrate = SubSection(
+        section_def=SubstrateProperties)
+
+    def normalize(self, archive, logger):
+        assign_id(self, archive, "dc")
+        super(CE_NSLI_DropCasting, self).normalize(archive, logger)
 
 
-class CE_NSLI_Dropcast(Dropcast, EntryData):
+class CE_NSLI_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", "end_time"]))
+                'users',
+                'end_time',  'steps', 'instruments', 'results', 'recipe', "samples",
+                "positon_in_experimental_plan", "present", "batch", "layer"],
+            properties=dict(
+                order=[
+                    "name", "location",
+                    "datetime",
+                    "solution", "substrate", "recipe_steps",
+                    "quenching",
+                    "annealing", "sintering"])))
 
+    substrate = SubSection(
+        section_def=SubstrateProperties)
+
+    def normalize(self, archive, logger):
+        assign_id(self, archive, "sc")
+        super(CE_NSLI_SpinCoating, self).normalize(archive, logger)
+
+
+class CE_NSLI_SEM(SEM_Microscope_Merlin, EntryData):
+    m_def = Section(
+        a_eln=dict(hide=['lab_id',
+                         'users',
+                         "location",
+                         'end_time',  'steps', 'instruments', 'results', "detector_data_folder", "external_sample_url"],
+                   properties=dict(
+            order=[
+                "name",
+                "detector_data", "datetime", "description", "sample_preparation",
+                "samples"])))
+
+    sample_preparation = Quantity(
+        type=Reference(WetChemicalDeposition.m_def),
+        a_eln=dict(component='ReferenceEditQuantity'))
+
+
+class CE_NSLI_XRD_XY(XRD, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                "location",
+                'end_time',  'steps', 'instruments', 'results',  'steps', 'instruments', 'results',
+                "metadata_file",
+                "shifted_data",
+                "identifier"],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file", "datetime", "description", "sample_preparation",
+                    "samples"])),
+        a_plot=[
+            {
+                'x': [
+                    'data/angle'],
+                'y': [
+                    'data/intensity'],
+                'layout': {
+                    'yaxis': {
+                        "fixedrange": False,
+                        "title": "Counts"},
+                    'xaxis': {
+                        "fixedrange": False}}},
+        ])
+
+    sample_preparation = Quantity(
+        type=Reference(WetChemicalDeposition.m_def),
+        a_eln=dict(component='ReferenceEditQuantity'))
 
 # %%####################################### Measurements
 
@@ -274,13 +443,6 @@ class CE_NSLI_OpticalMicroscopy(OpticalMicorscopy, EntryData):
                 'lab_id', 'solution', 'users', "location", "end_time"]))
 
 
-class CE_NSLI_SEM(SEM, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id', 'solution', 'users', "location", "end_time"]))
-
-
 class CE_NSLI_TEM(TEM, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -383,40 +545,40 @@ class CE_NSLI_SPV(SPV, EntryData):
 # %%####################################### Generic Entries
 
 
-class CE_NSLI_Process(ProcessOnSample, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id', 'users', "location", "end_time"]))
+# class CE_NSLI_Process(ProcessOnSample, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id', 'users', "location", "end_time"]))
 
-    data_file = Quantity(
-        type=str,
-        shape=['*'],
-        a_eln=dict(component='FileEditQuantity'),
-        a_browser=dict(adaptor='RawFileAdaptor'))
-
-
-class CE_NSLI_Deposition(Deposition, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id', 'users', "location", "end_time"]))
-
-    data_file = Quantity(
-        type=str,
-        shape=['*'],
-        a_eln=dict(component='FileEditQuantity'),
-        a_browser=dict(adaptor='RawFileAdaptor'))
+#     data_file = Quantity(
+#         type=str,
+#         shape=['*'],
+#         a_eln=dict(component='FileEditQuantity'),
+#         a_browser=dict(adaptor='RawFileAdaptor'))
 
 
-class CE_NSLI_Measurement(MeasurementOnSample, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'lab_id', 'users', "location", "end_time"]))
+# class CE_NSLI_Deposition(Deposition, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id', 'users', "location", "end_time"]))
 
-    data_file = Quantity(
-        type=str,
-        shape=['*'],
-        a_eln=dict(component='FileEditQuantity'),
-        a_browser=dict(adaptor='RawFileAdaptor'))
+#     data_file = Quantity(
+#         type=str,
+#         shape=['*'],
+#         a_eln=dict(component='FileEditQuantity'),
+#         a_browser=dict(adaptor='RawFileAdaptor'))
+
+
+# class CE_NSLI_Measurement(MeasurementOnSample, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id', 'users', "location", "end_time"]))
+
+#     data_file = Quantity(
+#         type=str,
+#         shape=['*'],
+#         a_eln=dict(component='FileEditQuantity'),
+#         a_browser=dict(adaptor='RawFileAdaptor'))
