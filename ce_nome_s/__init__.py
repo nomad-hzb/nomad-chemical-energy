@@ -18,6 +18,8 @@
 
 import numpy as np
 import os
+import pandas as pd
+
 
 # from nomad.units import ureg
 from nomad.metainfo import (
@@ -272,6 +274,12 @@ def get_project_number(path, file):
         return d["setup_id"]["project_sample_number"]
 
 
+def get_parameter(value):
+    if pd.isna(value):
+        return None
+    return value
+
+
 class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -294,7 +302,6 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
             with archive.m_context.raw_file(archive.metadata.mainfile) as f:
                 path = os.path.dirname(f.name)
-            import pandas as pd
             # load data
             xls = pd.ExcelFile(os.path.join(path, self.data_file))
             samples = pd.read_excel(xls, 'samples').astype({'id': 'str'})
@@ -311,15 +318,14 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 try:
                     sample_id = self.identifier.m_copy(deep=True)
                     sample_id.project_sample_number = next_free_id + counter
-                    row["id"] = f"{self.lab_id}_{sample_id.project_sample_number:04d}"
                     ce_nome_sample = CE_NOME_Sample(
-                        chemical_composition_or_formulas=row["chemical_composition_or_formula"],
-                        component_description=row["component_description"],
-                        origin=row["producer"],
-                        project_name_long=row["project_name_long"],
-                        description=row["description"],
-                        substrate=SubstrateProperties(substrate_type=row["substrate_type"],
-                                                      substrate_dimension=row["substrate_dimension"]),
+                        chemical_composition_or_formulas=get_parameter(row["chemical_composition_or_formula"]),
+                        component_description=get_parameter(row["component_description"]),
+                        origin=get_parameter(row["producer"]),
+                        project_name_long=get_parameter(row["project_name_long"]),
+                        description=get_parameter(row["description"]),
+                        substrate=SubstrateProperties(substrate_type=get_parameter(row["substrate_type"]),
+                                                      substrate_dimension=get_parameter(row["substrate_dimension"])),
                         sample_id=sample_id
                     )
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json','')}_sample_{idx}.archive.json"
@@ -336,16 +342,16 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 try:
                     envs_id = self.identifier.m_copy(deep=True)
                     envs_id.project_sample_number = next_free_id + counter
-                    row["id"] = f"{self.lab_id}_{envs_id.project_sample_number:04d}"
                     ce_nome_envs = CE_NOME_Environment(
                         ph_value=row["ph_value"],
                         description=row["description"],
                         solvent=PubChemPureSubstanceSection(
                             name=row["solvent_name"], load_data=False) if not pd.isna(row[f"solvent_name"]) else None,
-                        purging=Purging(time=row["purging_time"], temperature=row["purging_temperature"],
+                        purging=Purging(time=get_parameter(row["purging_time"]), temperature=get_parameter(row["purging_temperature"]),
                                         gas=PubChemPureSubstanceSection(name=row["purging_gas_name"], load_data=False)) if not pd.isna(row[f"purging_gas_name"]) else None,
-                        substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(row[f"concentration_M_{i}"])*1000,
-                                                               concentration_g_per_l=row[f"concentration_g_per_l_{i}"],
+                        substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(get_parameter(row[f"concentration_M_{i}"]))*1000 if get_parameter(row[f"concentration_M_{i}"]) else None,
+                                                               concentration_g_per_l=get_parameter(
+                                                                   row[f"concentration_g_per_l_{i}"]),
                                                                substance=PubChemPureSubstanceSection(name=row[f"substance_name_{i}"], load_data=False))
                                     for i in range(self.number_of_substances_per_env) if not pd.isna(row[f"substance_name_{i}"])],
                         environment_id=envs_id
@@ -366,12 +372,11 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 try:
                     setup_id = self.identifier.m_copy(deep=True)
                     setup_id.project_sample_number = next_free_id + counter
-                    row["id"] = f"{self.lab_id}_{setup_id.project_sample_number:04d}"
                     ce_nome_setup = CE_NOME_ElectroChemicalSetup(
-                        setup=row["setup"],
+                        setup=get_parameter(row["setup"]),
                         reference_electrode=find_sample_by_id(archive, row["reference_electrode"]),
                         counter_electrode=find_sample_by_id(archive, row["counter_electrode"]),
-                        description=row["description"],
+                        description=get_parameter(row["description"]),
                         setup_id=setup_id
                     )
 
