@@ -44,7 +44,7 @@ from baseclasses.characterizations import (
 from baseclasses.solar_energy import UVvisMeasurement
 
 from baseclasses.chemical_energy import (
-    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties,
+    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties, Equipment,
     ElectroChemicalSetup, Environment, Purging, SubstanceWithConcentration,
     get_next_project_sample_number,
     CyclicVoltammetry,
@@ -88,6 +88,17 @@ class CE_NOME_Electrode(Electrode, EntryData):
             order=[
                 "name", "lab_id",
                 "chemical_composition_or_formulas", "producer", "location"
+            ]))
+    )
+
+
+class CE_NOME_Equipment(Equipment, EntryData):
+    m_def = Section(
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
+                   properties=dict(
+            order=[
+                "name", "lab_id",
+                "producer", "location"
             ]))
     )
 
