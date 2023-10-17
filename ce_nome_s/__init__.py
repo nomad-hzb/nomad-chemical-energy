@@ -387,6 +387,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                         setup=get_parameter(row["setup"]),
                         reference_electrode=find_sample_by_id(archive, row["reference_electrode"]),
                         counter_electrode=find_sample_by_id(archive, row["counter_electrode"]),
+                        equipment=[find_sample_by_id(archive, row[f"equipment_{i}"]) for i in range(5)],
                         description=get_parameter(row["description"]),
                         setup_id=setup_id
                     )
