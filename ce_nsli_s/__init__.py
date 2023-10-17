@@ -125,12 +125,13 @@ class CE_NSLI_Solution(Solution, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'users', 'components', 'elemental_composition', "method", "temperature", "time", "speed", "solvent_ratio"],
+                'users', 'components', 'elemental_composition', "method", "temperature", "time", "speed", "solvent_ratio", "additive", "other_solution"],
             properties=dict(
                 order=[
                     "name",
                     "create_overview",
-                    "overview"
+                    "overview",
+                    "solute", "solvent", "preparation", "washing", "storage", "properties", "solution_id"
                 ],
             )))
 

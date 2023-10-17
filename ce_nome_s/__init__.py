@@ -87,7 +87,7 @@ class CE_NOME_Electrode(Electrode, EntryData):
                    properties=dict(
             order=[
                 "name", "lab_id",
-                "chemical_composition_or_formulas"
+                "chemical_composition_or_formulas", "producer", "location"
             ]))
     )
 
