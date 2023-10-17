@@ -174,7 +174,7 @@ class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
                 "chemical_composition_or_formulas",
                 "setup",
                 "reference_electrode",
-                "counter_electrode",
+                "counter_electrode", "equipment"
             ])),
     )
 
@@ -385,10 +385,10 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     setup_id.project_sample_number = next_free_id + counter
                     ce_nome_setup = CE_NOME_ElectroChemicalSetup(
                         setup=get_parameter(row["setup"]),
-                        reference_electrode=find_sample_by_id(archive, row["reference_electrode"]),
-                        counter_electrode=find_sample_by_id(archive, row["counter_electrode"]),
+                        reference_electrode=find_sample_by_id(archive,  get_parameter(row["reference_electrode"])),
+                        counter_electrode=find_sample_by_id(archive,  get_parameter(row["counter_electrode"])),
                         equipment=[find_sample_by_id(archive, row[f"equipment_{i}"]) for i in range(
-                            5) if find_sample_by_id(archive, row[f"equipment_{i}"])],
+                            5) if get_parameter(row[f"equipment_{i}"])],
                         description=get_parameter(row["description"]),
                         setup_id=setup_id
                     )
@@ -402,7 +402,6 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 except Exception as e:
                     logger.error(f"could not create row {idx} for setups",
                                  normalizer=self.__class__.__name__, section='system')
-                    raise e
 
             with pd.ExcelWriter(os.path.join(path, self.data_file)) as writer:
                 samples.to_excel(writer, sheet_name='samples', index=False)
