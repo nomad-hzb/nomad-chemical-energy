@@ -402,6 +402,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 except Exception as e:
                     logger.error(f"could not create row {idx} for setups",
                                  normalizer=self.__class__.__name__, section='system')
+                    raise e
 
             with pd.ExcelWriter(os.path.join(path, self.data_file)) as writer:
                 samples.to_excel(writer, sheet_name='samples', index=False)
