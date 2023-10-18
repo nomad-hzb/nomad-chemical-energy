@@ -354,16 +354,16 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     envs_id = self.identifier.m_copy(deep=True)
                     envs_id.project_sample_number = next_free_id + counter
                     ce_nome_envs = CE_NOME_Environment(
-                        ph_value=row["ph_value"],
-                        description=row["description"],
+                        ph_value=get_parameter(row["ph_value"]),
+                        description=get_parameter(row["description"]),
                         solvent=PubChemPureSubstanceSection(
                             name=row["solvent_name"], load_data=False) if not pd.isna(row[f"solvent_name"]) else None,
                         purging=Purging(time=get_parameter(row["purging_time"]), temperature=get_parameter(row["purging_temperature"]),
-                                        gas=PubChemPureSubstanceSection(name=row["purging_gas_name"], load_data=False)) if not pd.isna(row[f"purging_gas_name"]) else None,
+                                        gas=PubChemPureSubstanceSection(name=get_parameter(row["purging_gas_name"]), load_data=False)) if not pd.isna(row[f"purging_gas_name"]) else None,
                         substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(get_parameter(row[f"concentration_M_{i}"]))*1000 if get_parameter(row[f"concentration_M_{i}"]) else None,
                                                                concentration_g_per_l=get_parameter(
                                                                    row[f"concentration_g_per_l_{i}"]),
-                                                               substance=PubChemPureSubstanceSection(name=row[f"substance_name_{i}"], load_data=False))
+                                                               substance=PubChemPureSubstanceSection(name=get_parameter(row[f"substance_name_{i}"]), load_data=False))
                                     for i in range(self.number_of_substances_per_env) if not pd.isna(row[f"substance_name_{i}"])],
                         environment_id=envs_id
                     )
