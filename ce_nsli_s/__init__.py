@@ -62,7 +62,7 @@ from baseclasses.chemical_energy import (
     ConstantPotential
 )
 
-from baseclasses.helper.utilities import create_archive
+from baseclasses.helper.utilities import create_archive, set_sample_reference, get_entry_reference
 
 from baseclasses.wet_chemical_deposition import (
     DropCasting,
@@ -298,6 +298,35 @@ class CE_NSLI_XRD_XY(XRD, EntryData):
     sample_preparation = Quantity(
         type=Reference(WetChemicalDeposition.m_def),
         a_eln=dict(component='ReferenceEditQuantity'))
+
+    def normalize(self, archive, logger):
+
+        if self.data_file:
+            data_file_split = os.path.basename(self.data_file).split('.')
+            with archive.m_context.raw_file(self.data_file) as f:
+                file_name = f.name
+
+            if os.path.splitext(self.data_file)[-1] == ".xy" and self.data is None:
+                import pandas as pd
+                skiprows = 0
+                data = pd.read_csv(file_name, sep=" |\t", header=None, skiprows=skiprows)
+                self.data = XRDData(angle=data[0], intensity=data[1])
+
+                if len(data_file_split) > 2:
+                    if self.description:
+                        self.description += f"<br> Notes from file name: {data_file_split[1]}"
+                    else:
+                        self.description = f"Notes from file name: {data_file_split[1]}"
+
+            preparation_id = data_file_split[0]
+            if not self.sample_preparation:
+                self.sample_preparation = get_entry_reference(archive, self, preparation_id)
+
+            sample_id = "_".join(preparation_id.split("_")[:-1])
+            if not self.samples:
+                set_sample_reference(archive, self, sample_id)
+
+        super(CE_NSLI_XRD_XY, self).normalize(archive, logger)
 
 # %%####################################### Measurements
 
