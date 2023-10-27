@@ -140,7 +140,7 @@ class CENSLIIdentifier(ArchiveSection):
                 self.datetime = datetime.datetime.now()
 
         if self.mxene_formula and self.owner and self.datetime and self.mxene_formula and self.method:
-            creation_date = self.datetime.strftime('%Y%m%d')
+            creation_date = self.datetime.strftime('%y%m%d')
             owner = self.owner.replace(' ', '-')
             lab_id_list = [creation_date, owner, self.mxene_formula, self.method]
             self.lab_id = '_'.join(lab_id_list)
@@ -151,4 +151,6 @@ class CENSLIIdentifier(ArchiveSection):
             archive.results.eln = ELN()
 
         if self.lab_id:
-            archive.results.eln.lab_ids = [self.lab_id]
+            lab_ids = [self.lab_id]
+            archive.results.eln.lab_ids = lab_ids
+            archive.data.lab_id = self.lab_id
