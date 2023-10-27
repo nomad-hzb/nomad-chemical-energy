@@ -29,6 +29,9 @@ from nomad.metainfo import (
 from nomad.datamodel.data import EntryData
 
 from baseclasses.solution import Solution
+from baseclasses.mxene_solution import MXeneSolution
+
+from .ce_nsli_id import CENSLIIdentifier
 
 from baseclasses.characterizations import (
     Raman,
@@ -121,17 +124,17 @@ def get_processes(archive, entry_id, lab_id):
 # %% ####################### Entities
 
 
-class CE_NSLI_Solution(Solution, EntryData):
+class CE_NSLI_MXene_Solution(MXeneSolution, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'users', 'components', 'elemental_composition', "method", "temperature", "time", "speed", "solvent_ratio", "additive", "other_solution"],
+                'users', 'components', 'elemental_composition',],
             properties=dict(
                 order=[
                     "name",
                     "create_overview",
                     "overview",
-                    "solute", "solvent", "preparation", "washing", "storage", "properties", "solution_id"
+                    "MAX_phase", "etching", "delamination", "washing", "concentration", "properties"
                 ],
             )))
 
@@ -146,8 +149,11 @@ class CE_NSLI_Solution(Solution, EntryData):
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'))
 
+    sample_id = SubSection(
+        section_def=CENSLIIdentifier)
+
     def normalize(self, archive, logger):
-        super(CE_NSLI_Solution, self).normalize(archive, logger)
+        super(CE_NSLI_MXene_Solution, self).normalize(archive, logger)
 
         if self.create_overview and self.lab_id:
             self.create_overview = False
