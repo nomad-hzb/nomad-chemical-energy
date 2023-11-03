@@ -537,7 +537,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "voltage", "current", "current_density", "charge_density", "control", "charge"],
+                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "charge"],
             properties=dict(
                 order=[
                     "name",
