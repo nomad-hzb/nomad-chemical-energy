@@ -537,7 +537,9 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "charge"],
+                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "voltage",
+                "current", "current_density", "voltage_rhe_uncompensated",
+                "voltage_rhe_compensated", "voltage_ref_compensated", "charge_density", "control", "charge"],
             properties=dict(
                 order=[
                     "name",
@@ -576,7 +578,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cv_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
-                    get_voltammetry_archive(data, metadata, self)
+                    get_voltammetry_archive(data, metadata, self, multiple=True)
                     if metadata["TAG"] in ["CV", "COLLECT"] and self.properties is None:
                         self.properties = get_cv_properties(metadata)
 
