@@ -538,7 +538,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
             hide=[
                 'lab_id', 'solution',
                 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "voltage",
-                "current", "current_density", "voltage_rhe_uncompensated",
+                "current", "current_density", "voltage_rhe_uncompensated", "time",
                 "voltage_rhe_compensated", "voltage_ref_compensated", "charge_density", "control", "charge"],
             properties=dict(
                 order=[
