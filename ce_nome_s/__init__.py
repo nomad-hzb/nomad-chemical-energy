@@ -326,6 +326,8 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
             # samples
             for idx, row in samples.iterrows():
+                if row[0].startswith("CE-NOME"):
+                    continue
                 try:
                     sample_id = self.identifier.m_copy(deep=True)
                     sample_id.project_sample_number = next_free_id + counter
@@ -350,6 +352,8 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                                  normalizer=self.__class__.__name__, section='system')
             # environments
             for idx, row in envs.iterrows():
+                if row[0].startswith("CE-NOME"):
+                    continue
                 try:
                     envs_id = self.identifier.m_copy(deep=True)
                     envs_id.project_sample_number = next_free_id + counter
@@ -380,6 +384,8 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
             # setups
             for idx, row in setups.iterrows():
+                if row[0].startswith("CE-NOME"):
+                    continue
                 try:
                     setup_id = self.identifier.m_copy(deep=True)
                     setup_id.project_sample_number = next_free_id + counter
@@ -621,8 +627,10 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     metadata, data = get_header_and_data(filename=f.name)
                     if "RINGCURVE" in metadata:
                         data = [metadata["RINGCURVE"]]
+                    if "WE2CURVE" in metadata:
+                        data = [metadata["WE2CURVE"]]
                     get_voltammetry_archive(data, metadata, self)
-                    if metadata["TAG"] in ["CHRONOA", "COLLECT"] and self.properties is None:
+                    if metadata["TAG"] in ["CHRONOA", "COLLECT", "CV"] and self.properties is None:
                         self.properties = get_ca_properties(metadata)
         super(CE_NOME_Chronoamperometry, self).normalize(archive, logger)
 
