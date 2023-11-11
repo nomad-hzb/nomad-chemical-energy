@@ -650,7 +650,7 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
                     "samples",
                     "station", "voltage_shift", "resistance"])), a_plot=[
             {
-                'label': 'Current', 'x': 'time', 'y': 'voltage', 'layout': {
+                'label': 'Voltage', 'x': 'time', 'y': 'voltage', 'layout': {
                     'yaxis': {
                         "fixedrange": False}, 'xaxis': {
                         "fixedrange": False}}, "config": {
