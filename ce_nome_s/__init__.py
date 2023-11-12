@@ -689,7 +689,7 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles"],
+                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
