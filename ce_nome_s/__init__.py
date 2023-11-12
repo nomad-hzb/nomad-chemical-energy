@@ -262,8 +262,12 @@ class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
 
 def get_next_free_project_number(archive, entity_id):
     from nomad.search import search
+    from nomad.app.v1.models import MetadataPagination
+
     query = {'results.eln.lab_ids': entity_id}
-    search_result = search(owner='all', query=query,
+    pagination = MetadataPagination()
+    pagination.page_size = 9999
+    search_result = search(owner='all', query=query, pagination=pagination,
                            user_id=archive.metadata.main_author.user_id)
     project_sample_numbers = []
     for entry in search_result.data:
