@@ -369,7 +369,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                         solvent=PubChemPureSubstanceSection(
                             name=row["solvent_name"], load_data=False) if not pd.isna(row[f"solvent_name"]) else None,
                         purging=Purging(time=get_parameter(row, "purging_time"), temperature=get_parameter(row, "purging_temperature"),
-                                        gas=PubChemPureSubstanceSection(name=get_parameter(row, "purging_gas_name"), load_data=False)) if not pd.isna(row, f"purging_gas_name") else None,
+                                        gas=PubChemPureSubstanceSection(name=get_parameter(row, "purging_gas_name"), load_data=False)) if not pd.isna(row[f"purging_gas_name"]) else None,
                         substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(get_parameter(row, f"concentration_M_{i}"))*1000 if get_parameter(row, f"concentration_M_{i}") else None,
                                                                concentration_g_per_l=get_parameter(
                                                                    row, f"concentration_g_per_l_{i}"),
@@ -387,6 +387,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 except Exception as e:
                     logger.error(f"could not create row {idx} for environment",
                                  normalizer=self.__class__.__name__, section='system')
+                    raise e
 
             # setups
             for idx, row in setups.iterrows():
