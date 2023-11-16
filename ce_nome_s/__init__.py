@@ -373,6 +373,8 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                         substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(get_parameter(row, f"concentration_M_{i}"))*1000 if get_parameter(row, f"concentration_M_{i}") else None,
                                                                concentration_g_per_l=get_parameter(
                                                                    row, f"concentration_g_per_l_{i}"),
+                                                               amount_relative=get_parameter(
+                                                                   row, f"amount_relative_{i}"),
                                                                substance=PubChemPureSubstanceSection(name=get_parameter(row, f"substance_name_{i}"), load_data=False))
                                     for i in range(self.number_of_substances_per_env) if not pd.isna(row[f"substance_name_{i}"])],
                         environment_id=envs_id
