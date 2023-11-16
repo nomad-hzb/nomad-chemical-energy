@@ -44,7 +44,7 @@ from baseclasses.characterizations import (
 from baseclasses.solar_energy import UVvisMeasurement
 
 from baseclasses.chemical_energy import (
-    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties, Equipment,
+    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties, Equipment, CatalystSynthesis,
     ElectroChemicalSetup, Environment, Purging, SubstanceWithConcentration,
     get_next_project_sample_number,
     CyclicVoltammetry,
@@ -303,7 +303,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 order=[
                     "name",
                     "lab_id", "create_template", "create_entries", "data_file",
-                    "number_of_substances_per_env"])))
+                    "number_of_substances_per_env", "number_of_substances_per_synthesis"])))
 
     def normalize(self, archive, logger):
         super(CE_NOME_DocumentationTool, self).normalize(archive, logger)
@@ -345,8 +345,19 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                         substrate=SubstrateProperties(substrate_type=get_parameter(row, "substrate_type"),
                                                       substrate_dimension=get_parameter(row, "substrate_dimension")),
                         active_area=get_parameter(row, "active_area_cm**2"),
-                        sample_id=sample_id
-                    )
+                        sample_id=sample_id,
+                        synthesis=[CatalystSynthesis(method=get_parameter(row, "synthesis_method"),
+                                                     description=get_parameter(row, "synthesis_description"),
+                                                     substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(get_parameter(row, f"concentration_M_{i}"))*1000 if get_parameter(row, f"concentration_M_{i}") else None,
+                                                                                            concentration_g_per_l=get_parameter(
+                                                                                                row, f"concentration_g_per_l_{i}"),
+                                                                                            amount_relative=get_parameter(
+                                                                                                row, f"amount_relative_{i}"),
+                                                                                            substance=PubChemPureSubstanceSection(name=get_parameter(row, f"substance_name_{i}"), load_data=False))
+                                                                 for i in range(self.number_of_substances_per_env) if not pd.isna(row[f"substance_name_{i}"])]
+
+
+                                                     )])
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json','')}_sample_{idx}.archive.json"
                     created = create_archive(ce_nome_sample, archive, file_name)
                     samples.at[idx, "id"] = f"{id_base}_{get_project_number(path, file_name):04d}"
@@ -356,6 +367,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 except Exception as e:
                     logger.error(f"could not create row {idx} for samples",
                                  normalizer=self.__class__.__name__, section='system')
+                    raise e
             # environments
             for idx, row in envs.iterrows():
                 if row[0].startswith("CE-NOME"):
@@ -403,7 +415,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                         reference_electrode=find_sample_by_id(archive,  get_parameter(row, "reference_electrode")),
                         counter_electrode=find_sample_by_id(archive,  get_parameter(row, "counter_electrode")),
                         equipment=[find_sample_by_id(archive, row[f"equipment_{i}"]) for i in range(
-                            5) if get_parameter(row, f"equipment_{i}")],
+                            5) if get_parameter(row, f"equipment_{i}") and find_sample_by_id(archive, row[f"equipment_{i}"])],
                         description=get_parameter(row, "description"),
                         setup_id=setup_id
                     )
@@ -417,6 +429,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 except Exception as e:
                     logger.error(f"could not create row {idx} for setups",
                                  normalizer=self.__class__.__name__, section='system')
+                    raise e
 
             with pd.ExcelWriter(os.path.join(path, self.data_file)) as writer:
                 samples.to_excel(writer, sheet_name='samples', index=False)
