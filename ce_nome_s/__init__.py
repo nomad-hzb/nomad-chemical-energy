@@ -55,7 +55,8 @@ from baseclasses.chemical_energy import (
     ElectrochemicalImpedanceSpectroscopy,
     # PreparationProtocol,
     PhaseFluorometryOxygen,
-    PumpRateMeasurement
+    PumpRateMeasurement,
+    LinearSweepVoltammetry
 )
 
 from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
@@ -533,31 +534,23 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_eis_properties, get_eis_data, get_meta_data
                     metadata, data = get_header_and_data(filename=f.name)
-                    data = data[0]
-                    get_eis_data(data, self)
+                    get_eis_data(data["ZCURVE"][0], self)
                     get_meta_data(metadata, self)
-                    if "EISPOT" in metadata["TAG"] and self.properties is None:
-                        self.properties = get_eis_properties(metadata)
+                    self.properties = get_eis_properties(metadata)
         super(CE_NOME_ElectrochemicalImpedanceSpectroscopy,
               self).normalize(archive, logger)
 
 
-# class CE_NOME_ElectrochemicalImpedanceSpectroscopy_Multiple(
-#         ElectrochemicalImpedanceSpectroscopyMultiple, EntryData):
-#     m_def = Section(
-#         a_eln=dict(
-#             hide=[
-#                 'lab_id', 'solution',
-#                 'users', "location", 'end_time',  'steps', 'instruments', 'results'],
-#             properties=dict(
-#                 order=[
-#                     "name",
-#                     "data_file",
-#                     "environment",
-#                     "setup",
-#                     "samples",
-#                     "station"])),
-#     )
+def get_curve_tag(methods, function):
+    if not methods:
+        return "CURVE"
+    if "-" not in methods:
+        return "CURVE GENERATOR"
+
+    if "gen" in function.lower():
+        return "CURVE GENERATOR"
+    if "det" in function.lower():
+        return "CURVE DETECTOR"
 
 
 class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
@@ -607,18 +600,71 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cv_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
-                    get_voltammetry_archive(data, metadata, self, multiple=True)
-                    if metadata["TAG"] in ["CV", "COLLECT"] and self.properties is None:
-                        self.properties = get_cv_properties(metadata)
+                    curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
+                    get_voltammetry_archive(data[curve_key], metadata, self, multiple=True)
+
+                    self.properties = get_cv_properties(metadata)
 
         super(CE_NOME_CyclicVoltammetry, self).normalize(archive, logger)
+
+
+class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'solution',
+                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "control", "cycles", "charge", "charge_density"],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file",
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station", "voltage_shift", "resistance"])),
+        a_plot=[{
+            'label': 'Current Density over Voltage RHE',
+            'x': 'voltage_rhe_compensated',
+            'y': 'current_density',
+            'layout': {
+                "showlegend": True,
+                'yaxis': {
+                    "fixedrange": False},
+                'xaxis': {
+                    "fixedrange": False}},
+        },
+            {
+                'label': 'Current over Voltage',
+                'x': 'voltage',
+                'y': 'current',
+                'layout': {
+                    "showlegend": True,
+                    'yaxis': {
+                        "fixedrange": False},
+                    'xaxis': {
+                        "fixedrange": False}},
+        }]
+    )
+
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+                if os.path.splitext(self.data_file)[-1] == ".DTA":
+                    from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.gamry_archive import get_lsv_properties, get_voltammetry_archive
+                    metadata, data = get_header_and_data(filename=f.name)
+                    curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
+                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    self.properties = get_lsv_properties(metadata)
+
+        super(CE_NOME_LinearSweepVoltammetry, self).normalize(archive, logger)
 
 
 class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles"],
+                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles", "charge", "charge_density"],
             properties=dict(
                 order=[
                     "name",
@@ -648,13 +694,9 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_ca_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
-                    if "RINGCURVE" in metadata:
-                        data = [metadata["RINGCURVE"]]
-                    if "WE2CURVE" in metadata:
-                        data = [metadata["WE2CURVE"]]
-                    get_voltammetry_archive(data, metadata, self)
-                    if metadata["TAG"] in ["CHRONOA", "COLLECT", "CV"] and self.properties is None:
-                        self.properties = get_ca_properties(metadata)
+                    curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
+                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    self.properties = get_ca_properties(metadata)
         super(CE_NOME_Chronoamperometry, self).normalize(archive, logger)
 
 
@@ -686,25 +728,10 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cp_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
-                    get_voltammetry_archive(data, metadata, self)
-                    if metadata["TAG"] in ["CHRONOP"] and self.properties is None:
-                        self.properties = get_cp_properties(metadata)
+                    curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
+                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    self.properties = get_cp_properties(metadata)
         super(CE_NOME_Chronopotentiometry, self).normalize(archive, logger)
-
-
-# class CE_NOME_Chronoamperometry_Multiple(ChronoamperometryMultiple, EntryData):
-#     m_def = Section(
-#         a_eln=dict(
-#             hide=[
-#                 'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results'],
-#             properties=dict(
-#                 order=[
-#                     "name",
-#                     "data_file",
-#                     "environment",
-#                     "setup",
-#                     "samples",
-#                     "station", "voltage_shift", "resistance"])))
 
 
 class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
@@ -739,9 +766,9 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cc_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
-                    get_voltammetry_archive(data, metadata, self)
-                    if "CHRONOC" in metadata["TAG"] and self.properties is None:
-                        self.properties = get_cc_properties(metadata)
+                    curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
+                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    self.properties = get_cc_properties(metadata)
         super(CE_NOME_Chronocoulometry, self).normalize(archive, logger)
 
 
@@ -778,9 +805,9 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_ocv_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
-                    get_voltammetry_archive(data, metadata, self)
-                    if "CORPOT" in metadata["TAG"] and self.properties is None:
-                        self.properties = get_ocv_properties(metadata)
+                    curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
+                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    self.properties = get_ocv_properties(metadata)
         super(CE_NOME_OpenCircuitVoltage, self).normalize(archive, logger)
 
 
