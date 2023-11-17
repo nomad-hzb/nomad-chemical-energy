@@ -601,7 +601,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     from baseclasses.helper.archive_builder.gamry_archive import get_cv_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
-                    get_voltammetry_archive(data[curve_key], metadata, self, multiple=True)
+                    get_voltammetry_archive(data, metadata, curve_key, self, multiple=True)
 
                     self.properties = get_cv_properties(metadata)
 
@@ -654,7 +654,7 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
                     from baseclasses.helper.archive_builder.gamry_archive import get_lsv_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
-                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    get_voltammetry_archive(data, metadata, curve_key, self)
                     self.properties = get_lsv_properties(metadata)
 
         super(CE_NOME_LinearSweepVoltammetry, self).normalize(archive, logger)
@@ -695,7 +695,7 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     from baseclasses.helper.archive_builder.gamry_archive import get_ca_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
-                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    get_voltammetry_archive(data, metadata, curve_key, self)
                     self.properties = get_ca_properties(metadata)
         super(CE_NOME_Chronoamperometry, self).normalize(archive, logger)
 
@@ -729,7 +729,7 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
                     from baseclasses.helper.archive_builder.gamry_archive import get_cp_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
-                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    get_voltammetry_archive(data, metadata, curve_key, self)
                     self.properties = get_cp_properties(metadata)
         super(CE_NOME_Chronopotentiometry, self).normalize(archive, logger)
 
@@ -767,7 +767,7 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                     from baseclasses.helper.archive_builder.gamry_archive import get_cc_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
-                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    get_voltammetry_archive(data, metadata, curve_key, self)
                     self.properties = get_cc_properties(metadata)
         super(CE_NOME_Chronocoulometry, self).normalize(archive, logger)
 
@@ -806,7 +806,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                     from baseclasses.helper.archive_builder.gamry_archive import get_ocv_properties, get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
-                    get_voltammetry_archive(data[curve_key], metadata, self)
+                    get_voltammetry_archive(data, metadata, curve_key, self)
                     self.properties = get_ocv_properties(metadata)
         super(CE_NOME_OpenCircuitVoltage, self).normalize(archive, logger)
 
