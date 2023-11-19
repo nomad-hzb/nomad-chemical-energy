@@ -536,7 +536,8 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
                     metadata, data = get_header_and_data(filename=f.name)
                     get_eis_data(data["ZCURVE"][0], self)
                     get_meta_data(metadata, self)
-                    self.properties = get_eis_properties(metadata)
+                    if not self.properties:
+                        self.properties = get_eis_properties(metadata)
         super(CE_NOME_ElectrochemicalImpedanceSpectroscopy,
               self).normalize(archive, logger)
 
@@ -602,8 +603,8 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self, multiple=True)
-
-                    self.properties = get_cv_properties(metadata)
+                    if not self.properties:
+                        self.properties = get_cv_properties(metadata)
 
         super(CE_NOME_CyclicVoltammetry, self).normalize(archive, logger)
 
@@ -655,7 +656,8 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
-                    self.properties = get_lsv_properties(metadata)
+                    if not self.properties:
+                        self.properties = get_lsv_properties(metadata)
 
         super(CE_NOME_LinearSweepVoltammetry, self).normalize(archive, logger)
 
@@ -696,7 +698,8 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
-                    self.properties = get_ca_properties(metadata)
+                    if not self.properties:
+                        self.properties = get_ca_properties(metadata)
         super(CE_NOME_Chronoamperometry, self).normalize(archive, logger)
 
 
@@ -730,7 +733,8 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
-                    self.properties = get_cp_properties(metadata)
+                    if not self.properties:
+                        self.properties = get_cp_properties(metadata)
         super(CE_NOME_Chronopotentiometry, self).normalize(archive, logger)
 
 
@@ -768,7 +772,8 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
-                    self.properties = get_cc_properties(metadata)
+                    if not self.properties:
+                        self.properties = get_cc_properties(metadata)
         super(CE_NOME_Chronocoulometry, self).normalize(archive, logger)
 
 
@@ -807,7 +812,8 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
-                    self.properties = get_ocv_properties(metadata)
+                    if not self.properties:
+                        self.properties = get_ocv_properties(metadata)
         super(CE_NOME_OpenCircuitVoltage, self).normalize(archive, logger)
 
 
