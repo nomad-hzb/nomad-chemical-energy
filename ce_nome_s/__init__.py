@@ -355,7 +355,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                                                                                             amount_relative=get_parameter(
                                                                                                 row, f"amount_relative_{i}"),
                                                                                             substance=PubChemPureSubstanceSection(name=get_parameter(row, f"substance_name_{i}"), load_data=False))
-                                                                 for i in range(self.number_of_substances_per_env) if not pd.isna(row[f"substance_name_{i}"])]
+                                                                 for i in range(self.number_of_substances_per_synthesis) if not pd.isna(row[f"substance_name_{i}"])]
 
 
                                                      )])
