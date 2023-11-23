@@ -346,6 +346,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                         substrate=SubstrateProperties(substrate_type=get_parameter(row, "substrate_type"),
                                                       substrate_dimension=get_parameter(row, "substrate_dimension")),
                         active_area=get_parameter(row, "active_area_cm**2"),
+                        mass_coverage=get_parameter(row, "mass_coverage_ug_cm**2"),
                         sample_id=sample_id,
                         synthesis=[CatalystSynthesis(method=get_parameter(row, "synthesis_method"),
                                                      description=get_parameter(row, "synthesis_description"),
