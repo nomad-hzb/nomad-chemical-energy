@@ -571,28 +571,28 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     "setup",
                     "samples",
                     "station", "voltage_shift", "resistance"])),
-        # a_plot=[{
-        #     'label': 'Current Density over Voltage RHE',
-        #     'x': 'cycles/:/voltage_rhe_compensated',
-        #     'y': 'cycles/:/current_density',
-        #     'layout': {
-        #         "showlegend": True,
-        #         'yaxis': {
-        #             "fixedrange": False},
-        #         'xaxis': {
-        #             "fixedrange": False}},
-        # },
-        #     {
-        #         'label': 'Current over Voltage',
-        #         'x': 'cycles/:/voltage',
-        #         'y': 'cycles/:/current',
-        #         'layout': {
-        #             "showlegend": True,
-        #             'yaxis': {
-        #                 "fixedrange": False},
-        #             'xaxis': {
-        #                 "fixedrange": False}},
-        # }]
+        a_plot=[{
+            'label': 'Current Density over Voltage RHE',
+            'x': 'cycles/:/voltage_rhe_compensated',
+            'y': 'cycles/:/current_density',
+            'layout': {
+                "showlegend": True,
+                'yaxis': {
+                    "fixedrange": False},
+                'xaxis': {
+                    "fixedrange": False}},
+        },
+            {
+                'label': 'Current over Voltage',
+                'x': 'cycles/:/voltage',
+                'y': 'cycles/:/current',
+                'layout': {
+                    "showlegend": True,
+                    'yaxis': {
+                        "fixedrange": False},
+                    'xaxis': {
+                        "fixedrange": False}},
+        }]
     )
 
     def normalize(self, archive, logger):
