@@ -547,7 +547,7 @@ def get_curve_tag(methods, function):
     if not methods:
         return "CURVE"
     if "-" not in methods:
-        return "CURVE GENERATOR"
+        return "CURVE"
 
     if "gen" in function.lower():
         return "CURVE GENERATOR"
