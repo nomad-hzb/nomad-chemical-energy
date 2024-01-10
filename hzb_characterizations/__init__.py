@@ -17,23 +17,19 @@
 #
 
 import os
-
-# from nomad.units import ureg
-from nomad.metainfo import (
-    Package,
-    Section)
-from nomad.datamodel.data import EntryData
-
-
 from baseclasses.characterizations import (
     XRD, XRDData, XPS, TGA, XRR, XRF, Ellipsometry,
     XRDLibrary, XPSLibrary, XRRLibrary, XRFLibrary, EllipsometryLibrary
 )
-
-
 from baseclasses.characterizations.electron_microscopy import (
     SEM_Microscope_Merlin
 )
+
+from nomad.datamodel.data import EntryData
+# from nomad.units import ureg
+from nomad.metainfo import (
+    Package,
+    Section)
 
 m_package2 = Package(name='ce-wannsee')
 
@@ -48,7 +44,7 @@ class HZB_SEM_Merlin(SEM_Microscope_Merlin, EntryData):
         a_eln=dict(hide=['lab_id',
                          'users',
                          "location",
-                         'end_time',  'steps', 'instruments', 'results', "detector_data_folder", "external_sample_url"],
+                         'end_time', 'steps', 'instruments', 'results', "detector_data_folder", "external_sample_url"],
                    properties=dict(
                        order=[
                            "name",
@@ -64,7 +60,7 @@ class HZB_Ellipsometry(Ellipsometry, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "identifier"],
             properties=dict(
                 order=[
@@ -80,7 +76,7 @@ class HZB_Ellipsometry_Library(EllipsometryLibrary, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "identifier"],
             properties=dict(
                 order=[
@@ -96,7 +92,7 @@ class HZB_XRR(XRR, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "identifier"],
             properties=dict(
                 order=[
@@ -115,7 +111,7 @@ class HZB_XRR_Library(XRRLibrary, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "identifier"],
             properties=dict(
                 order=[
@@ -134,7 +130,7 @@ class HZB_XRF(XRF, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "metadata_file",
                 "shifted_data",
                 "identifier"],
@@ -155,7 +151,7 @@ class HZB_XRF_Library(XRFLibrary, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "metadata_file",
                 "shifted_data",
                 "identifier"],
@@ -176,7 +172,7 @@ class HZB_XRD(XRD, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "metadata_file",
                 "shifted_data",
                 "identifier"],
@@ -212,7 +208,6 @@ class HZB_XRD(XRD, EntryData):
                     else:
                         skiprows = 0
                         data = pd.read_csv(f.name, sep=" |\t", header=None, skiprows=skiprows)
-                    print(data)
                     self.data = XRDData(angle=data[0], intensity=data[1])
         super(HZB_XRD, self).normalize(archive, logger)
 
@@ -224,7 +219,7 @@ class HZB_XRD_Library(XRDLibrary, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "metadata_file",
                 "shifted_data",
                 "identifier"],
@@ -245,7 +240,7 @@ class HZB_XPS(XPS, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "identifier"],
             properties=dict(
                 order=[
@@ -261,7 +256,7 @@ class HZB_XPS_Library(XPSLibrary, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "metadata_file",
                 "shifted_data",
                 "identifier"],
@@ -279,7 +274,7 @@ class HZB_TGA(TGA, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',
+                'end_time', 'steps', 'instruments', 'results',
                 "identifier"],
             properties=dict(
                 order=[
