@@ -41,6 +41,10 @@ from baseclasses.characterizations import (
     XASFluorescence, XASTransmission
 )
 
+from baseclasses.voila import (
+    VoilaNotebook
+)
+
 from baseclasses.solar_energy import UVvisMeasurement
 
 from baseclasses.chemical_energy import (
@@ -553,6 +557,14 @@ def get_curve_tag(methods, function):
         return "CURVE GENERATOR"
     if "det" in function.lower():
         return "CURVE DETECTOR"
+
+class CE_NOME_VoilaNotebook(VoilaNotebook, EntryData):
+    m_def = Section(
+
+    )
+
+    def normalize(self, archive, logger):
+        super(CE_NOME_VoilaNotebook, self).normalize(archive, logger)
 
 
 class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
