@@ -17,10 +17,22 @@
 #
 
 import os
+
+
+# from nomad.units import ureg
+from nomad.metainfo import (
+    Package,
+    Section)
+from nomad.datamodel.data import EntryData
+
 from baseclasses.characterizations import (
     XRD, XRDData, XPS, TGA, XRR, XRF, Ellipsometry,
     XRDLibrary, XPSLibrary, XRRLibrary, XRFLibrary, EllipsometryLibrary
 )
+
+
+# from nomad_measurements.xrd import XRayDiffraction
+
 from baseclasses.characterizations.electron_microscopy import (
     SEM_Microscope_Merlin
 )
@@ -210,6 +222,27 @@ class HZB_XRD(XRD, EntryData):
                         data = pd.read_csv(f.name, sep=" |\t", header=None, skiprows=skiprows)
                     self.data = XRDData(angle=data[0], intensity=data[1])
         super(HZB_XRD, self).normalize(archive, logger)
+
+
+# class HZB_XRD2(XRayDiffraction, EntryData):
+#     m_def = Section(
+#         a_eln=dict(
+#             hide=[
+#                 'lab_id',
+#                 'users',
+#                 "location",
+#                 'end_time', 'steps', 'instruments', 'results',
+#                 "metadata_file",
+#                 "shifted_data",
+#                 "identifier"],
+#             properties=dict(
+#                 order=[
+#                     "name",
+#                     "data_file",
+#                     "samples"])))
+#
+#     def normalize(self, archive, logger):
+#         super(HZB_XRD2, self).normalize(archive, logger)
 
 
 class HZB_XRD_Library(XRDLibrary, EntryData):

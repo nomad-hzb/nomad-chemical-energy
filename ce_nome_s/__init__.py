@@ -20,7 +20,6 @@ import numpy as np
 import os
 import pandas as pd
 
-
 # from nomad.units import ureg
 from nomad.metainfo import (
     Package,
@@ -48,7 +47,8 @@ from baseclasses.voila import (
 from baseclasses.solar_energy import UVvisMeasurement
 
 from baseclasses.chemical_energy import (
-    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties, Equipment, CatalystSynthesis,
+    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties, Equipment,
+    CatalystSynthesis,
     ElectroChemicalSetup, Environment, Purging, SubstanceWithConcentration,
     get_next_project_sample_number,
     CyclicVoltammetry,
@@ -64,6 +64,7 @@ from baseclasses.chemical_energy import (
 )
 
 from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
+from datetime import date
 
 m_package2 = Package(name='CE-NOME')
 
@@ -90,10 +91,10 @@ class CE_NOME_Electrode(Electrode, EntryData):
     m_def = Section(
         a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
                    properties=dict(
-            order=[
-                "name", "lab_id",
-                "chemical_composition_or_formulas", "producer", "location"
-            ]))
+                       order=[
+                           "name", "lab_id",
+                           "chemical_composition_or_formulas", "producer", "location"
+                       ]))
     )
 
 
@@ -101,10 +102,10 @@ class CE_NOME_Equipment(Equipment, EntryData):
     m_def = Section(
         a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
                    properties=dict(
-            order=[
-                "name", "lab_id",
-                "producer", "location"
-            ]))
+                       order=[
+                           "name", "lab_id",
+                           "producer", "location"
+                       ]))
     )
 
 
@@ -173,14 +174,14 @@ class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
     m_def = Section(
         a_eln=dict(hide=['users', 'origin', "elemental_composition", "components", "substrate"],
                    properties=dict(
-            order=[
-                "name",
-                "lab_id",
-                "chemical_composition_or_formulas",
-                "setup",
-                "reference_electrode",
-                "counter_electrode", "equipment"
-            ])),
+                       order=[
+                           "name",
+                           "lab_id",
+                           "chemical_composition_or_formulas",
+                           "setup",
+                           "reference_electrode",
+                           "counter_electrode", "equipment"
+                       ])),
     )
 
     setup_id = SubSection(
@@ -274,24 +275,7 @@ def get_next_free_project_number(archive, entity_id):
     pagination.page_size = 9999
     search_result = search(owner='all', query=query, pagination=pagination,
                            user_id=archive.metadata.main_author.user_id)
-    project_sample_numbers = []
-    for entry in search_result.data:
-        lab_ids = entry["results"]["eln"]["lab_ids"]
-        project_sample_numbers.extend([int(lab_id.split(
-            "_")[-1]) for lab_id in lab_ids if lab_id.split("_")[-1].isdigit()])
-    return max(project_sample_numbers) + 1 if project_sample_numbers else 0
-
-
-def get_project_number(path, file):
-    import json
-    with open(os.path.join(path, file)) as f:
-        d = json.load(f).get("data")
-    if "sample_id" in d:
-        return d["sample_id"]["project_sample_number"]
-    if "environment_id" in d:
-        return d["environment_id"]["project_sample_number"]
-    if "setup_id" in d:
-        return d["setup_id"]["project_sample_number"]
+    return get_next_project_sample_number(search_result.data, entity_id)
 
 
 def get_parameter(obj, key):
@@ -299,6 +283,75 @@ def get_parameter(obj, key):
     if pd.isna(value):
         return None
     return value
+
+
+def get_number_of_substances(row, prefix):
+    return sum([s.startswith(prefix) for s in list(row.keys())])
+
+
+def set_setup(archive, row):
+    return CE_NOME_ElectroChemicalSetup(
+        setup=get_parameter(row, "setup"),
+        reference_electrode=find_sample_by_id(archive, get_parameter(row, "reference_electrode")),
+        counter_electrode=find_sample_by_id(archive, get_parameter(row, "counter_electrode")),
+        equipment=[find_sample_by_id(archive, row[f"equipment_{i}"]) for i in range(
+            5) if get_parameter(row, f"equipment_{i}") and find_sample_by_id(archive, row[f"equipment_{i}"])],
+        description=get_parameter(row, "description"),
+    )
+
+
+def set_environment(row):
+    number_of_substances_per_env = get_number_of_substances(row, "substance_name_")
+    return CE_NOME_Environment(
+        ph_value=get_parameter(row, "ph_value"),
+        description=get_parameter(row, "description"),
+        solvent=PubChemPureSubstanceSection(
+            name=row["solvent_name"], load_data=False) if not pd.isna(row[f"solvent_name"]) else None,
+        purging=Purging(time=get_parameter(row, "purging_time"), temperature=get_parameter(row, "purging_temperature"),
+                        gas=PubChemPureSubstanceSection(name=get_parameter(row, "purging_gas_name"),
+                                                        load_data=False)) if not pd.isna(
+            row[f"purging_gas_name"]) else None,
+        substances=[SubstanceWithConcentration(
+            concentration_mmol_per_l=float(get_parameter(row, f"concentration_M_{i}")) * 1000 if get_parameter(row,
+                                                                                                               f"concentration_M_{i}") else None,
+            concentration_g_per_l=get_parameter(
+                row, f"concentration_g_per_l_{i}"),
+            amount_relative=get_parameter(
+                row, f"amount_relative_{i}"),
+            substance=PubChemPureSubstanceSection(name=get_parameter(row, f"substance_name_{i}"), load_data=False))
+            for i in range(number_of_substances_per_env) if not pd.isna(row[f"substance_name_{i}"])],
+    )
+
+
+def set_sample(row):
+    number_of_substances_per_synthesis = get_number_of_substances(row, "substance_name_")
+    return CE_NOME_Sample(
+        chemical_composition_or_formulas=get_parameter(row, "chemical_composition_or_formula"),
+        component_description=get_parameter(row, "component_description"),
+        origin=get_parameter(row, "producer"),
+        project_name_long=get_parameter(row, "project_name_long"),
+        description=get_parameter(row, "description"),
+        substrate=SubstrateProperties(substrate_type=get_parameter(row, "substrate_type"),
+                                      substrate_dimension=get_parameter(row, "substrate_dimension")),
+        active_area=get_parameter(row, "active_area_cm**2"),
+        mass_coverage=get_parameter(row, "mass_coverage_ug_cm**2"),
+        synthesis=[CatalystSynthesis(method=get_parameter(row, "synthesis_method"),
+                                     description=get_parameter(row, "synthesis_description"),
+                                     substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(
+                                         get_parameter(row, f"concentration_M_{i}")) * 1000 if get_parameter(row,
+                                                                                                             f"concentration_M_{i}") else None,
+                                         concentration_g_per_l=get_parameter(
+                                         row, f"concentration_g_per_l_{i}"),
+                                         amount_relative=get_parameter(
+                                         row, f"amount_relative_{i}"),
+                                         substance=PubChemPureSubstanceSection(
+                                         name=get_parameter(row,
+                                                            f"substance_name_{i}"),
+                                         load_data=False))
+            for i in range(number_of_substances_per_synthesis) if
+            not pd.isna(row[f"substance_name_{i}"])]
+
+        )])
 
 
 class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
@@ -331,45 +384,25 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
             # prepare id
             id_base = "_".join(self.lab_id.split("_")[:-1])
+            id_base_sample = "_".join([id_base, date.today().strftime('%y%m%d')])
             next_free_id = get_next_free_project_number(archive, id_base)
+            next_free_id_sample = get_next_free_project_number(archive, id_base_sample)
             counter = 0
+            counter_sample = 0
 
             # samples
             for idx, row in samples.iterrows():
                 if row[0].startswith("CE-NOME"):
                     continue
                 try:
-                    sample_id = self.identifier.m_copy(deep=True)
-                    sample_id.project_sample_number = next_free_id + counter
-                    ce_nome_sample = CE_NOME_Sample(
-                        chemical_composition_or_formulas=get_parameter(row, "chemical_composition_or_formula"),
-                        component_description=get_parameter(row, "component_description"),
-                        origin=get_parameter(row, "producer"),
-                        project_name_long=get_parameter(row, "project_name_long"),
-                        description=get_parameter(row, "description"),
-                        substrate=SubstrateProperties(substrate_type=get_parameter(row, "substrate_type"),
-                                                      substrate_dimension=get_parameter(row, "substrate_dimension")),
-                        active_area=get_parameter(row, "active_area_cm**2"),
-                        mass_coverage=get_parameter(row, "mass_coverage_ug_cm**2"),
-                        sample_id=sample_id,
-                        synthesis=[CatalystSynthesis(method=get_parameter(row, "synthesis_method"),
-                                                     description=get_parameter(row, "synthesis_description"),
-                                                     substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(get_parameter(row, f"concentration_M_{i}"))*1000 if get_parameter(row, f"concentration_M_{i}") else None,
-                                                                                            concentration_g_per_l=get_parameter(
-                                                                                                row, f"concentration_g_per_l_{i}"),
-                                                                                            amount_relative=get_parameter(
-                                                                                                row, f"amount_relative_{i}"),
-                                                                                            substance=PubChemPureSubstanceSection(name=get_parameter(row, f"substance_name_{i}"), load_data=False))
-                                                                 for i in range(self.number_of_substances_per_synthesis) if not pd.isna(row[f"substance_name_{i}"])]
-
-
-                                                     )])
-                    file_name = f"{archive.metadata.mainfile.replace('.archive.json','')}_sample_{idx}.archive.json"
+                    ce_nome_sample = set_sample(row)
+                    ce_nome_sample.lab_id = f"{id_base_sample}_{next_free_id_sample + counter_sample:04d}"
+                    file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_sample_{idx}.archive.json"
                     created = create_archive(ce_nome_sample, archive, file_name)
-                    samples.at[idx, "id"] = f"{id_base}_{get_project_number(path, file_name):04d}"
+                    samples.at[idx, "id"] = ce_nome_sample.lab_id
 
                     if created:
-                        counter += 1
+                        counter_sample += 1
                 except Exception as e:
                     logger.error(f"could not create row {idx} for samples",
                                  normalizer=self.__class__.__name__, section='system')
@@ -379,28 +412,11 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 if row[0].startswith("CE-NOME"):
                     continue
                 try:
-                    envs_id = self.identifier.m_copy(deep=True)
-                    envs_id.project_sample_number = next_free_id + counter
-                    ce_nome_envs = CE_NOME_Environment(
-                        ph_value=get_parameter(row, "ph_value"),
-                        description=get_parameter(row, "description"),
-                        solvent=PubChemPureSubstanceSection(
-                            name=row["solvent_name"], load_data=False) if not pd.isna(row[f"solvent_name"]) else None,
-                        purging=Purging(time=get_parameter(row, "purging_time"), temperature=get_parameter(row, "purging_temperature"),
-                                        gas=PubChemPureSubstanceSection(name=get_parameter(row, "purging_gas_name"), load_data=False)) if not pd.isna(row[f"purging_gas_name"]) else None,
-                        substances=[SubstanceWithConcentration(concentration_mmol_per_l=float(get_parameter(row, f"concentration_M_{i}"))*1000 if get_parameter(row, f"concentration_M_{i}") else None,
-                                                               concentration_g_per_l=get_parameter(
-                                                                   row, f"concentration_g_per_l_{i}"),
-                                                               amount_relative=get_parameter(
-                                                                   row, f"amount_relative_{i}"),
-                                                               substance=PubChemPureSubstanceSection(name=get_parameter(row, f"substance_name_{i}"), load_data=False))
-                                    for i in range(self.number_of_substances_per_env) if not pd.isna(row[f"substance_name_{i}"])],
-                        environment_id=envs_id
-                    )
-
-                    file_name = f"{archive.metadata.mainfile.replace('.archive.json','')}_env_{idx}.archive.json"
+                    ce_nome_envs = set_environment(row)
+                    ce_nome_envs.lab_id = f"{id_base}_{next_free_id + counter:04d}"
+                    file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_env_{idx}.archive.json"
                     created = create_archive(ce_nome_envs, archive, file_name)
-                    envs.at[idx, "id"] = f"{id_base}_{get_project_number(path, file_name):04d}"
+                    envs.at[idx, "id"] = ce_nome_envs.lab_id
 
                     if created:
                         counter += 1
@@ -414,21 +430,11 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 if row[0].startswith("CE-NOME"):
                     continue
                 try:
-                    setup_id = self.identifier.m_copy(deep=True)
-                    setup_id.project_sample_number = next_free_id + counter
-                    ce_nome_setup = CE_NOME_ElectroChemicalSetup(
-                        setup=get_parameter(row, "setup"),
-                        reference_electrode=find_sample_by_id(archive,  get_parameter(row, "reference_electrode")),
-                        counter_electrode=find_sample_by_id(archive,  get_parameter(row, "counter_electrode")),
-                        equipment=[find_sample_by_id(archive, row[f"equipment_{i}"]) for i in range(
-                            5) if get_parameter(row, f"equipment_{i}") and find_sample_by_id(archive, row[f"equipment_{i}"])],
-                        description=get_parameter(row, "description"),
-                        setup_id=setup_id
-                    )
-
-                    file_name = f"{archive.metadata.mainfile.replace('.archive.json','')}_setup_{idx}.archive.json"
+                    ce_nome_setup = set_setup(archive, row)
+                    ce_nome_setup.lab_id = f"{id_base}_{next_free_id + counter:04d}"
+                    file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_setup_{idx}.archive.json"
                     created = create_archive(ce_nome_setup, archive, file_name)
-                    setups.at[idx, "id"] = f"{id_base}_{get_project_number(path, file_name):04d}"
+                    setups.at[idx, "id"] = ce_nome_setup.lab_id
 
                     if created:
                         counter += 1
@@ -442,6 +448,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 envs.to_excel(writer, sheet_name='environments', index=False)
                 setups.to_excel(writer, sheet_name='setups', index=False)
 
+
 # %%####################################### Measurements
 
 
@@ -450,7 +457,7 @@ class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id',
-                'users', "location", 'end_time',  'steps', 'instruments', 'results'],
+                'users', "location", 'end_time', 'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -474,7 +481,7 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", 'end_time',  'steps', 'instruments', 'results'],
+                'users', "location", 'end_time', 'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -498,7 +505,7 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file"],
+                'users', "location", 'end_time', 'steps', 'instruments', 'results', "metadata_file"],
             properties=dict(
                 order=[
                     "name",
@@ -537,7 +544,8 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
             with archive.m_context.raw_file(self.data_file) as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.gamry_archive import get_eis_properties, get_eis_data, get_meta_data
+                    from baseclasses.helper.archive_builder.gamry_archive import get_eis_properties, get_eis_data, \
+                        get_meta_data
                     metadata, data = get_header_and_data(filename=f.name)
                     get_eis_data(data["ZCURVE"][0], self)
                     get_meta_data(metadata, self)
@@ -572,7 +580,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "voltage",
+                'users', "location", 'end_time', 'steps', 'instruments', 'results', "metadata_file", "voltage",
                 "current", "current_density", "voltage_rhe_uncompensated", "time",
                 "voltage_rhe_compensated", "voltage_ref_compensated", "charge_density", "control", "charge"],
             properties=dict(
@@ -612,7 +620,8 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
             with archive.m_context.raw_file(self.data_file) as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.gamry_archive import get_cv_properties, get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.gamry_archive import get_cv_properties, \
+                        get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self, multiple=True)
@@ -627,7 +636,8 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "control", "cycles", "charge", "charge_density"],
+                'users', "location", 'end_time', 'steps', 'instruments', 'results', "metadata_file", "control",
+                "cycles", "charge", "charge_density"],
             properties=dict(
                 order=[
                     "name",
@@ -665,7 +675,8 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
             with archive.m_context.raw_file(self.data_file) as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.gamry_archive import get_lsv_properties, get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.gamry_archive import get_lsv_properties, \
+                        get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
@@ -679,7 +690,8 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles", "charge", "charge_density"],
+                'lab_id', 'solution', 'users', "location", 'end_time', 'steps', 'instruments', 'results',
+                "metadata_file", "charge_density", "control", "cycles", "charge", "charge_density"],
             properties=dict(
                 order=[
                     "name",
@@ -707,7 +719,8 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
             with archive.m_context.raw_file(self.data_file) as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.gamry_archive import get_ca_properties, get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.gamry_archive import get_ca_properties, \
+                        get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
@@ -720,7 +733,8 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles"],
+                'lab_id', 'solution', 'users', "location", 'end_time', 'steps', 'instruments', 'results',
+                "metadata_file", "charge_density", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -742,7 +756,8 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
             with archive.m_context.raw_file(self.data_file) as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.gamry_archive import get_cp_properties, get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.gamry_archive import get_cp_properties, \
+                        get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
@@ -755,7 +770,8 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "control", "cycles"],
+                'lab_id', 'solution', 'users', "location", 'end_time', 'steps', 'instruments', 'results',
+                "metadata_file", "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -769,11 +785,11 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                 'x': 'time',
                 'y': ['./current_density', './charge_density'],
                 'layout': {
-                     "showlegend": True,
-                     'yaxis': {
-                         "fixedrange": False},
-                     'xaxis': {
-                         "fixedrange": False}},
+                    "showlegend": True,
+                    'yaxis': {
+                        "fixedrange": False},
+                    'xaxis': {
+                        "fixedrange": False}},
             }])
 
     def normalize(self, archive, logger):
@@ -781,7 +797,8 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
             with archive.m_context.raw_file(self.data_file) as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.gamry_archive import get_cc_properties, get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.gamry_archive import get_cc_properties, \
+                        get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
@@ -795,7 +812,8 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
         a_eln=dict(
             hide=[
                 'lab_id', 'solution',
-                'users', "location", 'end_time',  'steps', 'instruments', 'results', "metadata_file", "charge_density", "control", "cycles"],
+                'users', "location", 'end_time', 'steps', 'instruments', 'results', "metadata_file", "charge_density",
+                "control", "cycles"],
             properties=dict(
                 order=[
                     "name",
@@ -821,7 +839,8 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
             with archive.m_context.raw_file(self.data_file) as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.gamry_archive import get_ocv_properties, get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.gamry_archive import get_ocv_properties, \
+                        get_voltammetry_archive
                     metadata, data = get_header_and_data(filename=f.name)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
@@ -837,7 +856,7 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
                 'lab_id', 'solution',
                 'users',
                 'location',
-                'end_time',  'steps', 'instruments', 'results'],
+                'end_time', 'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -870,7 +889,7 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
                 'lab_id', 'solution',
                 'users',
                 'location',
-                'end_time',  'steps', 'instruments', 'results'],
+                'end_time', 'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -918,7 +937,7 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
                 'lab_id', 'solution',
                 'users',
                 'location',
-                'end_time',  'steps', 'instruments', 'results'],
+                'end_time', 'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -951,6 +970,7 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
                 logger.error(e)
         super(CE_NOME_PumpRateMeasurement, self).normalize(archive, logger)
 
+
 # %%####################################### Generic Entries
 
 
@@ -962,7 +982,7 @@ class CE_NOME_Process(BaseProcess, EntryData):
                 'users',
                 "location",
                 "is_standard_process",
-                'end_time',  'steps', 'instruments', 'results'],
+                'end_time', 'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
@@ -1005,7 +1025,7 @@ class CE_NOME_Measurement(BaseMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'users', "location", 'end_time',  'steps', 'instruments', 'results'],
+                'lab_id', 'users', "location", 'end_time', 'steps', 'instruments', 'results'],
             properties=dict(
                 order=[
                     "name",
