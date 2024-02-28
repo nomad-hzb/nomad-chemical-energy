@@ -64,7 +64,7 @@ from baseclasses.chemical_energy import (
 )
 
 from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
-from datetime import date
+from datetime import datetime
 
 m_package2 = Package(name='CE-NOME')
 
@@ -357,6 +357,7 @@ def set_sample(row):
 class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
     m_def = Section(
         a_eln=dict(
+            hide=["number_of_substances_per_env", "number_of_substances_per_synthesis"],
             properties=dict(
                 order=[
                     "name",
@@ -384,7 +385,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
             # prepare id
             id_base = "_".join(self.lab_id.split("_")[:-1])
-            id_base_sample = "_".join([id_base, date.today().strftime('%y%m%d')])
+            id_base_sample = "_".join([id_base, self.datetime.strftime('%y%m%d')])  # today??
             next_free_id = get_next_free_project_number(archive, id_base)
             next_free_id_sample = get_next_free_project_number(archive, id_base_sample)
             counter = 0
@@ -392,16 +393,15 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
             # samples
             for idx, row in samples.iterrows():
-                if row[0].startswith("CE-NOME"):
-                    continue
+                edit = True if row[0].startswith("CE-NOME") else False
                 try:
                     ce_nome_sample = set_sample(row)
-                    ce_nome_sample.lab_id = f"{id_base_sample}_{next_free_id_sample + counter_sample:04d}"
+                    ce_nome_sample.lab_id = f"{id_base_sample}_{next_free_id_sample + counter_sample:04d}" if not edit else row[0]
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_sample_{idx}.archive.json"
-                    created = create_archive(ce_nome_sample, archive, file_name)
+                    created = create_archive(ce_nome_sample, archive, file_name, overwrite=edit)
                     samples.at[idx, "id"] = ce_nome_sample.lab_id
 
-                    if created:
+                    if not edit:
                         counter_sample += 1
                 except Exception as e:
                     logger.error(f"could not create row {idx} for samples",
@@ -409,16 +409,15 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     raise e
             # environments
             for idx, row in envs.iterrows():
-                if row[0].startswith("CE-NOME"):
-                    continue
+                edit = True if row[0].startswith("CE-NOME") else False
                 try:
                     ce_nome_envs = set_environment(row)
-                    ce_nome_envs.lab_id = f"{id_base}_{next_free_id + counter:04d}"
+                    ce_nome_envs.lab_id = f"{id_base}_{next_free_id + counter:04d}" if not edit else row[0]
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_env_{idx}.archive.json"
-                    created = create_archive(ce_nome_envs, archive, file_name)
+                    created = create_archive(ce_nome_envs, archive, file_name, overwrite=edit)
                     envs.at[idx, "id"] = ce_nome_envs.lab_id
 
-                    if created:
+                    if not edit:
                         counter += 1
                 except Exception as e:
                     logger.error(f"could not create row {idx} for environment",
@@ -427,16 +426,15 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
             # setups
             for idx, row in setups.iterrows():
-                if row[0].startswith("CE-NOME"):
-                    continue
+                edit = True if row[0].startswith("CE-NOME") else False
                 try:
                     ce_nome_setup = set_setup(archive, row)
-                    ce_nome_setup.lab_id = f"{id_base}_{next_free_id + counter:04d}"
+                    ce_nome_setup.lab_id = f"{id_base}_{next_free_id + counter:04d}" if not edit else row[0]
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_setup_{idx}.archive.json"
-                    created = create_archive(ce_nome_setup, archive, file_name)
+                    created = create_archive(ce_nome_setup, archive, file_name, overwrite=edit)
                     setups.at[idx, "id"] = ce_nome_setup.lab_id
 
-                    if created:
+                    if not edit:
                         counter += 1
                 except Exception as e:
                     logger.error(f"could not create row {idx} for setups",
@@ -565,6 +563,7 @@ def get_curve_tag(methods, function):
         return "CURVE GENERATOR"
     if "det" in function.lower():
         return "CURVE DETECTOR"
+
 
 class CE_NOME_VoilaNotebook(VoilaNotebook, EntryData):
     m_def = Section(
