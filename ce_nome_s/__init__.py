@@ -60,7 +60,8 @@ from baseclasses.chemical_energy import (
     # PreparationProtocol,
     PhaseFluorometryOxygen,
     PumpRateMeasurement,
-    LinearSweepVoltammetry
+    LinearSweepVoltammetry,
+    PotentiometryGasChromatographyMeasurement
 )
 
 from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
@@ -443,6 +444,41 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 setups.to_excel(writer, sheet_name='setups', index=False)
 
 # %%####################################### Measurements
+
+class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromatographyMeasurement, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'location', 'steps', 'samples', 'atmosphere', 'instruments'
+                ],
+            properties=dict(
+                order=[
+                    'name', 'properties', 'gaschromatographies', 'potentiometry', 'thermocouple', 'results'
+                    ])),
+                a_plot=[{
+                    'label': 'Potential-dependent Faradaic efficiencies',
+                    'x': 'potentiometry/working_electrode_potential',
+                    'y': ['results/gas_results/faradaic_efficiency',
+                          'results/total_flow_rate'],
+                    'layout': {"showlegend": True,
+                               'yaxis': {
+                                   "fixedrange": False},
+                               'xaxis': {
+                                   "fixedrange": False}}},
+                    {
+                        'label': 'Current–voltage characteristics and electrode temperatures',
+                        'x': 'potentiometry/working_electrode_potential',
+                        'y': ['results/gas_results/current',
+                              'thermocouple/temperature_cathode'],
+                        'layout': {"showlegend": True,
+                                   'yaxis': {
+                                       "fixedrange": False},
+                                   'xaxis': {
+                                       "fixedrange": False}},
+                    }])
+
+    def normalize(self, archive, logger):
+        super(CE_NOME_PotentiometryGasChromatographyMeasurement, self).normalize(archive, logger)
 
 
 class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
