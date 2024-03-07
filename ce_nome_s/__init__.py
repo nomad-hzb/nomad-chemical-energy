@@ -61,6 +61,7 @@ from baseclasses.chemical_energy import (
     PhaseFluorometryOxygen,
     PumpRateMeasurement,
     LinearSweepVoltammetry,
+    CENECCElectrode,
     PotentiometryGasChromatographyMeasurement
 )
 
@@ -442,6 +443,21 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 samples.to_excel(writer, sheet_name='samples', index=False)
                 envs.to_excel(writer, sheet_name='environments', index=False)
                 setups.to_excel(writer, sheet_name='setups', index=False)
+
+class CE_NECC_Electrode(CENECCElectrode, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=["users", "origin", "elemental_composition", "components", "chemical_composition_or_formulas"],
+            properties=dict(
+                order=[
+                    "name",
+                    "lab_id",
+                    "recipe_id",
+                    "recipe_type",
+                    "element",
+                    "deposition_method"
+                ])),
+        label_quantity='sample_id')
 
 # %%####################################### Measurements
 
