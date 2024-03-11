@@ -447,7 +447,8 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 class CE_NECC_Electrode(CENECCElectrode, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=["users", "origin", "elemental_composition", "components", "chemical_composition_or_formulas"],
+            hide=["users", "origin", "elemental_composition",
+                  "components", "chemical_composition_or_formulas"],
             properties=dict(
                 order=[
                     "name",
@@ -469,7 +470,8 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
                 ],
             properties=dict(
                 order=[
-                    'name', 'properties', 'gaschromatographies', 'potentiometry', 'thermocouple', 'results'
+                    'name', 'properties', 'gaschromatographies',
+                    'potentiometry', 'thermocouple', 'results'
                     ])),
                 a_plot=[{
                     'label': 'Potential-dependent Faradaic efficiencies',
@@ -494,7 +496,7 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
                     }])
 
     def normalize(self, archive, logger):
-        super(CE_NOME_PotentiometryGasChromatographyMeasurement, self).normalize(archive, logger)
+        super(CE_NECC_PotentiometryGasChromatographyMeasurement, self).normalize(archive, logger)
 
 
 class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
