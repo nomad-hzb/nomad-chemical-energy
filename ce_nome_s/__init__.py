@@ -370,6 +370,8 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
             author = archive.metadata.main_author
             self.identifier = SampleIDCENOME(owner=f"{author.first_name} {author.last_name}")
             self.identifier.normalize(archive, logger)
+            super(CE_NOME_DocumentationTool, self).normalize(archive, logger)
+
         if self.create_entries and self.data_file:
             if not self.lab_id:
                 logger.error(
