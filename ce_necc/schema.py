@@ -16,12 +16,22 @@
 # limitations under the License.
 #
 
+import os
+import pandas as pd
+
+from datetime import datetime
+
 from nomad.metainfo import (Section)
 from nomad.datamodel.data import EntryData
 
 from baseclasses.chemical_energy import (
     CENECCElectrode,
-    PotentiometryGasChromatographyMeasurement
+    PotentiometryGasChromatographyMeasurement,
+    NECCExperimentalProperties,
+    GasChromatographyOutput,
+    PotentiostatOutput,
+    ThermocoupleOutput,
+    PotentiometryGasChromatographyResults
 )
 
 # %% ####################### Entities
@@ -78,5 +88,93 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
                     }])
 
     def normalize(self, archive, logger):
+
+        with archive.m_context.raw_file(archive.metadata.mainfile) as f:
+            path = os.path.dirname(f.name)
+
+        if self.data_file:
+            gaschromatography_measurements = []
+
+            if self.properties is None:
+                # TODO fill properties with meaningful values
+                self.properties = NECCExperimentalProperties(membrane_thickness=45)
+
+            if self.potentiometry is None:
+                # TODO move methods in helpers file and import it
+                # from baseclasses.helper.file_parser.conductivity_parser import read_conductivity
+                date_time, time, current, working_electrode_potential = read_potentiostat_data(os.path.join(path, self.data_file))
+                self.potentiometry = PotentiostatOutput(datetime=date_time,
+                                                        time=time,
+                                                        current=current,
+                                                        working_electrode_potential=working_electrode_potential)
+
+            if self.thermocouple is None:
+                # TODO move methods in helpers file and import it
+                date_time, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(os.path.join(path, self.data_file))
+                self.thermocouple = ThermocoupleOutput(datetime=date_time,
+                                                       pressure=pressure,
+                                                       temperature_cathode=temperature_cathode,
+                                                       temperature_anode=temperature_anode)
+
+            gas_type, retention_time, area = read_gaschromatography_data(os.path.join(path, self.data_file))
+            gaschromatography_measurements.append(GasChromatographyOutput(
+                #experiment_name='',
+                #datetime='',
+                gas_type=gas_type,
+                retention_time=retention_time,
+                area=area,
+                #ppm=''),
+            ))
+
+            self.gaschromatographies = gaschromatography_measurements
+
         super(CE_NECC_PotentiometryGasChromatographyMeasurement, self).normalize(archive, logger)
 
+
+def read_potentiostat_data(file):
+    data = pd.read_excel(file, sheet_name='Raw Data', header=1)
+
+    date_time = pd.to_datetime(data['time/s'])
+    # TODO compute real time/s
+    time = 0
+    current = data['<I>/mA']
+    working_electrode_potential = data['Ewe/V']
+
+    return date_time, time, current, working_electrode_potential
+
+def read_thermocouple_data(file):
+    data = pd.read_excel(file, sheet_name='Raw Data', header=3)
+
+    data['DateTime'] = pd.to_datetime(data['Time Stamp Local'].astype(str))
+    data['DateTime'] = data['Date'] + pd.to_timedelta(data['DateTime'].dt.strftime('%H:%M:%S'))
+    date_time = data['DateTime']
+    pressure = data['bar(g)']
+    temperature_cathode = data['øC  cathode?']
+    temperature_anode = data['øC  anode?']
+
+    return date_time, pressure, temperature_cathode, temperature_anode
+
+def read_gaschromatography_data(file):
+    data = pd.read_excel(file, sheet_name='Raw Data', header=1)
+
+    #experiment_name
+    #datetime
+    gas_type = data['Gas type'][0]
+    retention_time = data['RT (mins)']
+    area = data['area  (pA*min)']
+    #ppm
+
+    return gas_type, retention_time, area
+
+def read_results_data(file):
+    data = pd.read_excel(file, sheet_name='Results', header=0)
+
+    total_flow_rate = data['Total flow rate (ml/min)']
+    total_fe = data['Total FE (%)']
+
+    #gas_results:
+    #gas_type
+    #current
+    #faradaic_efficiency
+
+    return total_flow_rate, total_fe

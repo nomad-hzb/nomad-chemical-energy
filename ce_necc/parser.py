@@ -18,7 +18,6 @@
 
 import datetime
 
-
 from nomad.datamodel import EntryArchive
 from nomad.metainfo import (
     Quantity,
@@ -64,17 +63,18 @@ class NECCXlsxParser(MatchingParser):
         file = mainfile.split('/')[-1]
 
         if file.endswith(".xlsx"):
-            entry = CE_NECC_PotentiometryGasChromatographyMeasurement()
+            entry = CE_NECC_PotentiometryGasChromatographyMeasurement(data_file=file)
 
         if entry is None:
             return
 
         search_id = file.split("#")[0]
         set_sample_reference(archive, entry, search_id)
-
         entry.datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
         entry.name = f"{search_id}"
-
         file_name = f'{file}.archive.json'
-        archive.data = ParsedExcelFile(activity=create_archive(entry, archive, file_name))
-        archive.metadata.entry_name = file
+        create_archive(entry, archive, file_name)
+
+        # TODO create archive works differrent for UnoldLab example; when keeping current version remove ParsedExcelFile class
+        # archive.data = ParsedExcelFile(activity=create_archive(entry, archive, file_name))
+        # archive.metadata.entry_name = file
