@@ -66,7 +66,7 @@ from baseclasses.chemical_energy import (
 from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
 from datetime import datetime
 
-m_package2 = Package(name='CE-NOME')
+m_package = Package(name='CE-NOME')
 
 
 # %% ####################### Entities
@@ -1042,3 +1042,6 @@ class CE_NOME_Measurement(BaseMeasurement, EntryData):
         shape=['*'],
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'))
+
+
+m_package.__init_metainfo__()

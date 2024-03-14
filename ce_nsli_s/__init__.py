@@ -73,7 +73,7 @@ from baseclasses.wet_chemical_deposition import (
     WetChemicalDeposition
 )
 
-m_package1 = Package(name='CE-NSLI')
+m_package = Package(name='CE-NSLI')
 
 
 def find_id(archive, lab_id, method):
@@ -618,3 +618,5 @@ class CE_NSLI_SPV(SPV, EntryData):
 #         shape=['*'],
 #         a_eln=dict(component='FileEditQuantity'),
 #         a_browser=dict(adaptor='RawFileAdaptor'))
+
+m_package.__init_metainfo__()
