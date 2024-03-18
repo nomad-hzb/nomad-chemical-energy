@@ -34,20 +34,19 @@ from nomad.datamodel.metainfo.basesections import (
     Activity,
 )
 
-from baseclasses.helper.utilities import create_archive, set_sample_reference
+from baseclasses.helper.utilities import (create_archive, get_entry_id_from_file_name,
+                                          get_reference, set_sample_reference)
 
 from ce_necc.schema import (CE_NECC_Electrode, CE_NECC_PotentiometryGasChromatographyMeasurement)
-
 
 class ParsedExcelFile(EntryData):
     activity = Quantity(
         type=Activity,
-        shape=["*"],
+        shape=['*'],
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
         )
     )
-
 
 class NECCXlsxParser(MatchingParser):
 
@@ -64,6 +63,7 @@ class NECCXlsxParser(MatchingParser):
 
         if file.endswith(".xlsx"):
             entry = CE_NECC_PotentiometryGasChromatographyMeasurement(data_file=file)
+            # TODO add CE_NECC_Electrode
 
         if entry is None:
             return
@@ -75,6 +75,6 @@ class NECCXlsxParser(MatchingParser):
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)
 
-        # TODO create archive works differrent for UnoldLab example; when keeping current version remove ParsedExcelFile class
-        # archive.data = ParsedExcelFile(activity=create_archive(entry, archive, file_name))
-        # archive.metadata.entry_name = file
+        entry_id = get_entry_id_from_file_name(file_name, archive)
+        archive.data = ParsedExcelFile(activity=[get_reference(archive.metadata.upload_id, entry_id)])
+        archive.metadata.entry_name = file
