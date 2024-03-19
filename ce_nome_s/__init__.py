@@ -851,13 +851,18 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
             with archive.m_context.raw_file(data_file) as f:
                 file_name = f.name
             datetime_object = None
-            if os.path.splitext(data_file)[-1] != ".ABS":
-                continue
-            data = pd.read_csv(
-                file_name, delimiter='  ', header=None, skiprows=2)
-            from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
-            measurements.append(get_uvvis_archive(
-                data, datetime_object, data_file))
+            if os.path.splitext(data_file)[-1] == ".csv":
+                data = pd.read_csv(
+                    file_name, delimiter=',', header=None, skiprows=2)
+                from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
+                measurements.append(get_uvvis_archive(
+                    data, datetime_object, data_file))
+            if os.path.splitext(data_file)[-1] == ".ABS":
+                data = pd.read_csv(
+                    file_name, delimiter='  ', header=None, skiprows=2)
+                from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
+                measurements.append(get_uvvis_archive(
+                    data, datetime_object, data_file))
         self.measurements = measurements
 
         super(CE_NOME_UVvismeasurement, self).normalize(archive, logger)
