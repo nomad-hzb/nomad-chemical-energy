@@ -63,7 +63,6 @@ class NECCXlsxParser(MatchingParser):
 
         if file.endswith(".xlsx"):
             entry = CE_NECC_PotentiometryGasChromatographyMeasurement(data_file=file)
-            # TODO add CE_NECC_Electrode
 
         if entry is None:
             return

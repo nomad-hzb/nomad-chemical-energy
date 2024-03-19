@@ -38,15 +38,18 @@ class CE_NECC_Electrode(CENECCElectrode, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=["users", "origin", "elemental_composition",
-                  "components", "chemical_composition_or_formulas"],
+                  "components"],
             properties=dict(
                 order=[
                     "name",
                     "lab_id",
                     "recipe_id",
                     "recipe_type",
-                    "element",
-                    "deposition_method"
+                    "chemical_composition_or_formulas",
+                    "deposition_method",
+                    "deposition_temperature",
+                    "n2_deposition_pressure",
+                    "mass_loading"
                 ])),
         label_quantity='sample_id')
 
@@ -96,9 +99,8 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
                 experimental_properties_dict = read_properties(os.path.join(path, self.data_file))
                 self.properties = NECCExperimentalProperties()
                 for attribute_name, value in experimental_properties_dict.items():
-                    if not pd.isna(value):
-                        # TODO setattr should be avoided but I don't know better way when having that many attributes
-                        setattr(self.properties, attribute_name, value)
+                    # TODO setattr should be avoided but I don't know better way when having that many attributes
+                    setattr(self.properties, attribute_name, value)
 
             if self.potentiometry is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_potentiostat_data
