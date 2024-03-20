@@ -866,7 +866,15 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "samples"])))
+                    "samples"])),
+            a_plot=[{
+                'x': 'measurements/:/wavelength',
+                'y': 'measurements/:/intensity',
+                'layout': {'yaxis': {"fixedrange": False},
+                           'xaxis': {"fixedrange": False}},
+                "config": {"scrollZoom": True,
+                           'staticPlot': False,
+                           }}])
 
     def normalize(self, archive, logger):
         import pandas as pd
@@ -875,13 +883,16 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
             with archive.m_context.raw_file(data_file) as f:
                 file_name = f.name
             datetime_object = None
-            if os.path.splitext(data_file)[-1] != ".ABS":
+            if os.path.splitext(data_file)[-1] not in [".ABS", ".csv"]:
                 continue
-            data = pd.read_csv(
-                file_name, delimiter='  ', header=None, skiprows=2)
+            delimiter = ''
+            if os.path.splitext(data_file)[-1] == ".csv":
+                delimiter = ','
+            if os.path.splitext(data_file)[-1] == ".ABS":
+                delimiter = '  '
+            data = pd.read_csv(file_name, delimiter=delimiter, header=None, skiprows=2)
             from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
-            measurements.append(get_uvvis_archive(
-                data, datetime_object, data_file))
+            measurements.append(get_uvvis_archive(data, datetime_object, data_file))
         self.measurements = measurements
 
         super(CE_NOME_UVvismeasurement, self).normalize(archive, logger)
