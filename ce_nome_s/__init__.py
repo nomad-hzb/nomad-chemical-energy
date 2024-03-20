@@ -844,8 +844,8 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
                     "data_file",
                     "samples"])),
             a_plot=[{
-                'x': 'measurements/wavelength',
-                'y': 'measurements/intensity',
+                'x': 'measurements/:/wavelength',
+                'y': 'measurements/:/intensity',
                 'layout': {'yaxis': {"fixedrange": False},
                            'xaxis': {"fixedrange": False}},
                 "config": {"scrollZoom": True,
