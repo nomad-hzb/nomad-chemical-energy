@@ -17,13 +17,13 @@
 #
 
 import os
-import pandas as pd
 
 from nomad.metainfo import (Section)
 from nomad.datamodel.data import EntryData
 
 from baseclasses.chemical_energy import (
     CENECCElectrode,
+    CENECCElectrodeRecipe,
     PotentiometryGasChromatographyMeasurement,
     NECCExperimentalProperties,
     GasChromatographyOutput,
@@ -34,24 +34,35 @@ from baseclasses.chemical_energy import (
 
 # %% ####################### Entities
 
-class CE_NECC_Electrode(CENECCElectrode, EntryData):
+class CE_NECC_ElectrodeRecipe(CENECCElectrodeRecipe, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=["users", "origin", "elemental_composition",
+            hide=["users", "origin", "chemical_composition_or_formulas", "elemental_composition",
                   "components"],
             properties=dict(
                 order=[
                     "name",
                     "lab_id",
-                    "recipe_id",
                     "recipe_type",
-                    "chemical_composition_or_formulas",
                     "deposition_method",
                     "deposition_temperature",
                     "n2_deposition_pressure",
                     "mass_loading"
                 ])),
-        label_quantity='sample_id')
+        label_quantity='sample_id') # TODO what is this?
+
+class CE_NECC_Electrode(CENECCElectrode, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=["chemical_composition_or_formulas", "origin", "elemental_composition", "components"],
+            properties=dict(
+                order=[
+                    "name",
+                    "lab_id",
+                    "recipe",
+                    "remarks"
+                ])),
+        label_quantity='electrode_id')
 
 # %%####################################### Measurements
 
