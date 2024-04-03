@@ -44,8 +44,6 @@ from baseclasses.voila import (
     VoilaNotebook
 )
 
-from baseclasses.solar_energy import UVvisMeasurement
-
 from baseclasses.chemical_energy import (
     CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties, Equipment,
     CatalystSynthesis,
@@ -60,7 +58,9 @@ from baseclasses.chemical_energy import (
     # PreparationProtocol,
     PhaseFluorometryOxygen,
     PumpRateMeasurement,
-    LinearSweepVoltammetry
+    LinearSweepVoltammetry,
+    UVvisMeasurementConcentration,
+    UVvisConcentrationDetection
 )
 
 from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
@@ -854,7 +854,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
         super(CE_NOME_OpenCircuitVoltage, self).normalize(archive, logger)
 
 
-class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
+class CE_NOME_UVvismeasurement(UVvisMeasurementConcentration, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -891,8 +891,8 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
             if os.path.splitext(data_file)[-1] == ".ABS":
                 delimiter = '  '
             data = pd.read_csv(file_name, delimiter=delimiter, header=None, skiprows=2)
-            from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
-            measurements.append(get_uvvis_archive(data, datetime_object, data_file))
+            from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_concentration_archive
+            measurements.append(get_uvvis_concentration_archive(data, datetime_object, data_file))
         self.measurements = measurements
 
         super(CE_NOME_UVvismeasurement, self).normalize(archive, logger)
@@ -1056,3 +1056,11 @@ class CE_NOME_Measurement(BaseMeasurement, EntryData):
 
 
 m_package.__init_metainfo__()
+
+class CE_NOME_UVvisConcentrationDetection(UVvisConcentrationDetection, EntryData):
+    # TODO decide whether to use Analysis parent class and if inputs/outputs should be hidden
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'location', 'end_time', 'method', 'steps'],
+            properties=dict(
+                order=['name', 'uvvis_measurement', 'material_name', 'minimum_area', 'maximum_area', 'slope', 'intercept'])))
