@@ -116,14 +116,16 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
             instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(os.path.join(path, self.data_file))
             for gas_index in range(len(gas_types)):
                 file_index = 0 if gas_index < 4 else 1
-                gaschromatography_measurements.append(GasChromatographyOutput(
-                    instrument_file_name=instrument_file_names.iloc[:, file_index],
-                    datetime=datetimes,
-                    gas_type=gas_types.iat[gas_index],
-                    retention_time=retention_times.iloc[:, gas_index],
-                    area=areas.iloc[:, gas_index],
-                    ppm=ppms.iloc[:, gas_index]
-                ))
+                gas_type = gas_types.iat[gas_index]
+                if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
+                    gaschromatography_measurements.append(GasChromatographyOutput(
+                        instrument_file_name=instrument_file_names.iloc[:, file_index],
+                        datetime=datetimes,
+                        gas_type=gas_type,
+                        retention_time=retention_times.iloc[:, gas_index],
+                        area=areas.iloc[:, gas_index],
+                        ppm=ppms.iloc[:, gas_index]
+                    ))
             self.gaschromatographies = gaschromatography_measurements
 
             if self.fe_results is None:
