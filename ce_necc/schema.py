@@ -18,6 +18,7 @@
 
 import os
 import pandas as pd
+from datetime import datetime
 
 from nomad.metainfo import Section, Quantity
 from nomad.datamodel.data import EntryData
@@ -112,22 +113,23 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                                                            temperature_cathode=temperature_cathode,
                                                            temperature_anode=temperature_anode)
 
-            from baseclasses.helper.file_parser.necc_excel_parser import read_gaschromatography_data
-            gaschromatography_measurements = []
-            instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(os.path.join(path, self.data_file))
-            for gas_index in range(len(gas_types)):
-                file_index = 0 if gas_index < 4 else 1
-                gas_type = gas_types.iat[gas_index]
-                if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
-                    gaschromatography_measurements.append(GasChromatographyMeasurement(
-                        instrument_file_name=instrument_file_names.iloc[:, file_index],
-                        datetime=datetimes,
-                        gas_type=gas_type,
-                        retention_time=retention_times.iloc[:, gas_index],
-                        area=areas.iloc[:, gas_index],
-                        ppm=ppms.iloc[:, gas_index]
-                    ))
-            self.gaschromatographies = gaschromatography_measurements
+            if self.gaschromatographies is None:
+                from baseclasses.helper.file_parser.necc_excel_parser import read_gaschromatography_data
+                gaschromatography_measurements = []
+                instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(os.path.join(path, self.data_file))
+                for gas_index in range(len(gas_types)):
+                    file_index = 0 if gas_index < 4 else 1
+                    gas_type = gas_types.iat[gas_index]
+                    if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
+                        gaschromatography_measurements.append(GasChromatographyMeasurement(
+                            instrument_file_name=instrument_file_names.iloc[:, file_index],
+                            datetime=datetimes,
+                            gas_type=gas_type,
+                            retention_time=retention_times.iloc[:, gas_index],
+                            area=areas.iloc[:, gas_index],
+                            ppm=ppms.iloc[:, gas_index]
+                        ))
+                self.gaschromatographies = gaschromatography_measurements
 
             if self.fe_results is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_results_data
@@ -154,9 +156,18 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
         # TODO merged_df für plots nutzen?
 
-        #fig = go.Figure(data=[go.Bar(name='Total FE in %', x=self.fe_results.datetime, y=abs(self.fe_results.total_fe))])
+        x_data = self.fe_results.datetime
+        y_data = abs(self.fe_results.total_fe)
+
+        if len(x_data) != len(y_data):
+            minimal_length = min(len(x_data), len(y_data))
+            x_data = x_data[:minimal_length]
+            y_data = y_data[:minimal_length]
+
+        # TODO look into TypeError: can not serialize 'datetime.datetime' object
+        #fig = go.Figure(data=[go.Bar(name='Total FE in %', x=x_data, y=y_data)])
         #for gas in self.fe_results.gas_results:
-        #    fig.add_traces(go.Bar(name=gas.gas_type, x=self.fe_results.datetime, y=abs(gas.faradaic_efficiency)))
+        #    fig.add_traces(go.Bar(name=gas.gas_type, x=gas.datetime, y=abs(gas.faradaic_efficiency)))
         #fig.update_layout(barmode='group', showlegend=True)
         #fig.update_layout(title_text='Potential-Dependent Faradaic Efficiencies')
         # the next line is necessary for yvalues that are 0 if float xvalues are used
