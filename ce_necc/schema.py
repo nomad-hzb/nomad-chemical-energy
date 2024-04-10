@@ -83,6 +83,8 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
     def normalize(self, archive, logger):
 
+        super(CE_NECC_EC_GC, self).normalize(archive, logger)
+
         with archive.m_context.raw_file(archive.metadata.mainfile) as f:
             path = os.path.dirname(f.name)
 
@@ -97,19 +99,18 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
             if self.potentiometry is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_potentiostat_data
-                date_time, time, current, working_electrode_potential = read_potentiostat_data(os.path.join(path, self.data_file))
-                self.potentiometry = PotentiostatMeasurement(datetime=date_time,
-                                                        time=time,
-                                                        current=current,
-                                                        working_electrode_potential=working_electrode_potential)
+                datetimes, current, working_electrode_potential = read_potentiostat_data(os.path.join(path, self.data_file))
+                self.potentiometry = PotentiostatMeasurement(datetime=datetimes,
+                                                             current=current,
+                                                             working_electrode_potential=working_electrode_potential)
 
             if self.thermocouple is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_thermocouple_data
-                date_time, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(os.path.join(path, self.data_file))
-                self.thermocouple = ThermocoupleMeasurement(datetime=date_time,
-                                                       pressure=pressure,
-                                                       temperature_cathode=temperature_cathode,
-                                                       temperature_anode=temperature_anode)
+                datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(os.path.join(path, self.data_file))
+                self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
+                                                           pressure=pressure,
+                                                           temperature_cathode=temperature_cathode,
+                                                           temperature_anode=temperature_anode)
 
             from baseclasses.helper.file_parser.necc_excel_parser import read_gaschromatography_data
             gaschromatography_measurements = []
@@ -130,23 +131,17 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
             if self.fe_results is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_results_data
-                total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements = read_results_data(os.path.join(path, self.data_file))
-                self.fe_results = PotentiometryGasChromatographyResults(total_flow_rate=total_flow_rate,
+                datetimes, total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements = read_results_data(os.path.join(path, self.data_file))
+                self.fe_results = PotentiometryGasChromatographyResults(datetime=datetimes,
+                                                                        total_flow_rate=total_flow_rate,
                                                                         cell_current=cell_current,
                                                                         cell_voltage=cell_voltage,
                                                                         gas_results=gas_measurements,
                                                                         total_fe=total_fe)
 
-        super(CE_NECC_EC_GC, self).normalize(archive, logger)
-
-
-        # TODO set x axis
-        x_potential_data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-        #x_potential_data = self.fe_results.cell_voltage
-
-        gaschromatography_df = pd.DataFrame({'datetime': self.gaschromatographies[0].datetime,
-                                             'ppm': self.gaschromatographies[0].ppm})
-        gaschromatography_df['datetime'] += pd.Timedelta(seconds=1) #needed for same mapping as in excel sheet
+        #gaschromatography_df = pd.DataFrame({'datetime': self.gaschromatographies[0].datetime,
+        #                                     'ppm': self.gaschromatographies[0].ppm})
+        #gaschromatography_df['datetime'] += pd.Timedelta(seconds=1) #needed for same mapping as in excel sheet
 
         #potentiometry_df = pd.DataFrame({'datetime': self.potentiometry.datetime,
         #                                 'potential': self.potentiometry.working_electrode_potential,
@@ -159,11 +154,11 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
         # TODO merged_df für plots nutzen?
 
-        fig = go.Figure(data=[go.Bar(name='Total FE in %', x=x_potential_data, y=abs(self.fe_results.total_fe))])
-        for gas in self.fe_results.gas_results:
-            fig.add_traces(go.Bar(name=gas.gas_type, x=x_potential_data, y=abs(gas.faradaic_efficiency)))
-        fig.update_layout(barmode='group', showlegend=True)
-        fig.update_layout(title_text='Potential-Dependent Faradaic Efficiencies')
+        #fig = go.Figure(data=[go.Bar(name='Total FE in %', x=self.fe_results.datetime, y=abs(self.fe_results.total_fe))])
+        #for gas in self.fe_results.gas_results:
+        #    fig.add_traces(go.Bar(name=gas.gas_type, x=self.fe_results.datetime, y=abs(gas.faradaic_efficiency)))
+        #fig.update_layout(barmode='group', showlegend=True)
+        #fig.update_layout(title_text='Potential-Dependent Faradaic Efficiencies')
         # the next line is necessary for yvalues that are 0 if float xvalues are used
         #fig.update_traces(marker_line_color='blue', marker_line_width=2)
-        self.figures = [PlotlyFigure(label='figure 1', figure=fig.to_plotly_json())]
+        #self.figures = [PlotlyFigure(label='figure 1', figure=fig.to_plotly_json())]
