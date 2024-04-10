@@ -29,9 +29,9 @@ from baseclasses.chemical_energy import (
     CENECCElectrodeRecipe,
     PotentiometryGasChromatographyMeasurement,
     NECCExperimentalProperties,
-    GasChromatographyOutput,
-    PotentiostatOutput,
-    ThermocoupleOutput,
+    GasChromatographyMeasurement,
+    PotentiostatMeasurement,
+    ThermocoupleMeasurement,
     PotentiometryGasChromatographyResults
 )
 
@@ -69,7 +69,7 @@ class CE_NECC_Electrode(CENECCElectrode, EntryData):
 
 # %%####################################### Measurements
 
-class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromatographyMeasurement, PlotSection, EntryData):
+class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -98,7 +98,7 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
             if self.potentiometry is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_potentiostat_data
                 date_time, time, current, working_electrode_potential = read_potentiostat_data(os.path.join(path, self.data_file))
-                self.potentiometry = PotentiostatOutput(datetime=date_time,
+                self.potentiometry = PotentiostatMeasurement(datetime=date_time,
                                                         time=time,
                                                         current=current,
                                                         working_electrode_potential=working_electrode_potential)
@@ -106,7 +106,7 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
             if self.thermocouple is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_thermocouple_data
                 date_time, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(os.path.join(path, self.data_file))
-                self.thermocouple = ThermocoupleOutput(datetime=date_time,
+                self.thermocouple = ThermocoupleMeasurement(datetime=date_time,
                                                        pressure=pressure,
                                                        temperature_cathode=temperature_cathode,
                                                        temperature_anode=temperature_anode)
@@ -118,7 +118,7 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
                 file_index = 0 if gas_index < 4 else 1
                 gas_type = gas_types.iat[gas_index]
                 if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
-                    gaschromatography_measurements.append(GasChromatographyOutput(
+                    gaschromatography_measurements.append(GasChromatographyMeasurement(
                         instrument_file_name=instrument_file_names.iloc[:, file_index],
                         datetime=datetimes,
                         gas_type=gas_type,
@@ -137,7 +137,7 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
                                                                         gas_results=gas_measurements,
                                                                         total_fe=total_fe)
 
-        super(CE_NECC_PotentiometryGasChromatographyMeasurement, self).normalize(archive, logger)
+        super(CE_NECC_EC_GC, self).normalize(archive, logger)
 
 
         # TODO set x axis
@@ -148,14 +148,14 @@ class CE_NECC_PotentiometryGasChromatographyMeasurement(PotentiometryGasChromato
                                              'ppm': self.gaschromatographies[0].ppm})
         gaschromatography_df['datetime'] += pd.Timedelta(seconds=1) #needed for same mapping as in excel sheet
 
-        potentiometry_df = pd.DataFrame({'datetime': self.potentiometry.datetime,
-                                         'potential': self.potentiometry.working_electrode_potential,
-                                         'current': self.potentiometry.current})
-        thermocouple_df = pd.DataFrame({'datetime': self.thermocouple.datetime,
-                                        'temp_cathode': self.thermocouple.temperature_cathode,
-                                        'temp_anode': self.thermocouple.temperature_anode,
-                                        'pressure': self.thermocouple.pressure})
-        merged_df = pd.merge_asof(gaschromatography_df, potentiometry_df, on='datetime')
+        #potentiometry_df = pd.DataFrame({'datetime': self.potentiometry.datetime,
+        #                                 'potential': self.potentiometry.working_electrode_potential,
+        #                                 'current': self.potentiometry.current})
+        #thermocouple_df = pd.DataFrame({'datetime': self.thermocouple.datetime,
+        #                                'temp_cathode': self.thermocouple.temperature_cathode,
+        #                                'temp_anode': self.thermocouple.temperature_anode,
+        #                                'pressure': self.thermocouple.pressure})
+        #merged_df = pd.merge_asof(gaschromatography_df, potentiometry_df, on='datetime')
 
         # TODO merged_df für plots nutzen?
 

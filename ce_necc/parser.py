@@ -37,7 +37,7 @@ from nomad.datamodel.metainfo.basesections import (
 from baseclasses.helper.utilities import (create_archive, get_entry_id_from_file_name,
                                           get_reference, set_sample_reference)
 
-from ce_necc.schema import (CE_NECC_PotentiometryGasChromatographyMeasurement)
+from ce_necc.schema import (CE_NECC_EC_GC)
 
 class ParsedExcelFile(EntryData):
     activity = Quantity(
@@ -62,7 +62,7 @@ class NECCXlsxParser(MatchingParser):
         file = mainfile.split('/')[-1]
 
         if file.endswith(".xlsx"):
-            entry = CE_NECC_PotentiometryGasChromatographyMeasurement(data_file=file)
+            entry = CE_NECC_EC_GC(data_file=file)
 
         if entry is None:
             return
