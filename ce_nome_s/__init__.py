@@ -64,9 +64,10 @@ from baseclasses.chemical_energy import (
     PhaseFluorometryOxygen,
     PumpRateMeasurement,
     LinearSweepVoltammetry,
-    UVvisDataConcentration,
-    UVvisConcentrationDetection
+    UVvisDataConcentration
 )
+
+from baseclasses.data_transformations import UVvisConcentrationDetection
 
 from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
 from datetime import datetime
@@ -907,7 +908,7 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
             for measurement in self.measurements:
                 measurement.normalize(archive, logger)
                 fig.add_traces(go.Scatter(name=measurement.name, x=measurement.wavelength, y = measurement.intensity, mode = 'lines'))
-                fig.add_traces(go.Scatter(name='peaks', x=[measurement.peak_x_value], y=[measurement.peak_value], mode='markers', line_color='black', showlegend=False))
+                fig.add_traces(go.Scatter(name='peaks', x=[measurement.peak_wavelength], y=[measurement.peak_value], mode='markers', line_color='black', showlegend=False))
             fig.update_layout(showlegend=True, xaxis={'fixedrange': False})
             fig.update_layout(xaxis_title=f'Wavelength [{self.measurements[0].wavelength.units}]',
                               yaxis_title='Intensity',
