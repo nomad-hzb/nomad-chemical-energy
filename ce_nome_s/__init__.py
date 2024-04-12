@@ -20,6 +20,9 @@ import numpy as np
 import os
 import pandas as pd
 
+from nomad.datamodel.metainfo.plot import PlotSection, PlotlyFigure
+import plotly.graph_objs as go
+
 # from nomad.units import ureg
 from nomad.metainfo import (
     Package,
@@ -44,6 +47,8 @@ from baseclasses.voila import (
     VoilaNotebook
 )
 
+from baseclasses.solar_energy import UVvisMeasurement
+
 from baseclasses.chemical_energy import (
     CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties, Equipment,
     CatalystSynthesis,
@@ -59,7 +64,8 @@ from baseclasses.chemical_energy import (
     PhaseFluorometryOxygen,
     PumpRateMeasurement,
     LinearSweepVoltammetry,
-    UVvisMeasurementConcentration,
+    #UVvisMeasurementConcentration,
+    UVvisDataConcentration,
     UVvisConcentrationDetection
 )
 
@@ -854,7 +860,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
         super(CE_NOME_OpenCircuitVoltage, self).normalize(archive, logger)
 
 
-class CE_NOME_UVvismeasurement(UVvisMeasurementConcentration, EntryData):
+class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -866,15 +872,10 @@ class CE_NOME_UVvismeasurement(UVvisMeasurementConcentration, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "samples"])),
-            a_plot=[{
-                'x': 'measurements/:/wavelength',
-                'y': 'measurements/:/intensity',
-                'layout': {'yaxis': {"fixedrange": False},
-                           'xaxis': {"fixedrange": False}},
-                "config": {"scrollZoom": True,
-                           'staticPlot': False,
-                           }}])
+                    "samples"])))
+
+    measurements = SubSection(
+        section_def=UVvisDataConcentration, repeats=True)
 
     def normalize(self, archive, logger):
         import pandas as pd
@@ -900,6 +901,17 @@ class CE_NOME_UVvismeasurement(UVvisMeasurementConcentration, EntryData):
                 from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_concentration_archive
                 measurements.append(get_uvvis_concentration_archive(data, datetime_object, data_file))
         self.measurements = measurements
+
+        fig = go.Figure()
+        for measurement in self.measurements:
+            measurement.normalize(archive, logger)
+            fig.add_traces(go.Scatter(name=measurement.name, x=measurement.wavelength, y = measurement.intensity, mode = 'lines'))
+            fig.add_traces(go.Scatter(name='peaks', x=[measurement.peak_x_value], y=[measurement.peak_value], mode='markers', line_color='black', showlegend=False))
+        fig.update_layout(showlegend=True, xaxis={'fixedrange': False})
+        fig.update_layout(xaxis_title='Wavelength',
+                          yaxis_title='Intensity',
+                          title_text='UVvis')
+        self.figures = [PlotlyFigure(label='figure 1', figure=fig.to_plotly_json())]
 
         super(CE_NOME_UVvismeasurement, self).normalize(archive, logger)
 
