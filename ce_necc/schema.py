@@ -86,10 +86,12 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         with archive.m_context.raw_file(archive.metadata.mainfile) as f:
             path = os.path.dirname(f.name)
 
+        xls_file = pd.ExcelFile(os.path.join(path, self.data_file))
+
         if self.data_file:
             if self.properties is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_properties
-                experimental_properties_dict = read_properties(os.path.join(path, self.data_file))
+                experimental_properties_dict = read_properties(xls_file)
                 self.properties = NECCExperimentalProperties()
                 for attribute_name, value in experimental_properties_dict.items():
                     # TODO setattr should be avoided but I don't know better way when having that many attributes
@@ -97,14 +99,14 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
             if self.potentiometry is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_potentiostat_data
-                datetimes, current, working_electrode_potential = read_potentiostat_data(os.path.join(path, self.data_file))
+                datetimes, current, working_electrode_potential = read_potentiostat_data(xls_file)
                 self.potentiometry = PotentiostatMeasurement(datetime=datetimes,
                                                              current=current,
                                                              working_electrode_potential=working_electrode_potential)
 
             if self.thermocouple is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_thermocouple_data
-                datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(os.path.join(path, self.data_file))
+                datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(xls_file)
                 self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
                                                            pressure=pressure,
                                                            temperature_cathode=temperature_cathode,
@@ -113,7 +115,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
             if len(self.gaschromatographies) == 0:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_gaschromatography_data
                 gaschromatography_measurements = []
-                instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(os.path.join(path, self.data_file))
+                instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(xls_file)
                 for gas_index in range(len(gas_types)):
                     file_index = 0 if gas_index < 4 else 1
                     gas_type = gas_types.iat[gas_index]
@@ -130,7 +132,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
             if self.fe_results is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_results_data
-                datetimes, total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements = read_results_data(os.path.join(path, self.data_file))
+                datetimes, total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements = read_results_data(xls_file)
                 self.fe_results = PotentiometryGasChromatographyResults(datetime=datetimes,
                                                                         total_flow_rate=total_flow_rate,
                                                                         cell_current=cell_current,
