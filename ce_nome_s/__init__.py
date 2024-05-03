@@ -20,6 +20,9 @@ import numpy as np
 import os
 import pandas as pd
 
+from nomad.datamodel.metainfo.plot import PlotSection, PlotlyFigure
+import plotly.graph_objs as go
+
 # from nomad.units import ureg
 from nomad.metainfo import (
     Package,
@@ -60,8 +63,11 @@ from baseclasses.chemical_energy import (
     # PreparationProtocol,
     PhaseFluorometryOxygen,
     PumpRateMeasurement,
-    LinearSweepVoltammetry
+    LinearSweepVoltammetry,
+    UVvisDataConcentration
 )
+
+from baseclasses.data_transformations import UVvisConcentrationDetection
 
 from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
 from datetime import datetime
@@ -854,7 +860,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
         super(CE_NOME_OpenCircuitVoltage, self).normalize(archive, logger)
 
 
-class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
+class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -866,34 +872,48 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData):
                 order=[
                     "name",
                     "data_file",
-                    "samples"])),
-            a_plot=[{
-                'x': 'measurements/:/wavelength',
-                'y': 'measurements/:/intensity',
-                'layout': {'yaxis': {"fixedrange": False},
-                           'xaxis': {"fixedrange": False}},
-                "config": {"scrollZoom": True,
-                           'staticPlot': False,
-                           }}])
+                    "samples"])))
+
+    measurements = SubSection(
+        section_def=UVvisDataConcentration, repeats=True)
 
     def normalize(self, archive, logger):
         import pandas as pd
         measurements = []
-        for data_file in self.data_file:
-            with archive.m_context.raw_file(data_file) as f:
-                file_name = f.name
-            datetime_object = None
-            if os.path.splitext(data_file)[-1] not in [".ABS", ".csv"]:
-                continue
-            delimiter = ''
-            if os.path.splitext(data_file)[-1] == ".csv":
-                delimiter = ','
-            if os.path.splitext(data_file)[-1] == ".ABS":
-                delimiter = '  '
-            data = pd.read_csv(file_name, delimiter=delimiter, header=None, skiprows=2)
-            from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_archive
-            measurements.append(get_uvvis_archive(data, datetime_object, data_file))
-        self.measurements = measurements
+
+        if self.data_file is not None:
+            for data_file in self.data_file:
+                is_new_data = True
+                for measurement in self.measurements:
+                    if data_file == measurement.name:
+                        is_new_data = False
+                        measurements.append(measurement)
+                if is_new_data:
+                    with archive.m_context.raw_file(data_file) as f:
+                        file_name = f.name
+                    datetime_object = None
+                    if os.path.splitext(data_file)[-1] not in [".ABS", ".csv"]:
+                        continue
+                    delimiter = ''
+                    if os.path.splitext(data_file)[-1] == ".csv":
+                        delimiter = ','
+                    if os.path.splitext(data_file)[-1] == ".ABS":
+                        delimiter = '  '
+                    data = pd.read_csv(file_name, delimiter=delimiter, header=None, skiprows=2)
+                    from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_concentration_archive
+                    measurements.append(get_uvvis_concentration_archive(data, datetime_object, data_file))
+            self.measurements = measurements
+
+            fig = go.Figure()
+            for measurement in self.measurements:
+                measurement.normalize(archive, logger)
+                fig.add_traces(go.Scatter(name=measurement.name, x=measurement.wavelength, y = measurement.intensity, mode = 'lines'))
+                fig.add_traces(go.Scatter(name='peaks', x=[measurement.peak_wavelength], y=[measurement.peak_value], mode='markers', line_color='black', showlegend=False))
+            fig.update_layout(showlegend=True, xaxis={'fixedrange': False})
+            fig.update_layout(xaxis_title=f'Wavelength [{self.measurements[0].wavelength.units}]',
+                              yaxis_title='Intensity',
+                              title_text='UVvis')
+            self.figures = [PlotlyFigure(label='figure 1', figure=fig.to_plotly_json())]
 
         super(CE_NOME_UVvismeasurement, self).normalize(archive, logger)
 
@@ -1056,3 +1076,11 @@ class CE_NOME_Measurement(BaseMeasurement, EntryData):
 
 
 m_package.__init_metainfo__()
+
+class CE_NOME_UVvisConcentrationDetection(UVvisConcentrationDetection, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'location', 'end_time', 'method', 'steps', 'outputs'],
+            properties=dict(
+                order=['name', 'uvvis_measurement', 'material_name', 'minimum_peak_value', 'maximum_peak_value', 'slope', 'intercept'])))
+
