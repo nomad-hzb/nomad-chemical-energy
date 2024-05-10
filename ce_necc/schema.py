@@ -73,11 +73,11 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'location', 'steps', 'samples', 'atmosphere', 'instruments', 'results', 'method'
+                'location', 'steps', 'samples', 'atmosphere', 'instruments', 'results', 'method'
                 ],
             properties=dict(
                 order=[
-                    'name', 'properties', 'gaschromatographies',
+                    'name', 'lab_id', 'properties', 'gaschromatographies',
                     'potentiometry', 'thermocouple', 'fe_results'
                     ])))
 
