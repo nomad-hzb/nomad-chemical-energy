@@ -166,7 +166,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         for gas in self.fe_results.gas_results:
             date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in gas.datetime]
             fig1.add_traces(go.Bar(name=gas.gas_type, x=date_strings, y=abs(gas.faradaic_efficiency)))
-        fig1.update_layout(barmode='group', showlegend=True)
+        fig1.update_layout(barmode='group', showlegend=True, xaxis={'fixedrange': False})
         fig1.update_layout(title_text='Time-Dependent Faradaic Efficiencies')
 
         date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in self.fe_results.datetime]
@@ -180,7 +180,8 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                                        overlaying='y', side='right',
                                        titlefont=dict(color='green'),
                                        tickfont=dict(color='green')))
-        fig2.update_layout(title_text='Temperatures and Flow Rate over Time', showlegend=True)
+        fig2.update_layout(title_text='Temperatures and Flow Rate over Time',
+                           showlegend=True, xaxis={'fixedrange': False})
 
         fig3 = go.Figure(data=[go.Scatter(name='Current', x=date_strings, y=self.fe_results.cell_current,
                                           line=dict(color='blue'))])
@@ -194,7 +195,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                                        overlaying='y', side='right',
                                        titlefont=dict(color='red'),
                                        tickfont=dict(color='red')))
-        fig3.update_layout(title_text='Current and Voltage over Time', showlegend=True)
+        fig3.update_layout(title_text='Current and Voltage over Time', showlegend=True, xaxis={'fixedrange': False})
 
         self.figures = [PlotlyFigure(label='Faradaic Efficiencies Figure', figure=fig1.to_plotly_json()),
                         PlotlyFigure(label='Temperatures and Flow Rate Figure', figure=fig2.to_plotly_json()),
