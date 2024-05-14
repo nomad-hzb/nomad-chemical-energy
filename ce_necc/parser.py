@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+import pandas as pd
 import datetime
 
 from nomad.datamodel import EntryArchive
@@ -62,6 +63,10 @@ class NECCXlsxParser(MatchingParser):
         file = mainfile.split('/')[-1]
 
         if file.endswith(".xlsx"):
+            xls_file = pd.ExcelFile(mainfile)
+            num_sheets = len(xls_file.sheet_names)
+            if num_sheets != 4:
+                return
             entry = CE_NECC_EC_GC(data_file=file)
 
         if entry is None:
