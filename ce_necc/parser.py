@@ -62,15 +62,14 @@ class NECCXlsxParser(MatchingParser):
         entry = None
         file = mainfile.split('/')[-1]
 
-        if file.endswith(".xlsx"):
-            xls_file = pd.ExcelFile(mainfile)
-            num_sheets = len(xls_file.sheet_names)
-            if num_sheets != 4:
-                return
-            entry = CE_NECC_EC_GC(data_file=file)
-
-        if entry is None:
+        if not file.endswith(".xlsx"):
             return
+
+        xls_file = pd.ExcelFile(mainfile)
+        num_sheets = len(xls_file.sheet_names)
+        if num_sheets != 4:
+            return
+        entry = CE_NECC_EC_GC(data_file=file)
 
         search_id = file.split("#")[0]
         set_sample_reference(archive, entry, search_id)
