@@ -1082,5 +1082,6 @@ class CE_NOME_UVvisConcentrationDetection(UVvisConcentrationDetection, EntryData
         a_eln=dict(
             hide=['lab_id', 'location', 'end_time', 'method', 'steps', 'outputs'],
             properties=dict(
-                order=['name', 'uvvis_measurement', 'material_name', 'minimum_peak_value', 'maximum_peak_value', 'slope', 'intercept'])))
+                order=['name', 'uvvis_measurement', 'material_name', 'minimum_peak_value', 'maximum_peak_value',
+                       'slope', 'intercept', 'blank_substraction'])))
 
