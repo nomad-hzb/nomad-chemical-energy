@@ -97,25 +97,13 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                     # TODO setattr should be avoided but I don't know better way when having that many attributes
                     setattr(self.properties, attribute_name, value)
 
-            if self.potentiometry is None:
-                from baseclasses.helper.file_parser.necc_excel_parser import read_potentiostat_data
-                datetimes, current, working_electrode_potential = read_potentiostat_data(xls_file)
-                self.potentiometry = PotentiostatMeasurement(datetime=datetimes,
-                                                             current=current,
-                                                             working_electrode_potential=working_electrode_potential)
-
-            if self.thermocouple is None:
-                from baseclasses.helper.file_parser.necc_excel_parser import read_thermocouple_data
-                datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(xls_file)
-                self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
-                                                           pressure=pressure,
-                                                           temperature_cathode=temperature_cathode,
-                                                           temperature_anode=temperature_anode)
-
             if len(self.gaschromatographies) == 0:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_gaschromatography_data
                 gaschromatography_measurements = []
                 instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(xls_file)
+                if datetimes.size > 0:
+                    start_time = datetimes.iat[0]
+                    end_time = datetimes.iat[-1]
                 for gas_index in range(len(gas_types)):
                     file_index = 0 if gas_index < 4 else 1
                     gas_type = gas_types.iat[gas_index]
@@ -129,6 +117,24 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                             ppm=ppms.iloc[:, gas_index]
                         ))
                 self.gaschromatographies = gaschromatography_measurements
+
+            if self.potentiometry is None:
+                from baseclasses.helper.file_parser.necc_excel_parser import read_potentiostat_data
+                datetimes, current, working_electrode_potential = read_potentiostat_data(xls_file)
+                if start_time is None or end_time is None:
+                    start_time = datetimes.iat[0]
+                    end_time = datetimes.iat[-1]
+                self.potentiometry = PotentiostatMeasurement(datetime=datetimes,
+                                                             current=current,
+                                                             working_electrode_potential=working_electrode_potential)
+
+            if self.thermocouple is None:
+                from baseclasses.helper.file_parser.necc_excel_parser import read_thermocouple_data
+                datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(xls_file, start_time, end_time)
+                self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
+                                                           pressure=pressure,
+                                                           temperature_cathode=temperature_cathode,
+                                                           temperature_anode=temperature_anode)
 
             if self.fe_results is None:
                 from baseclasses.helper.file_parser.necc_excel_parser import read_results_data
