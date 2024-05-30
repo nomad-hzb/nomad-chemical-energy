@@ -65,3 +65,5 @@ You can now start to develop you schema. Here are a few things that you might wa
 
 To learn more about plugins, how to add them to an Oasis, how to publish them, read our
 documentation on plugins: https://nomad-lab/prod/v1/staging/docs/plugins.html
+
+<iframe src="https://scribehow.com/embed/Create_a_New_Project_Entry_in_Nomad_Oasis__4CfyoibRQWi36EtqRcKkQQ" width="100%" height="640" allowfullscreen frameborder="0"></iframe>
