@@ -458,9 +458,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 envs.to_excel(writer, sheet_name='environments', index=False)
                 setups.to_excel(writer, sheet_name='setups', index=False)
 
-
 # %%####################################### Measurements
-
 
 class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
     m_def = Section(
