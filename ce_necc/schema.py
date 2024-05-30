@@ -102,7 +102,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                     # TODO setattr should be avoided but I don't know better way when having that many attributes
                     setattr(self.properties, attribute_name, value)
 
-            if not self.thermocouple is None or not self.gaschromatographies or not self.potentiometry:
+            if not self.thermocouple or not self.gaschromatographies or not self.potentiometry:
                 data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
 
                 from .necc_excel_parser import read_gaschromatography_data
