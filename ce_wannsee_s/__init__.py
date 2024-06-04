@@ -221,7 +221,7 @@ class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
             with archive.m_context.raw_file(self.data_file) as f:
 
                 if os.path.splitext(self.data_file)[-1] == ".mpt":
-                    from baseclasses.helper.file_parser.mps_file_parser import read_mpt_file
+                    from ce_wannsee_s.file_parser.mps_file_parser import read_mpt_file
                     from baseclasses.helper.archive_builder.mpt_get_archive import get_voltammetry_data, get_cv_properties
 
                     metadata, data, technique = read_mpt_file(f.name)
@@ -278,7 +278,7 @@ class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file) as f:
                 if os.path.splitext(self.data_file)[-1] == ".cor":
-                    from baseclasses.helper.file_parser.corr_ware_parser import get_header_data_corrware
+                    from ce_wannsee_s.file_parser.corr_ware_parser import get_header_data_corrware
                     from baseclasses.helper.archive_builder.corr_ware_archive import \
                         (get_core_ware_archive_properties, get_core_ware_archive)
 
@@ -338,7 +338,7 @@ class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
             with archive.m_context.raw_file(self.data_file) as f:
 
                 if os.path.splitext(self.data_file)[-1] == ".mpt":
-                    from baseclasses.helper.file_parser.mps_file_parser import read_mpt_file
+                    from ce_wannsee_s.file_parser.mps_file_parser import read_mpt_file
                     from baseclasses.helper.archive_builder.mpt_get_archive import get_eis_data, get_meta_data, get_eis_properties
 
                     metadata, data, technique = read_mpt_file(
@@ -387,7 +387,7 @@ class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
             with archive.m_context.raw_file(self.data_file) as f:
 
                 if os.path.splitext(self.data_file)[-1] == ".mpt":
-                    from baseclasses.helper.file_parser.mps_file_parser import read_mpt_file
+                    from ce_wannsee_s.file_parser.mps_file_parser import read_mpt_file
                     from baseclasses.helper.archive_builder.mpt_get_archive import get_voltammetry_data, get_ocv_properties
 
                     metadata, data, technique = read_mpt_file(f.name)
