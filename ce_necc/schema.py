@@ -53,7 +53,7 @@ class CE_NECC_ElectrodeRecipe(CENECCElectrodeRecipe, EntryData):
                     "n2_deposition_pressure",
                     "mass_loading"
                 ])),
-        label_quantity='sample_id')  # TODO what is this?
+        label_quantity='sample_id')
 
 
 class CE_NECC_Electrode(CENECCElectrode, EntryData):
@@ -136,13 +136,16 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                                                              working_electrode_potential=working_electrode_potential)
                 from .necc_excel_parser import read_thermocouple_data
                 data.columns = data.iloc[1]
-
-                datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(
+                try:
+                    datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(
                     data.iloc[2:], start_time, end_time)
-                self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
-                                                            pressure=pressure,
-                                                            temperature_cathode=temperature_cathode,
-                                                            temperature_anode=temperature_anode)
+                    self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
+                                                                pressure=pressure,
+                                                                temperature_cathode=temperature_cathode,
+                                                                temperature_anode=temperature_anode)
+                except Exception as e:
+                    logger.info(e)
+                    self.thermocouple = ThermocoupleMeasurement()
 
             if self.fe_results is None:
                 from .necc_excel_parser import read_results_data
