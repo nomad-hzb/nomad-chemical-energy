@@ -1,5 +1,5 @@
 description: This is a plugin schema generated from a yaml schema.
-name: parsers/necc_xlsx
+name: parsers/ce_necc
 plugin_type: parser
 mainfile_name_re: ^.*\.xlsx$
 mainfile_mime_re: '(application|text)/.*'

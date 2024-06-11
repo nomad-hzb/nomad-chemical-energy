@@ -19,7 +19,7 @@
 import os
 import pandas as pd
 
-from nomad.metainfo import Section, Quantity
+from nomad.metainfo import Package, Section, Quantity
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.plot import PlotSection, PlotlyFigure
 import plotly.graph_objects as go
@@ -36,6 +36,8 @@ from baseclasses.chemical_energy import (
 )
 
 # %% ####################### Entities
+
+m_package = Package(name='ce_necc')
 
 
 class CE_NECC_ElectrodeRecipe(CENECCElectrodeRecipe, EntryData):
@@ -221,3 +223,5 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         self.figures = [PlotlyFigure(label='Faradaic Efficiencies Figure', figure=fig1.to_plotly_json()),
                         PlotlyFigure(label='Temperatures and Flow Rate Figure', figure=fig2.to_plotly_json()),
                         PlotlyFigure(label='Current and Voltage Figure', figure=fig3.to_plotly_json())]
+
+m_package.__init_metainfo__()

@@ -9,8 +9,11 @@ plugins:
   include: 
     - 'schemas/CE_NOME'
     - 'schemas/CE_NSLI'
+    - 'parsers/ce_necc'
   options:
     schemas/CE_NOME:
       python_package: CE_NOME
     schemas/CE_NSLI:
       python_package: CE_NSLI
+    parsers/ce_necc:
+      python_package: ce_necc
