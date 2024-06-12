@@ -61,10 +61,9 @@ class CE_NECC_ElectrodeRecipe(CENECCElectrodeRecipe, EntryData):
 class CE_NECC_Electrode(CENECCElectrode, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=["chemical_composition_or_formulas", "origin", "elemental_composition", "components"],
+            hide=["chemical_composition_or_formulas", "origin", "elemental_composition", "components", "name", "datetime"],
             properties=dict(
                 order=[
-                    "name",
                     "lab_id",
                     "recipe",
                     "remarks"
