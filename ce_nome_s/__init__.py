@@ -285,7 +285,11 @@ def get_next_free_project_number(archive, entity_id):
 
 
 def get_parameter(obj, key):
-    value = getattr(obj, key, None)
+    value = None
+    try:
+        value = obj[key]
+    except:
+        pass
     if pd.isna(value):
         return None
     return value
