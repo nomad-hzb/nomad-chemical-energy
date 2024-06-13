@@ -64,6 +64,7 @@ from baseclasses.chemical_energy import (
     PhaseFluorometryOxygen,
     PumpRateMeasurement,
     LinearSweepVoltammetry,
+    GalvanodynamicSweep,
     UVvisDataConcentration
 )
 
@@ -701,6 +702,61 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
                         self.properties = get_lsv_properties(metadata)
 
         super(CE_NOME_LinearSweepVoltammetry, self).normalize(archive, logger)
+
+
+class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'solution',
+                'users', "location", 'end_time', 'steps', 'instruments', 'results', "metadata_file", "control",
+                "cycles", "charge", "charge_density"],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file",
+                    "environment",
+                    "setup",
+                    "samples",
+                    "station", "voltage_shift", "resistance"])),
+        a_plot=[{
+            'label': 'Current Density over Voltage RHE',
+            'x': 'voltage_rhe_compensated',
+            'y': 'current_density',
+            'layout': {
+                "showlegend": True,
+                'yaxis': {
+                    "fixedrange": False},
+                'xaxis': {
+                    "fixedrange": False}},
+        },
+            {
+                'label': 'Current over Voltage',
+                'x': 'voltage',
+                'y': 'current',
+                'layout': {
+                    "showlegend": True,
+                    'yaxis': {
+                        "fixedrange": False},
+                    'xaxis': {
+                        "fixedrange": False}},
+        }]
+    )
+
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+                if os.path.splitext(self.data_file)[-1] == ".DTA":
+                    from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.gamry_archive import get_lsg_properties, \
+                        get_voltammetry_archive
+                    metadata, data = get_header_and_data(filename=f.name)
+                    curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
+                    get_voltammetry_archive(data, metadata, curve_key, self)
+                    if not self.properties:
+                        self.properties = get_lsg_properties(metadata)
+
+        super(CE_NOME_GalvanodynamicSweep, self).normalize(archive, logger)
 
 
 class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
