@@ -297,6 +297,7 @@ def get_number_of_substances(row, prefix):
 
 def set_setup(archive, row):
     return CE_NOME_ElectroChemicalSetup(
+        name=get_parameter(row, "name"),
         setup=get_parameter(row, "setup"),
         reference_electrode=find_sample_by_id(archive, get_parameter(row, "reference_electrode")),
         counter_electrode=find_sample_by_id(archive, get_parameter(row, "counter_electrode")),
@@ -309,6 +310,7 @@ def set_setup(archive, row):
 def set_environment(row):
     number_of_substances_per_env = get_number_of_substances(row, "substance_name_")
     return CE_NOME_Environment(
+        name=get_parameter(row, "name"),
         ph_value=get_parameter(row, "ph_value"),
         description=get_parameter(row, "description"),
         solvent=PubChemPureSubstanceSection(
@@ -332,6 +334,7 @@ def set_environment(row):
 def set_sample(row):
     number_of_substances_per_synthesis = get_number_of_substances(row, "substance_name_")
     return CE_NOME_Sample(
+        name=get_parameter(row, "name"),
         chemical_composition_or_formulas=get_parameter(row, "chemical_composition_or_formula"),
         component_description=get_parameter(row, "component_description"),
         origin=get_parameter(row, "producer"),
@@ -459,6 +462,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 setups.to_excel(writer, sheet_name='setups', index=False)
 
 # %%####################################### Measurements
+
 
 class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
     m_def = Section(
@@ -905,8 +909,10 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
             fig = go.Figure()
             for measurement in self.measurements:
                 measurement.normalize(archive, logger)
-                fig.add_traces(go.Scatter(name=measurement.name, x=measurement.wavelength, y = measurement.intensity, mode = 'lines'))
-                fig.add_traces(go.Scatter(name='peaks', x=[measurement.peak_wavelength], y=[measurement.peak_value], mode='markers', line_color='black', showlegend=False))
+                fig.add_traces(go.Scatter(name=measurement.name, x=measurement.wavelength,
+                               y=measurement.intensity, mode='lines'))
+                fig.add_traces(go.Scatter(name='peaks', x=[measurement.peak_wavelength], y=[
+                               measurement.peak_value], mode='markers', line_color='black', showlegend=False))
             fig.update_layout(showlegend=True, xaxis={'fixedrange': False})
             fig.update_layout(xaxis_title=f'Wavelength [{self.measurements[0].wavelength.units}]',
                               yaxis_title='Intensity',
@@ -1075,6 +1081,7 @@ class CE_NOME_Measurement(BaseMeasurement, EntryData):
 
 m_package.__init_metainfo__()
 
+
 class CE_NOME_UVvisConcentrationDetection(UVvisConcentrationDetection, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -1082,4 +1089,3 @@ class CE_NOME_UVvisConcentrationDetection(UVvisConcentrationDetection, EntryData
             properties=dict(
                 order=['name', 'uvvis_measurement', 'material_name', 'minimum_peak_value', 'maximum_peak_value',
                        'slope', 'intercept', 'blank_substraction'])))
-
