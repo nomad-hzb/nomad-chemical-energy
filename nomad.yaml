@@ -7,10 +7,11 @@ plugins:
   # loaded. Many build in plugins require more dependencies. Install nomad-lab[parsing]
   # to make all default plugins work.
   include: 
-    - 'schemas/CE_NOME'
+    - 'parsers/CE_NOME'
     - 'schemas/CE_NSLI'
   options:
-    schemas/CE_NOME:
+    parsers/CE_NOME:
       python_package: CE_NOME
     schemas/CE_NSLI:
       python_package: CE_NSLI
+

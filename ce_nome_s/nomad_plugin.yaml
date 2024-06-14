@@ -1,4 +1,17 @@
-plugin_type: schema
-name: NOMAD schema for HZB CE-NOME plugin
+plugin_type: parser
+name: parsers/CE_NOME
 description: |
-  This is the collection of application schemas for the CE-NOME department at HZB.
+  This is a plugin schema and parser for gamry, uvvis, and csv data at CE-NOME.
+mainfile_name_re: ^(.*\.DTA)$
+parser_class_name: ce_nome_s.GamryParser
+code_name: CE-NOME Gamry UVvis csv Code
+
+
+
+#mainfile_name_re: ^(.*\.(csv|ABS))$
+#mainfile_contents_re: ^(.*)(\r\n|\r|\n)((WL\/nm,Abs)|("  ABSOR->  Wave:.*))
+#parser_class_name: ce_nome_s.UVvisParser
+
+#mainfile_name_re: ^(.+\.(pump|oxy)\.(csv|xlsx))$
+#mainfile_mime_re: '(application|text)/.*'
+#parser_class_name: ce_nome_s.CENOMEcsvParser
