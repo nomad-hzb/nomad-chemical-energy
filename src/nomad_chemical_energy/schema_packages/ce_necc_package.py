@@ -1,0 +1,225 @@
+#
+# Copyright The NOMAD Authors.
+#
+# This file is part of NOMAD. See https://nomad-lab.eu for further info.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import os
+import pandas as pd
+
+from nomad.metainfo import Section, Quantity, SchemaPackage
+from nomad.datamodel.data import EntryData
+from nomad.datamodel.metainfo.plot import PlotSection, PlotlyFigure
+import plotly.graph_objects as go
+
+from baseclasses.chemical_energy import (
+    CENECCElectrode,
+    CENECCElectrodeRecipe,
+    PotentiometryGasChromatographyMeasurement,
+    NECCExperimentalProperties,
+    GasChromatographyMeasurement,
+    PotentiostatMeasurement,
+    ThermocoupleMeasurement,
+    PotentiometryGasChromatographyResults
+)
+
+m_package = SchemaPackage()
+
+# %% ####################### Entities
+
+
+class CE_NECC_ElectrodeRecipe(CENECCElectrodeRecipe, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=["users", "origin", "chemical_composition_or_formulas", "elemental_composition",
+                  "components"],
+            properties=dict(
+                order=[
+                    "name",
+                    "lab_id",
+                    "recipe_type",
+                    "deposition_method",
+                    "deposition_temperature",
+                    "n2_deposition_pressure",
+                    "mass_loading"
+                ])),
+        label_quantity='sample_id')  # TODO what is this?
+
+
+class CE_NECC_Electrode(CENECCElectrode, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=["chemical_composition_or_formulas", "origin", "elemental_composition", "components"],
+            properties=dict(
+                order=[
+                    "name",
+                    "lab_id",
+                    "recipe",
+                    "remarks"
+                ])),
+        label_quantity='electrode_id')
+
+# %%####################################### Measurements
+
+
+class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'location', 'steps', 'samples', 'atmosphere', 'instruments', 'results', 'method'
+            ],
+            properties=dict(
+                order=[
+                    'name', 'lab_id', 'properties', 'gaschromatographies',
+                    'potentiometry', 'thermocouple', 'fe_results'
+                ])))
+
+    def normalize(self, archive, logger):
+
+        with archive.m_context.raw_file(archive.metadata.mainfile) as f:
+            path = os.path.dirname(f.name)
+
+        xls_file = pd.ExcelFile(os.path.join(path, self.data_file))
+
+        if self.data_file:
+
+            if self.properties is None:
+
+                from .file_parser.necc_excel_parser import read_properties
+                experimental_properties_dict = read_properties(xls_file)
+                self.properties = NECCExperimentalProperties()
+                for attribute_name, value in experimental_properties_dict.items():
+                    # TODO setattr should be avoided but I don't know better way when having that many attributes
+                    setattr(self.properties, attribute_name, value)
+
+            if not self.thermocouple or not self.gaschromatographies or not self.potentiometry:
+                data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
+
+                from .file_parser.necc_excel_parser import read_gaschromatography_data
+                gaschromatography_measurements = []
+                instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(
+                    data)
+                if datetimes.size > 0:
+                    start_time = datetimes.iat[0]
+                    end_time = datetimes.iat[-1]
+                for gas_index in range(len(gas_types)):
+                    file_index = 0 if gas_index < 4 else 1
+                    gas_type = gas_types.iat[gas_index]
+                    if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
+                        gaschromatography_measurements.append(GasChromatographyMeasurement(
+                            instrument_file_name=instrument_file_names.iloc[:, file_index],
+                            datetime=datetimes,
+                            gas_type=gas_type,
+                            retention_time=retention_times.iloc[:, gas_index],
+                            area=areas.iloc[:, gas_index],
+                            ppm=ppms.iloc[:, gas_index]
+                        ))
+                self.gaschromatographies = gaschromatography_measurements
+
+                from .file_parser.necc_excel_parser import read_potentiostat_data
+                datetimes, current, working_electrode_potential = read_potentiostat_data(data)
+                if start_time is None or end_time is None:
+                    start_time = datetimes.iat[0]
+                    end_time = datetimes.iat[-1]
+                self.potentiometry = PotentiostatMeasurement(datetime=datetimes,
+                                                             current=current,
+                                                             working_electrode_potential=working_electrode_potential)
+                from .file_parser.necc_excel_parser import read_thermocouple_data
+                data.columns = data.iloc[1]
+
+                datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(
+                    data.iloc[2:], start_time, end_time)
+                self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
+                                                            pressure=pressure,
+                                                            temperature_cathode=temperature_cathode,
+                                                            temperature_anode=temperature_anode)
+
+            if self.fe_results is None:
+                from .file_parser.necc_excel_parser import read_results_data
+                datetimes, total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements = read_results_data(
+                    xls_file)
+                self.fe_results = PotentiometryGasChromatographyResults(datetime=datetimes,
+                                                                        total_flow_rate=total_flow_rate,
+                                                                        cell_current=cell_current,
+                                                                        cell_voltage=cell_voltage,
+                                                                        gas_results=gas_measurements,
+                                                                        total_fe=total_fe)
+
+        self.properties.normalize(archive, logger)
+        self.thermocouple.normalize(archive, logger)
+        self.fe_results.normalize(archive, logger)
+        super(CE_NECC_EC_GC, self).normalize(archive, logger)
+
+        # gaschromatography_df = pd.DataFrame({'datetime': self.gaschromatographies[0].datetime,
+        #                                     'ppm': self.gaschromatographies[0].ppm})
+        # gaschromatography_df['datetime'] += pd.Timedelta(seconds=1) #needed for same mapping as in excel sheet
+
+        # potentiometry_df = pd.DataFrame({'datetime': self.potentiometry.datetime,
+        #                                 'potential': self.potentiometry.working_electrode_potential,
+        #                                 'current': self.potentiometry.current})
+        thermocouple_df = pd.DataFrame({'datetime': self.thermocouple.datetime,
+                                        'temp_cathode': self.thermocouple.temperature_cathode,
+                                        'temp_anode': self.thermocouple.temperature_anode,
+                                        'pressure': self.thermocouple.pressure})
+        results_df = pd.DataFrame({'datetime': self.fe_results.datetime,
+                                   'total_flow_rate': self.fe_results.total_flow_rate})
+
+        merged_df = pd.merge_asof(results_df, thermocouple_df, on='datetime')
+        # merged_df = pd.merge_asof(gaschromatography_df, potentiometry_df, on='datetime')
+
+        date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in self.fe_results.datetime]
+        fig1 = go.Figure(data=[go.Bar(name='Total FE in %', x=date_strings, y=abs(self.fe_results.total_fe))])
+        for gas in self.fe_results.gas_results:
+            date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in gas.datetime]
+            fig1.add_traces(go.Bar(name=gas.gas_type, x=date_strings, y=abs(gas.faradaic_efficiency)))
+        fig1.update_layout(barmode='group', showlegend=True, xaxis={'fixedrange': False})
+
+        fig1.update_layout(title_text='Time-Dependent Faradaic Efficiencies')
+
+        date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in self.fe_results.datetime]
+        fig2 = go.Figure(data=[go.Scatter(name='Temperature Cathode', x=date_strings, y=merged_df['temp_cathode'])])
+        fig2.add_traces(go.Scatter(name='Temperature Anode', x=date_strings, y=merged_df['temp_anode']))
+        fig2.add_traces(go.Scatter(name='Total Flow Rate', x=date_strings, y=self.fe_results.total_flow_rate,
+                                   yaxis='y2', line=dict(color='green')))
+        fig2.update_layout(yaxis=dict(title=f'Temperature [{self.thermocouple.temperature_cathode[0].units}]'),
+                           yaxis2=dict(title=f'Total Flow Rate [{self.fe_results.total_flow_rate[0].units}]',
+                                       anchor='x',
+                                       overlaying='y', side='right',
+                                       titlefont=dict(color='green'),
+                                       tickfont=dict(color='green')))
+        fig2.update_layout(title_text='Temperatures and Flow Rate over Time',
+                           showlegend=True, xaxis={'fixedrange': False})
+
+        fig3 = go.Figure(data=[go.Scatter(name='Current', x=date_strings, y=self.fe_results.cell_current,
+                                          line=dict(color='blue'))])
+        fig3.add_traces(go.Scatter(name='Voltage', x=date_strings, y=self.fe_results.cell_voltage,
+                                   yaxis='y2', line=dict(color='red')))
+        fig3.update_layout(yaxis=dict(title=f'Current [{self.fe_results.cell_current[0].units}]',
+                                      titlefont=dict(color='blue'),
+                                      tickfont=dict(color='blue')),
+                           yaxis2=dict(title=f'Voltage [{self.fe_results.cell_voltage[0].units}]',
+                                       anchor='x',
+                                       overlaying='y', side='right',
+                                       titlefont=dict(color='red'),
+                                       tickfont=dict(color='red')))
+
+        fig3.update_layout(title_text='Current and Voltage over Time', showlegend=True, xaxis={'fixedrange': False})
+
+        self.figures = [PlotlyFigure(label='Faradaic Efficiencies Figure', figure=fig1.to_plotly_json()),
+                        PlotlyFigure(label='Temperatures and Flow Rate Figure', figure=fig2.to_plotly_json()),
+                        PlotlyFigure(label='Current and Voltage Figure', figure=fig3.to_plotly_json())]
+
+
+m_package.__init_metainfo__()
