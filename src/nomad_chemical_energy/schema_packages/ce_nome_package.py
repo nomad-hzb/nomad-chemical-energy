@@ -27,7 +27,7 @@ import plotly.graph_objs as go
 from nomad.metainfo import (
     Package,
     Quantity,
-    Section, SubSection)
+    Section, SubSection, SchemaPackage)
 from nomad.datamodel.data import EntryData
 
 from nomad.datamodel.metainfo.eln import Substance
@@ -61,10 +61,10 @@ from baseclasses.chemical_energy import (
     OpenCircuitVoltage,
     ElectrochemicalImpedanceSpectroscopy,
     # PreparationProtocol,
+    GalvanodynamicSweep,
     PhaseFluorometryOxygen,
     PumpRateMeasurement,
     LinearSweepVoltammetry,
-    GalvanodynamicSweep,
     UVvisDataConcentration
 )
 
@@ -73,10 +73,10 @@ from baseclasses.data_transformations import UVvisConcentrationDetection
 from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
 from datetime import datetime
 
-m_package = Package(name='CE-NOME')
-
+m_package = SchemaPackage()
 
 # %% ####################### Entities
+
 
 class CE_NOME_Design(Design, EntryData):
     pass
@@ -1149,3 +1149,6 @@ class CE_NOME_UVvisConcentrationDetection(UVvisConcentrationDetection, EntryData
             properties=dict(
                 order=['name', 'uvvis_measurement', 'material_name', 'minimum_peak_value', 'maximum_peak_value',
                        'slope', 'intercept', 'blank_substraction'])))
+
+
+m_package.__init_metainfo__()
