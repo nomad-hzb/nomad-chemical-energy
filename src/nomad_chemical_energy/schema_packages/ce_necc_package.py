@@ -97,7 +97,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
             if self.properties is None:
 
-                from .file_parser.necc_excel_parser import read_properties
+                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_properties
                 experimental_properties_dict = read_properties(xls_file)
                 self.properties = NECCExperimentalProperties()
                 for attribute_name, value in experimental_properties_dict.items():
@@ -107,7 +107,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
             if not self.thermocouple or not self.gaschromatographies or not self.potentiometry:
                 data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
 
-                from .file_parser.necc_excel_parser import read_gaschromatography_data
+                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_gaschromatography_data
                 gaschromatography_measurements = []
                 instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(
                     data)
@@ -128,7 +128,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         ))
                 self.gaschromatographies = gaschromatography_measurements
 
-                from .file_parser.necc_excel_parser import read_potentiostat_data
+                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_potentiostat_data
                 datetimes, current, working_electrode_potential = read_potentiostat_data(data)
                 if start_time is None or end_time is None:
                     start_time = datetimes.iat[0]
@@ -136,7 +136,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                 self.potentiometry = PotentiostatMeasurement(datetime=datetimes,
                                                              current=current,
                                                              working_electrode_potential=working_electrode_potential)
-                from .file_parser.necc_excel_parser import read_thermocouple_data
+                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_thermocouple_data
                 data.columns = data.iloc[1]
 
                 datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(
@@ -147,7 +147,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                                                             temperature_anode=temperature_anode)
 
             if self.fe_results is None:
-                from .file_parser.necc_excel_parser import read_results_data
+                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_results_data
                 datetimes, total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements = read_results_data(
                     xls_file)
                 self.fe_results = PotentiometryGasChromatographyResults(datetime=datetimes,
