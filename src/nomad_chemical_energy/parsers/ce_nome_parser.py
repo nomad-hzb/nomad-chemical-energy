@@ -65,7 +65,7 @@ class GamryParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual
         # parser.
-        from baseclasses.helper.file_parser.gamry_parser import get_header_and_data
+        from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
         metadata, _ = get_header_and_data(filename=mainfile)
 
         measurement_base, measurement_name = os.path.split(mainfile)
