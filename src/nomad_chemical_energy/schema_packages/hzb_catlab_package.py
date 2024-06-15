@@ -45,7 +45,7 @@ from nomad.datamodel.metainfo.basesections import PubChemPureSubstanceSection
 # from nomad.units import ureg
 from nomad.metainfo import (
     Section, SubSection, Quantity, SchemaPackage)
-from nomad_measurements.catalytic_measurement.catalytic_measurement import ReactionConditions
+# from nomad_measurements.catalytic_measurement.catalytic_measurement import ReactionConditions
 
 m_package = SchemaPackage()
 
@@ -99,7 +99,7 @@ class Catlab_SimpleCatalyticReaction(BaseMeasurement, EntryData):
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'))
 
-    reaction = SubSection(section_def=ReactionConditions, a_eln=ELNAnnotation(label='Reaction Data'))
+    # reaction = SubSection(section_def=ReactionConditions, a_eln=ELNAnnotation(label='Reaction Data'))
 
 
 class CatLab_PECVD(PECVDeposition, EntryData):
