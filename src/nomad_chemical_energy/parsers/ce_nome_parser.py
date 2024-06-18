@@ -42,7 +42,7 @@ from nomad_chemical_energy.schema_packages.ce_nome_package import \
      CE_NOME_Chronocoulometry, CE_NOME_ElectrochemicalImpedanceSpectroscopy,
      CE_NOME_LinearSweepVoltammetry, CE_NOME_Measurement, CE_NOME_OpenCircuitVoltage,
      CE_NOME_PhaseFluorometryOxygen, CE_NOME_PumpRateMeasurement, CE_NOME_UVvismeasurement,
-     Bessy2_KMC2_XASTransmission, Bessy2_KMC2_XASFluorescence, CE_NOME_GalvanodynamicSweep)
+     Bessy2_KMC2_XASTransmission, Bessy2_KMC2_XASFluorescence, CE_NOME_GalvanodynamicSweep, CE_NOME_TIF_Image)
 
 
 '''
@@ -61,6 +61,15 @@ class ParsedGamryFile(EntryData):
 
 
 class ParsedKMC2File(EntryData):
+    activity = Quantity(
+        type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        )
+    )
+
+
+class ParsedTifFile(EntryData):
     activity = Quantity(
         type=Activity,
         a_eln=ELNAnnotation(
@@ -285,6 +294,42 @@ class XASParser(MatchingParser):
             file_name = f'{measurement_name}.archive.json'
             create_archive(xas_measurement, archive, file_name)
             archive.data = ParsedKMC2File(activity=get_reference(
+                archive.metadata.upload_id,
+                get_entry_id_from_file_name(file_name, archive)
+            ))
+            archive.metadata.entry_name = measurement_name
+
+
+class CENOMETIFParser(MatchingParser):
+
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        # Log a hello world, just to get us started. TODO remove from an actual
+        # parser.
+
+        measurement_base, measurement_name = os.path.split(mainfile)
+        archive.metadata.entry_name = measurement_name
+
+        tif_image = CE_NOME_TIF_Image()
+
+        tif_image.image = measurement_name
+        tif_image.name = measurement_name
+
+        sample_id = measurement_name.split(".")[0]
+        sample_ref = find_sample_by_id(archive, sample_id)
+        if sample_ref is not None:
+            tif_image.samples = [CompositeSystemReference(reference=sample_ref)]
+
+        if not tif_image.samples:
+            sample = search_class(archive, "CE_NOME_Sample")
+            if sample is not None:
+                upload_id, entry_id = sample["upload_id"], sample["entry_id"]
+                tif_image.samples = [CompositeSystemReference(reference=get_reference(upload_id, entry_id))]
+
+        # archive.data = cam_measurements
+        if tif_image is not None:
+            file_name = f'{measurement_name}.archive.json'
+            create_archive(tif_image, archive, file_name)
+            archive.data = ParsedTifFile(activity=get_reference(
                 archive.metadata.upload_id,
                 get_entry_id_from_file_name(file_name, archive)
             ))

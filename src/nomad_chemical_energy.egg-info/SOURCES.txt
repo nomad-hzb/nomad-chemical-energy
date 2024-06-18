@@ -1,9 +1,8 @@
+.gitignore
 LICENSE
 README.md
 pyproject.toml
 .ipynb_checkpoints/Untitled-checkpoint.ipynb
-ce_nome_s/__init__.py
-ce_nome_s/__pycache__/__init__.cpython-39.pyc
 src/nomad_chemical_energy.egg-info/PKG-INFO
 src/nomad_chemical_energy.egg-info/SOURCES.txt
 src/nomad_chemical_energy.egg-info/dependency_links.txt

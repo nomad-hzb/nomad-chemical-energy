@@ -1071,6 +1071,45 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
         super(CE_NOME_PumpRateMeasurement, self).normalize(archive, logger)
 
 
+class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                "location",
+                "is_standard_process",
+                'end_time', 'steps', 'instruments', 'results'],
+            properties=dict(
+                order=[
+                    "name",
+                    "image",
+                    "image_png",
+                ])))
+    image = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'))
+
+    image_preview = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'))
+
+    def normalize(self, archive, logger):
+        import hyperspy.api as hs
+        from datetime import datetime
+        if self.image:
+            with archive.m_context.raw_file(self.image) as f:
+                image_file_name = f.name
+            tif_file = hs.load(image_file_name)
+
+            png_file = os.path.splitext(image_file_name)[0] + '.png'
+            tif_file.save(png_file)
+            self.image_preview = os.path.basename(png_file)
+
+        super(CE_NOME_TIF_Image, self).normalize(archive, logger)
+
 # %%####################################### Generic Entries
 
 

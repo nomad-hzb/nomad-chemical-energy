@@ -4,6 +4,7 @@ ce_necc_xlsx_parser = nomad_chemical_energy.parsers:ce_necc_xlsx_parser
 ce_nome_csv_parser = nomad_chemical_energy.parsers:ce_nome_csv_parser
 ce_nome_gamry_parser = nomad_chemical_energy.parsers:ce_nome_gamry_parser
 ce_nome_package = nomad_chemical_energy.schema_packages:ce_nome_package
+ce_nome_tif_parser = nomad_chemical_energy.parsers:ce_nome_tif_parser
 ce_nome_uvvis_parser = nomad_chemical_energy.parsers:ce_nome_uvvis_parser
 ce_nome_xas_parser = nomad_chemical_energy.parsers:ce_nome_xas_parser
 ce_nsli_package = nomad_chemical_energy.schema_packages:ce_nsli_package

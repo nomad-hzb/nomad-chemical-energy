@@ -36,6 +36,13 @@ class CENOMEXASParserEntryPoint(ParserEntryPoint):
         return XASParser(**self.dict())
 
 
+class CENOMETIFParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nome_parser import CENOMETIFParser
+        return CENOMETIFParser(**self.dict())
+
+
 class CEWannseeMPTParserEntryPoint(ParserEntryPoint):
 
     def load(self):
@@ -90,6 +97,14 @@ ce_nome_xas_parser = CENOMEXASParserEntryPoint(
     mainfile_name_re='^(.*(\.dat))',
     mainfile_contents_re='/home/kmc2/data/'
 )
+
+ce_nome_tif_parser = CENOMETIFParserEntryPoint(
+    name='CENOMETIFParser',
+    description='Parser for CENOME tif files',
+    mainfile_name_re='^(.*(\.tif|\.tiff))',
+    mainfile_mime_re='image/.*'
+)
+
 
 ce_wannsee_mpt_parser = CEWannseeMPTParserEntryPoint(
     name='CEWannseeMPTParser',
