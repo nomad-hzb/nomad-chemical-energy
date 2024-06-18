@@ -60,6 +60,15 @@ class ParsedGamryFile(EntryData):
     )
 
 
+class ParsedKMC2File(EntryData):
+    activity = Quantity(
+        type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        )
+    )
+
+
 class GamryParser(MatchingParser):
 
     def parse(self, mainfile: str, archive: EntryArchive, logger):
@@ -260,12 +269,20 @@ class XASParser(MatchingParser):
         xas_measurement.data_file = measurement_name
         xas_measurement.name = measurement_name
 
-        sample = search_class(archive, "CE_NOME_Sample")
-        if sample is not None:
-            upload_id, entry_id = sample["upload_id"], sample["entry_id"]
-            xas_measurement.samples = [CompositeSystemReference(reference=get_reference(upload_id, entry_id))]
+        sample_id = measurement_name.split(".")[0]
+        sample_ref = find_sample_by_id(archive, sample_id)
+        if sample_ref is not None:
+            xas_measurement.samples = [CompositeSystemReference(reference=sample_ref)]
+
+        if not xas_measurement.samples:
+            sample = search_class(archive, "CE_NOME_Sample")
+            if sample is not None:
+                upload_id, entry_id = sample["upload_id"], sample["entry_id"]
+                xas_measurement.samples = [CompositeSystemReference(reference=get_reference(upload_id, entry_id))]
 
         # archive.data = cam_measurements
         if xas_measurement is not None:
             file_name = f'{measurement_name}.archive.json'
             create_archive(xas_measurement, archive, file_name)
+            archive.data = ParsedKMC2File(activity=create_archive(xas_measurement, archive, file_name))
+            archive.metadata.entry_name = file_name
