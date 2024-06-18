@@ -1099,6 +1099,7 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
     def normalize(self, archive, logger):
         import hyperspy.api as hs
         from datetime import datetime
+        self.method = "Vis Image"
         if self.image:
             with archive.m_context.raw_file(self.image) as f:
                 image_file_name = f.name
