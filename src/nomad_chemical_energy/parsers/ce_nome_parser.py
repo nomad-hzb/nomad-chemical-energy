@@ -283,5 +283,9 @@ class XASParser(MatchingParser):
         # archive.data = cam_measurements
         if xas_measurement is not None:
             file_name = f'{measurement_name}.archive.json'
-            archive.data = ParsedKMC2File(activity=create_archive(xas_measurement, archive, file_name))
-            archive.metadata.entry_name = file_name
+            create_archive(xas_measurement, archive, file_name)
+            archive.data = ParsedKMC2File(activity=get_reference(
+                archive.metadata.upload_id,
+                get_entry_id_from_file_name(file_name, archive)
+            ))
+            archive.metadata.entry_name = measurement_name
