@@ -64,6 +64,27 @@ class CEWannseeXRDParserEntryPoint(ParserEntryPoint):
         return XRDParser(**self.dict())
 
 
+class DLRECCPParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.dlr_electro_chemistry_parser import DLRECCPParser
+        return DLRECCPParser(**self.dict())
+
+
+class DLRECCVParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.dlr_electro_chemistry_parser import DLRECCVParser
+        return DLRECCVParser(**self.dict())
+
+
+class DLRECEISParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.dlr_electro_chemistry_parser import DLRECEISParser
+        return DLRECEISParser(**self.dict())
+
+
 ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     name='CENECCxlsxParser',
     description='Parser for CENECC xls files',
@@ -122,4 +143,23 @@ ce_wannsee_xrd_xy_parser = CEWannseeXRDParserEntryPoint(
     name='CEWannseeXRDParser',
     description='Parser for Wannsee xy xrd files',
     mainfile_name_re='^(.+\.?.+.xy)$'
+)
+
+
+dlr_ec_cv_parser = DLRECCVParserEntryPoint(
+    name='DLRECCVParser',
+    description='Parser for DLR CV files',
+    mainfile_contents_re='^.*\nPotential\sapplied\s\(V\)\tTime\s\(s\)\tWE\(1\).Current\s\(A\)\tScan\tIndex'
+)
+
+dlr_ec_cp_parser = DLRECCPParserEntryPoint(
+    name='DLRECCPParser',
+    description='Parser for DLR CP files',
+    mainfile_contents_re='^(.*)\nTime\s\(s\)\tWE\(1\).Potential\s\(V\)\tCorrected\stime\s\(s\)\tIndex'
+)
+
+dlr_ec_eis_parser = DLRECEISParserEntryPoint(
+    name='DLRECEISParser',
+    description='Parser for DLR EIS files',
+    mainfile_contents_re='''^.*\nIndex\tFrequency\s\(Hz\)\tZ'\s\(Ω\)\s-Z''\s\(Ω\)\tZ\s\(Ω\)\s-Phase\s\(°\)\tTime\s\(s\)'''
 )
