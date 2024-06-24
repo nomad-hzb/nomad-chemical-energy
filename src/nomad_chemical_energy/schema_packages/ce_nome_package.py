@@ -32,6 +32,12 @@ from nomad.datamodel.data import EntryData
 
 from nomad.datamodel.metainfo.eln import Substance
 from nomad.datamodel.metainfo.basesections import PubChemPureSubstanceSection
+
+
+from nomad.datamodel.metainfo.basesections import (
+    Process
+)
+
 from baseclasses import (
     BaseProcess, BaseMeasurement
 )
@@ -48,6 +54,8 @@ from baseclasses.voila import (
 )
 
 from baseclasses.solar_energy import UVvisMeasurement
+
+from baseclasses.material_processes_misc import Annealing
 
 from baseclasses.chemical_energy import (
     CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties, Equipment,
@@ -193,6 +201,24 @@ class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
 
     setup_id = SubSection(
         section_def=SampleIDCENOME)
+
+
+class CE_NOME_Annealing(Process, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'users',
+                'origin', "lab_id", "instruments", "steps", "end_time"],
+            properties=dict(
+                order=[
+                    "name"
+                ])))
+
+    properties = SubSection(section_def=Annealing)
+
+    def normalize(self, archive, logger):
+        self.method = "Annealing"
+        super(CE_NOME_Annealing, self).normalize(archive, logger)
 
 
 # class CE_NOME_Batch(CENOMESample, EntryData):
