@@ -1,7 +1,0 @@
-description: This is a plugin schema generated from a yaml schema.
-name: parsers/ce_necc
-plugin_type: parser
-mainfile_name_re: ^.*\.xlsx$
-mainfile_mime_re: '(application|text)/.*'
-parser_class_name: ce_necc.NECCXlsxParser
-code_name: HZB NECC Excelsheet Parser

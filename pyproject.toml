@@ -1,0 +1,131 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+]
+name = "nomad-chemical-energy"
+description = "A schema package plugin for chemical energy at hzb."
+version = "1.0.0"
+readme = "README.rst"
+requires-python = ">=3.9"
+authors = [
+    { name = "Michael Götte", email = "michael.goette@helmholtz-berlin.de" },
+    { name = "Carla Terboven", email = "carla.terboven@helmholtz-berlin.de" },
+
+]
+maintainers = [
+    { name = "Carla Terboven", email = "carla.terboven@helmholtz-berlin.de" },
+    { name = "Michael Götte", email = "michael.goette@helmholtz-berlin.de" },
+]
+license = { file = "LICENSE" }
+#dependencies = ["nomad-lab>=1.2.2dev578"]
+[project.urls]
+Repository = "https://github.com/nomad-hzb/nomad-chemical-energy"
+
+[project.optional-dependencies]
+dev = ["ruff", "pytest", "structlog"]
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # isort
+    "I",
+    # pylint 
+    "PL",
+]
+
+ignore = [
+    "F403", # 'from module import *' used; unable to detect undefined names
+]
+
+fixable = ["ALL"]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+# this is entirely optional, you can remove this if you wish to
+[tool.ruff.format]
+# use single quotes for strings.
+quote-style = "single"
+
+# indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.entry-points.'nomad.plugin']
+ce_nome_package = "nomad_chemical_energy.schema_packages:ce_nome_package"
+ce_necc_package = "nomad_chemical_energy.schema_packages:ce_necc_package"
+ce_nsli_package = "nomad_chemical_energy.schema_packages:ce_nsli_package"
+ce_wannsee_package = "nomad_chemical_energy.schema_packages:ce_wannsee_package"
+hzb_characterization_package = "nomad_chemical_energy.schema_packages:hzb_characterization_package"
+hzb_catlab_package = "nomad_chemical_energy.schema_packages:hzb_catlab_package"
+
+ce_necc_xlsx_parser = "nomad_chemical_energy.parsers:ce_necc_xlsx_parser"
+ce_nome_gamry_parser = "nomad_chemical_energy.parsers:ce_nome_gamry_parser"
+ce_nome_csv_parser = "nomad_chemical_energy.parsers:ce_nome_csv_parser"
+ce_nome_uvvis_parser = "nomad_chemical_energy.parsers:ce_nome_uvvis_parser"
+ce_nome_xas_parser = "nomad_chemical_energy.parsers:ce_nome_xas_parser"
+ce_nome_tif_parser = "nomad_chemical_energy.parsers:ce_nome_tif_parser"
+ce_wannsee_mpt_parser = "nomad_chemical_energy.parsers:ce_wannsee_mpt_parser"
+ce_wannsee_cor_parser = "nomad_chemical_energy.parsers:ce_wannsee_cor_parser"
+ce_wannsee_xrd_xy_parser = "nomad_chemical_energy.parsers:ce_wannsee_xrd_xy_parser"
+dlr_ec_cv_parser = "nomad_chemical_energy.parsers:dlr_ec_cv_parser"
+dlr_ec_cp_parser = "nomad_chemical_energy.parsers:dlr_ec_cp_parser"
+dlr_ec_eis_parser = "nomad_chemical_energy.parsers:dlr_ec_eis_parser"
