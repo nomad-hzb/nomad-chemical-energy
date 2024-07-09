@@ -85,6 +85,13 @@ class DLRECEISParserEntryPoint(ParserEntryPoint):
         return DLRECEISParser(**self.dict())
 
 
+class CatlabParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.hzb_catlab_parser import CatlabParser
+        return CatlabParser(**self.dict())
+
+
 ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     name='CENECCxlsxParser',
     description='Parser for CENECC xls files',
@@ -162,4 +169,17 @@ dlr_ec_eis_parser = DLRECEISParserEntryPoint(
     name='DLRECEISParser',
     description='Parser for DLR EIS files',
     mainfile_contents_re='''^.*\nIndex\tFrequency\s\(Hz\)\tZ'\s\(Ω\)\s-Z''\s\(Ω\)\tZ\s\(Ω\)\s-Phase\s\(°\)\tTime\s\(s\)'''
+)
+
+dlr_ec_eis_parser = DLRECEISParserEntryPoint(
+    name='DLRECEISParser',
+    description='Parser for DLR EIS files',
+    mainfile_contents_re='''^.*\nIndex\tFrequency\s\(Hz\)\tZ'\s\(Ω\)\s-Z''\s\(Ω\)\tZ\s\(Ω\)\s-Phase\s\(°\)\tTime\s\(s\)'''
+)
+
+hzb_catlab_parser = CatlabParserEntryPoint(
+    name='CatlabParser',
+    description='Parser for Catlab files',
+    mainfile_name_re='^.*[0-9].*#.*$',
+    mainfile_mime_re='.*/.*'
 )
