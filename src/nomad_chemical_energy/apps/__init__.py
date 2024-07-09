@@ -52,11 +52,10 @@ necc_find_app = AppEntryPoint(
         # results to the wanted subset. Any available search filter can be
         # targeted here. This example makes sure that only entries that use
         # MySchema are included.
-        #filters_locked={
-        #    "section_defs.definition_qualified_name:all": [
-        #        "nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC"
-        #    ]
-        #},
+        filters_locked={
+            "section_defs.definition_qualified_name":
+                "nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC"
+        },
         # Controls the filter menus shown on the left
         filter_menus=FilterMenus(
             options={
@@ -274,11 +273,10 @@ necc_compare_app = AppEntryPoint(
         # results to the wanted subset. Any available search filter can be
         # targeted here. This example makes sure that only entries that use
         # MySchema are included.
-        #filters_locked={
-        #    "section_defs.definition_qualified_name:all": [
-        #        "nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC"
-        #    ]
-        #},
+        filters_locked={
+            "section_defs.definition_qualified_name":
+                "nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC"
+        },
         # Controls the filter menus shown on the left
         filter_menus=FilterMenus(
             options={
