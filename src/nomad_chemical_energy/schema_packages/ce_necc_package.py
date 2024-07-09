@@ -55,16 +55,16 @@ class CE_NECC_ElectrodeRecipe(CENECCElectrodeRecipe, EntryData):
                     "n2_deposition_pressure",
                     "mass_loading"
                 ])),
-        label_quantity='sample_id')  # TODO what is this?
+        label_quantity='sample_id')
 
 
 class CE_NECC_Electrode(CENECCElectrode, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=["chemical_composition_or_formulas", "origin", "elemental_composition", "components"],
+            hide=["chemical_composition_or_formulas", "origin", "elemental_composition",
+                  "components", "name", "datetime"],
             properties=dict(
                 order=[
-                    "name",
                     "lab_id",
                     "recipe",
                     "remarks"
@@ -85,6 +85,46 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                     'name', 'lab_id', 'properties', 'gaschromatographies',
                     'potentiometry', 'thermocouple', 'fe_results'
                 ])))
+
+    def make_fe_figure(self, date_strings):
+        fig = go.Figure(data=[go.Bar(name='Total FE in %', x=date_strings, y=abs(self.fe_results.total_fe))])
+        for gas in self.fe_results.gas_results:
+            date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in gas.datetime]
+            fig.add_traces(go.Bar(name=gas.gas_type, x=date_strings, y=abs(gas.faradaic_efficiency)))
+        fig.update_layout(barmode='group', showlegend=True, xaxis={'fixedrange': False})
+        fig.update_layout(title_text='Time-Dependent Faradaic Efficiencies')
+        return fig
+
+    def make_thermocouple_figure(self, date_strings, merged_df):
+        fig = go.Figure(data=[go.Scatter(name='Temperature Cathode', x=date_strings, y=merged_df['temp_cathode'])])
+        fig.add_traces(go.Scatter(name='Temperature Anode', x=date_strings, y=merged_df['temp_anode']))
+        fig.add_traces(go.Scatter(name='Total Flow Rate', x=date_strings, y=self.fe_results.total_flow_rate,
+                                  yaxis='y2', line=dict(color='green')))
+        fig.update_layout(yaxis=dict(title=f'Temperature [{self.thermocouple.temperature_cathode[0].units}]'),
+                          yaxis2=dict(title=f'Total Flow Rate [{self.fe_results.total_flow_rate[0].units}]',
+                                      anchor='x',
+                                      overlaying='y', side='right',
+                                      titlefont=dict(color='green'),
+                                      tickfont=dict(color='green')))
+        fig.update_layout(title_text='Temperatures and Flow Rate over Time',
+                          showlegend=True, xaxis={'fixedrange': False})
+        return fig
+
+    def make_current_voltage_figure(self, date_strings):
+        fig = go.Figure(data=[go.Scatter(name='Current', x=date_strings, y=self.fe_results.cell_current,
+                                         line=dict(color='blue'))])
+        fig.add_traces(go.Scatter(name='Voltage', x=date_strings, y=self.fe_results.cell_voltage,
+                                  yaxis='y2', line=dict(color='red')))
+        fig.update_layout(yaxis=dict(title=f'Current [{self.fe_results.cell_current[0].units}]',
+                                     titlefont=dict(color='blue'),
+                                     tickfont=dict(color='blue')),
+                          yaxis2=dict(title=f'Voltage [{self.fe_results.cell_voltage[0].units}]',
+                                      anchor='x',
+                                      overlaying='y', side='right',
+                                      titlefont=dict(color='red'),
+                                      tickfont=dict(color='red')))
+        fig.update_layout(title_text='Current and Voltage over Time', showlegend=True, xaxis={'fixedrange': False})
+        return fig
 
     def normalize(self, archive, logger):
 
@@ -138,13 +178,16 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                                                              working_electrode_potential=working_electrode_potential)
                 from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_thermocouple_data
                 data.columns = data.iloc[1]
-
-                datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(
-                    data.iloc[2:], start_time, end_time)
-                self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
-                                                            pressure=pressure,
-                                                            temperature_cathode=temperature_cathode,
-                                                            temperature_anode=temperature_anode)
+                try:
+                    datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(
+                        data.iloc[2:], start_time, end_time)
+                    self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
+                                                                pressure=pressure,
+                                                                temperature_cathode=temperature_cathode,
+                                                                temperature_anode=temperature_anode)
+                except Exception as e:
+                    logger.info(e)
+                    self.thermocouple = ThermocoupleMeasurement()
 
             if self.fe_results is None:
                 from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_results_data
@@ -162,64 +205,24 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         self.fe_results.normalize(archive, logger)
         super(CE_NECC_EC_GC, self).normalize(archive, logger)
 
-        # gaschromatography_df = pd.DataFrame({'datetime': self.gaschromatographies[0].datetime,
-        #                                     'ppm': self.gaschromatographies[0].ppm})
-        # gaschromatography_df['datetime'] += pd.Timedelta(seconds=1) #needed for same mapping as in excel sheet
 
-        # potentiometry_df = pd.DataFrame({'datetime': self.potentiometry.datetime,
-        #                                 'potential': self.potentiometry.working_electrode_potential,
-        #                                 'current': self.potentiometry.current})
-        thermocouple_df = pd.DataFrame({'datetime': self.thermocouple.datetime,
-                                        'temp_cathode': self.thermocouple.temperature_cathode,
-                                        'temp_anode': self.thermocouple.temperature_anode,
-                                        'pressure': self.thermocouple.pressure})
-        results_df = pd.DataFrame({'datetime': self.fe_results.datetime,
-                                   'total_flow_rate': self.fe_results.total_flow_rate})
-
-        merged_df = pd.merge_asof(results_df, thermocouple_df, on='datetime')
-        # merged_df = pd.merge_asof(gaschromatography_df, potentiometry_df, on='datetime')
 
         date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in self.fe_results.datetime]
-        fig1 = go.Figure(data=[go.Bar(name='Total FE in %', x=date_strings, y=abs(self.fe_results.total_fe))])
-        for gas in self.fe_results.gas_results:
-            date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in gas.datetime]
-            fig1.add_traces(go.Bar(name=gas.gas_type, x=date_strings, y=abs(gas.faradaic_efficiency)))
-        fig1.update_layout(barmode='group', showlegend=True, xaxis={'fixedrange': False})
 
-        fig1.update_layout(title_text='Time-Dependent Faradaic Efficiencies')
-
-        date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in self.fe_results.datetime]
-        fig2 = go.Figure(data=[go.Scatter(name='Temperature Cathode', x=date_strings, y=merged_df['temp_cathode'])])
-        fig2.add_traces(go.Scatter(name='Temperature Anode', x=date_strings, y=merged_df['temp_anode']))
-        fig2.add_traces(go.Scatter(name='Total Flow Rate', x=date_strings, y=self.fe_results.total_flow_rate,
-                                   yaxis='y2', line=dict(color='green')))
-        fig2.update_layout(yaxis=dict(title=f'Temperature [{self.thermocouple.temperature_cathode[0].units}]'),
-                           yaxis2=dict(title=f'Total Flow Rate [{self.fe_results.total_flow_rate[0].units}]',
-                                       anchor='x',
-                                       overlaying='y', side='right',
-                                       titlefont=dict(color='green'),
-                                       tickfont=dict(color='green')))
-        fig2.update_layout(title_text='Temperatures and Flow Rate over Time',
-                           showlegend=True, xaxis={'fixedrange': False})
-
-        fig3 = go.Figure(data=[go.Scatter(name='Current', x=date_strings, y=self.fe_results.cell_current,
-                                          line=dict(color='blue'))])
-        fig3.add_traces(go.Scatter(name='Voltage', x=date_strings, y=self.fe_results.cell_voltage,
-                                   yaxis='y2', line=dict(color='red')))
-        fig3.update_layout(yaxis=dict(title=f'Current [{self.fe_results.cell_current[0].units}]',
-                                      titlefont=dict(color='blue'),
-                                      tickfont=dict(color='blue')),
-                           yaxis2=dict(title=f'Voltage [{self.fe_results.cell_voltage[0].units}]',
-                                       anchor='x',
-                                       overlaying='y', side='right',
-                                       titlefont=dict(color='red'),
-                                       tickfont=dict(color='red')))
-
-        fig3.update_layout(title_text='Current and Voltage over Time', showlegend=True, xaxis={'fixedrange': False})
-
+        fig1 = self.make_fe_figure(date_strings)
+        fig2 = self.make_current_voltage_figure(date_strings)
         self.figures = [PlotlyFigure(label='Faradaic Efficiencies Figure', figure=fig1.to_plotly_json()),
-                        PlotlyFigure(label='Temperatures and Flow Rate Figure', figure=fig2.to_plotly_json()),
-                        PlotlyFigure(label='Current and Voltage Figure', figure=fig3.to_plotly_json())]
+                        PlotlyFigure(label='Current and Voltage Figure', figure=fig2.to_plotly_json())]
+        if self.thermocouple.datetime is not None:
+            thermocouple_df = pd.DataFrame({'datetime': self.thermocouple.datetime,
+                                            'temp_cathode': self.thermocouple.temperature_cathode,
+                                            'temp_anode': self.thermocouple.temperature_anode,
+                                            'pressure': self.thermocouple.pressure})
+            results_df = pd.DataFrame({'datetime': self.fe_results.datetime,
+                                       'total_flow_rate': self.fe_results.total_flow_rate})
+            merged_df = pd.merge_asof(results_df, thermocouple_df, on='datetime')
+            fig3 = self.make_thermocouple_figure(date_strings, merged_df)
+            self.figures.append(PlotlyFigure(label='Temperatures and Flow Rate Figure', figure=fig3.to_plotly_json()))
 
 
 m_package.__init_metainfo__()
