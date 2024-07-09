@@ -14,6 +14,7 @@ src/nomad_chemical_energy/parsers/ce_necc_parser.py
 src/nomad_chemical_energy/parsers/ce_nome_parser.py
 src/nomad_chemical_energy/parsers/ce_wannsee_parser.py
 src/nomad_chemical_energy/parsers/dlr_electro_chemistry_parser.py
+src/nomad_chemical_energy/parsers/hzb_catlab_parser.py
 src/nomad_chemical_energy/schema_packages/__init__.py
 src/nomad_chemical_energy/schema_packages/ce_necc_package.py
 src/nomad_chemical_energy/schema_packages/ce_nome_package.py

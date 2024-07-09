@@ -117,6 +117,7 @@ ce_wannsee_package = "nomad_chemical_energy.schema_packages:ce_wannsee_package"
 hzb_characterization_package = "nomad_chemical_energy.schema_packages:hzb_characterization_package"
 hzb_catlab_package = "nomad_chemical_energy.schema_packages:hzb_catlab_package"
 
+hzb_catlab_parser = "nomad_chemical_energy.parsers:hzb_catlab_parser"
 ce_necc_xlsx_parser = "nomad_chemical_energy.parsers:ce_necc_xlsx_parser"
 ce_nome_gamry_parser = "nomad_chemical_energy.parsers:ce_nome_gamry_parser"
 ce_nome_csv_parser = "nomad_chemical_energy.parsers:ce_nome_csv_parser"
@@ -132,3 +133,4 @@ dlr_ec_eis_parser = "nomad_chemical_energy.parsers:dlr_ec_eis_parser"
 
 necc_find_app = "nomad_chemical_energy.apps:necc_find_app"
 necc_compare_app = "nomad_chemical_energy.apps:necc_compare_app"
+
