@@ -81,7 +81,7 @@ hzb_catlab_package = HZBCatlabPackageEntryPoint(
     description='Package for HZB Catlab Schemas',
 )
 
-dlr_Ec_package = DLRECPackageEntryPoint(
+dlr_ec_package = DLRECPackageEntryPoint(
     name='DLREC',
     description='Package for DLR EC Schemas',
 )
