@@ -160,7 +160,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                     if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
                         gaschromatography_measurements.append(GasChromatographyMeasurement(
                             instrument_file_name=instrument_file_names.iloc[:, file_index],
-                            datetime=datetimes,
+                            datetime=datetimes.to_list(),
                             gas_type=gas_type,
                             retention_time=retention_times.iloc[:, gas_index],
                             area=areas.iloc[:, gas_index],
@@ -173,7 +173,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                 if start_time is None or end_time is None:
                     start_time = datetimes.iat[0]
                     end_time = datetimes.iat[-1]
-                self.potentiometry = PotentiostatMeasurement(datetime=datetimes,
+                self.potentiometry = PotentiostatMeasurement(datetime=datetimes.to_list(),
                                                              current=current,
                                                              working_electrode_potential=working_electrode_potential)
                 from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_thermocouple_data
@@ -181,7 +181,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                 try:
                     datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(
                         data.iloc[2:], start_time, end_time)
-                    self.thermocouple = ThermocoupleMeasurement(datetime=datetimes,
+                    self.thermocouple = ThermocoupleMeasurement(datetime=datetimes.to_list(),
                                                                 pressure=pressure,
                                                                 temperature_cathode=temperature_cathode,
                                                                 temperature_anode=temperature_anode)
@@ -193,7 +193,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                 from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_results_data
                 datetimes, total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements = read_results_data(
                     xls_file)
-                self.fe_results = PotentiometryGasChromatographyResults(datetime=datetimes,
+                self.fe_results = PotentiometryGasChromatographyResults(datetime=datetimes.to_list(),
                                                                         total_flow_rate=total_flow_rate,
                                                                         cell_current=cell_current,
                                                                         cell_voltage=cell_voltage,
@@ -204,8 +204,6 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         self.thermocouple.normalize(archive, logger)
         self.fe_results.normalize(archive, logger)
         super(CE_NECC_EC_GC, self).normalize(archive, logger)
-
-
 
         date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in self.fe_results.datetime]
 

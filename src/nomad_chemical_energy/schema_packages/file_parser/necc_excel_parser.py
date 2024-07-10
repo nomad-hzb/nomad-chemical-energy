@@ -113,7 +113,7 @@ def read_results_data(file):
         fe = data[" ".join([gas_type, 'FE (%)'])].dropna()
         gas_measurements.append(GasFEResults(
             gas_type=gas_type,
-            datetime=datetimes,
+            datetime=datetimes.to_list(),
             current=current,
             faradaic_efficiency=fe,
         ))
