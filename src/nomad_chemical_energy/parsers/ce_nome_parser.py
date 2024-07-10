@@ -94,7 +94,7 @@ class GamryParser(MatchingParser):
         if "METHOD" in metadata:
             methods = metadata.get("METHOD").split("-")
         else:
-            methods = [metadata.get("TAG")]
+            methods = [metadata.get("TAG", '')]
 
         for method in methods:
             file_name = f"{measurement_name}_{method}.archive.json"
