@@ -55,32 +55,34 @@ class ParsedDLRECFile(EntryData):
     )
 
 
+def create_ec_entry(archive, mainfile, entry):
+    mainfile_split = os.path.basename(mainfile).split('.')
+    notes = ''
+    if len(mainfile_split) > 2:
+        notes = mainfile_split[1]
+    archive.metadata.entry_name = os.path.basename(mainfile)
+
+    search_id = mainfile_split[0]
+    set_sample_reference(archive, entry, search_id)
+
+    entry.name = f"{search_id} {notes}"
+    entry.description = f"Notes from file name: {notes}"
+
+    entry.data_file = os.path.basename(mainfile)
+    entry.datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+
+    file_name = f'{os.path.basename(mainfile)}.archive.json'
+    eid = get_entry_id_from_file_name(file_name, archive)
+    archive.data = ParsedDLRECFile(activity=get_reference(archive.metadata.upload_id, eid))
+    create_archive(entry, archive, file_name)
+
+
 class DLRECCVParser(MatchingParser):
 
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
-
-        mainfile_split = os.path.basename(mainfile).split('.')
-        notes = ''
-        if len(mainfile_split) > 2:
-            notes = mainfile_split[1]
         entry = DLR_CyclicVoltammetry()
-        archive.metadata.entry_name = os.path.basename(mainfile)
-
-        if not mainfile_split[-1] in ["nk"]:
-            search_id = mainfile_split[0]
-            set_sample_reference(archive, entry, search_id)
-
-            entry.name = f"{search_id} {notes}"
-            entry.description = f"Notes from file name: {notes}"
-
-        entry.data_file = os.path.basename(mainfile)
-        entry.datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-
-        file_name = f'{os.path.basename(mainfile)}.archive.json'
-        eid = get_entry_id_from_file_name(file_name, archive)
-        archive.data = ParsedDLRECFile(activity=get_reference(archive.metadata.upload_id, eid))
-        create_archive(entry, archive, file_name)
+        create_ec_entry(archive, mainfile, entry)
 
 
 class DLRECEISParser(MatchingParser):
@@ -88,52 +90,13 @@ class DLRECEISParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
 
-        mainfile_split = os.path.basename(mainfile).split('.')
-        notes = ''
-        if len(mainfile_split) > 2:
-            notes = mainfile_split[1]
         entry = DLR_ElectrochemicalImpedanceSpectroscopy()
-        archive.metadata.entry_name = os.path.basename(mainfile)
-
-        if not mainfile_split[-1] in ["nk"]:
-            search_id = mainfile_split[0]
-            set_sample_reference(archive, entry, search_id)
-
-            entry.name = f"{search_id} {notes}"
-            entry.description = f"Notes from file name: {notes}"
-
-        entry.data_file = os.path.basename(mainfile)
-        entry.datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-
-        file_name = f'{os.path.basename(mainfile)}.archive.json'
-        eid = get_entry_id_from_file_name(file_name, archive)
-        archive.data = ParsedDLRECFile(activity=get_reference(archive.metadata.upload_id, eid))
-        create_archive(entry, archive, file_name)
+        create_ec_entry(archive, mainfile, entry)
 
 
 class DLRECCPParser(MatchingParser):
 
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
-
-        mainfile_split = os.path.basename(mainfile).split('.')
-        notes = ''
-        if len(mainfile_split) > 2:
-            notes = mainfile_split[1]
         entry = DLR_Chronopotentiometry()
-        archive.metadata.entry_name = os.path.basename(mainfile)
-
-        if not mainfile_split[-1] in ["nk"]:
-            search_id = mainfile_split[0]
-            set_sample_reference(archive, entry, search_id)
-
-            entry.name = f"{search_id} {notes}"
-            entry.description = f"Notes from file name: {notes}"
-
-        entry.data_file = os.path.basename(mainfile)
-        entry.datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-
-        file_name = f'{os.path.basename(mainfile)}.archive.json'
-        eid = get_entry_id_from_file_name(file_name, archive)
-        archive.data = ParsedDLRECFile(activity=get_reference(archive.metadata.upload_id, eid))
-        create_archive(entry, archive, file_name)
+        create_ec_entry(archive, mainfile, entry)

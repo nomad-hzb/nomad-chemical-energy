@@ -116,6 +116,7 @@ ce_nsli_package = "nomad_chemical_energy.schema_packages:ce_nsli_package"
 ce_wannsee_package = "nomad_chemical_energy.schema_packages:ce_wannsee_package"
 hzb_characterization_package = "nomad_chemical_energy.schema_packages:hzb_characterization_package"
 hzb_catlab_package = "nomad_chemical_energy.schema_packages:hzb_catlab_package"
+dlr_ec_package = "nomad_chemical_energy.schema_packages:dlr_ec_package"
 
 hzb_catlab_parser = "nomad_chemical_energy.parsers:hzb_catlab_parser"
 ce_necc_xlsx_parser = "nomad_chemical_energy.parsers:ce_necc_xlsx_parser"
