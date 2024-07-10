@@ -21,15 +21,56 @@ from baseclasses.helper.utilities import set_sample_reference, create_archive
 from nomad_chemical_energy.schema_packages.ce_wannsee_package import (Wannsee_XRD_XY)
 from nomad.datamodel import EntryArchive
 from nomad.parsing import MatchingParser
-from baseclasses.helper.utilities import find_sample_by_id
+from baseclasses.helper.utilities import find_sample_by_id, get_entry_id_from_file_name, get_reference
 
 import os
 from nomad.datamodel.metainfo.basesections import CompositeSystemReference
 
+from nomad.datamodel.data import (
+    EntryData,
+)
+from nomad.metainfo import (
+    Quantity,
+)
+
+from nomad.datamodel.metainfo.basesections import (
+    Activity,
+)
+
+from nomad.datamodel.metainfo.annotations import (
+    ELNAnnotation,
+)
 
 '''
 This is a hello world style example for an example parser/converter.
 '''
+
+
+class ParsedMPTFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        )
+    )
+
+
+class ParsedXYFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        )
+    )
+
+
+class ParsedCORFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        )
+    )
 
 
 class MPTParser(MatchingParser):
@@ -96,6 +137,11 @@ class MPTParser(MatchingParser):
             file_name = f'{os.path.basename(mainfile)}.archive.json'
             create_archive(cam_measurements, archive, file_name)
 
+            eid = get_entry_id_from_file_name(file_name, archive)
+            ref = get_reference(archive.metadata.upload_id, eid)
+            archive.data = ParsedMPTFile(activity=ref)
+            archive.metadata.entry_name = f"{mainfile_split[0]} {notes}"
+
 
 class CORParser(MatchingParser):
 
@@ -121,6 +167,11 @@ class CORParser(MatchingParser):
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         create_archive(cam_measurements, archive, file_name)
 
+        eid = get_entry_id_from_file_name(file_name, archive)
+        ref = get_reference(archive.metadata.upload_id, eid)
+        archive.data = ParsedCORFile(activity=ref)
+        archive.metadata.entry_name = f"{mainfile_split[0]} {notes}"
+
 
 class XRDParser(MatchingParser):
 
@@ -145,3 +196,8 @@ class XRDParser(MatchingParser):
 
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         create_archive(entry, archive, file_name)
+
+        eid = get_entry_id_from_file_name(file_name, archive)
+        ref = get_reference(archive.metadata.upload_id, eid)
+        archive.data = ParsedXYFile(activity=ref)
+        archive.metadata.entry_name = f"{mainfile_split[0]} {notes}"
