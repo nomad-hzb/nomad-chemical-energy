@@ -9,6 +9,7 @@ src/nomad_chemical_energy.egg-info/dependency_links.txt
 src/nomad_chemical_energy.egg-info/entry_points.txt
 src/nomad_chemical_energy.egg-info/requires.txt
 src/nomad_chemical_energy.egg-info/top_level.txt
+src/nomad_chemical_energy/apps/__init__.py
 src/nomad_chemical_energy/parsers/__init__.py
 src/nomad_chemical_energy/parsers/ce_necc_parser.py
 src/nomad_chemical_energy/parsers/ce_nome_parser.py

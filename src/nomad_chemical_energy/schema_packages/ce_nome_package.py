@@ -376,7 +376,7 @@ def set_sample(row):
                                       substrate_dimension=get_parameter(row, "substrate_dimension")),
         active_area=get_parameter(row, "active_area_cm**2"),
         mass_coverage=get_parameter(row, "mass_coverage_ug_cm**2"),
-        expected_structure=ExpectedStructure(expected_structure_links=get_parameter(row, "expected_structure_links").split(","),
+        expected_structure=ExpectedStructure(expected_structure_links=get_parameter(row, "expected_structure_links").split(",") if get_parameter(row, "expected_structure_links") else None,
                                              expected_structure_description=get_parameter(row, "expected_structure_description")),
         synthesis=[CatalystSynthesis(method=get_parameter(row, "synthesis_method"),
                                      description=get_parameter(row, "synthesis_description"),
