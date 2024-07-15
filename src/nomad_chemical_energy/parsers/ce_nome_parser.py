@@ -42,7 +42,9 @@ from nomad_chemical_energy.schema_packages.ce_nome_package import \
      CE_NOME_Chronocoulometry, CE_NOME_ElectrochemicalImpedanceSpectroscopy,
      CE_NOME_LinearSweepVoltammetry, CE_NOME_Measurement, CE_NOME_OpenCircuitVoltage,
      CE_NOME_PhaseFluorometryOxygen, CE_NOME_PumpRateMeasurement, CE_NOME_UVvismeasurement,
-     Bessy2_KMC2_XASTransmission, Bessy2_KMC2_XASFluorescence, CE_NOME_GalvanodynamicSweep, CE_NOME_TIF_Image)
+     Bessy2_KMC2_XASTransmission, Bessy2_KMC2_XASFluorescence, CE_NOME_GalvanodynamicSweep, CE_NOME_TIF_Image,
+     CE_NOME_Massspectrometry
+     )
 
 
 '''
@@ -54,6 +56,15 @@ class ParsedGamryFile(EntryData):
     activity = Quantity(
         type=Activity,
         shape=["*"],
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        )
+    )
+
+
+class ParsedTxtFile(EntryData):
+    activity = Quantity(
+        type=Activity,
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
         )
@@ -259,6 +270,34 @@ class UVvisParser(MatchingParser):
 
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         create_archive(uvvis, archive, file_name)
+
+
+class MassspectrometryParser(MatchingParser):
+
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        # Log a hello world, just to get us started. TODO remove from an actual parser.
+
+        mainfile_split = os.path.basename(mainfile).split('.')
+        notes = ''
+        if len(mainfile_split) > 2:
+            notes = mainfile_split[1]
+
+        mass = CE_NOME_Massspectrometry()
+
+        sample_id = mainfile_split[0]
+        set_sample_reference(archive, mass, sample_id)
+        mass.name = f"{mainfile_split[0]} {notes}"
+        mass.description = f"Notes from file name: {notes}"
+        mass.data_file = os.path.basename(mainfile)
+
+        file_name = f'{os.path.basename(mainfile)}.archive.json'
+        create_archive(mass, archive, file_name)
+
+        archive.data = ParsedTxtFile(activity=get_reference(
+            archive.metadata.upload_id,
+            get_entry_id_from_file_name(file_name, archive)
+        ))
+        archive.metadata.entry_name = mainfile_split[0]
 
 
 class XASParser(MatchingParser):

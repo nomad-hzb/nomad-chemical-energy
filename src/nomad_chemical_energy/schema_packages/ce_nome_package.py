@@ -74,7 +74,7 @@ from baseclasses.chemical_energy import (
     PhaseFluorometryOxygen,
     PumpRateMeasurement,
     LinearSweepVoltammetry,
-    UVvisDataConcentration
+    UVvisDataConcentration, Massspectrometry
 )
 
 from baseclasses.data_transformations import UVvisConcentrationDetection
@@ -1139,6 +1139,86 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
             self.image_preview = os.path.basename(png_file)
 
         super(CE_NOME_TIF_Image, self).normalize(archive, logger)
+
+
+class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                "location",
+                'end_time', 'steps', 'instruments', 'results'],
+            properties=dict(
+                order=[
+                    "name",
+                    "data_file"]))
+    )
+
+    def normalize(self, archive, logger):
+        # from datetime import datetime
+        # self.method = "Vis Image"
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file) as f:
+                file_name = f.name
+            from nomad_chemical_energy.schema_packages.file_parser.spectra_international_parser import parse_spectrum
+            from baseclasses.helper.archive_builder.massspectrometry_archive import get_masssectromentry_archive
+
+            metadata, data = parse_spectrum(file_name)
+            self.settings, self.data = get_masssectromentry_archive(metadata, data)
+            self.recipe = metadata.get("Recipe Name")
+            self.time = data.Time.to_list()
+            self.datetime = data.Time.iloc[0]
+
+        if self.data and self.time:
+            import plotly.graph_objects as go
+            result_figures = []
+
+            fig = go.Figure()
+            for d in self.data:
+                fig.add_trace(
+                    go.Scatter(
+                        x=[r.strftime("%H:%M:%S") if r else None for r in self.time],
+                        y=d.spectrum_data,
+                        name=d.chemical_name
+                    )
+                )
+
+            layout_settings = {
+                'title': 'Mass spectra over time',
+                'xaxis': {
+                    'title': 'Time',
+                    'gridcolor': "lightgrey"
+                },
+                'yaxis': {
+                    'title': 'Data',
+                    'showgrid': True,
+                    'gridcolor': "lightgrey",
+                    'tickformat': '.2e',
+                },
+                'showlegend': True,
+                'legend': {
+                    'x': 0.02,
+                    'y': 0.98
+                },
+                'plot_bgcolor': "white",
+                'margin': {
+                    'b': 100,
+                    'r': 90
+                }
+            }
+            fig.update_layout(layout_settings)
+            result_figures.append(
+                PlotlyFigure(
+                    label='Mass spectra over time',
+                    index=0,
+                    figure=fig.to_plotly_json()
+                )
+            )
+            self.figures = result_figures
+
+        super(CE_NOME_Massspectrometry, self).normalize(archive, logger)
+
 
 # %%####################################### Generic Entries
 

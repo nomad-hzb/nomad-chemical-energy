@@ -43,6 +43,13 @@ class CENOMETIFParserEntryPoint(ParserEntryPoint):
         return CENOMETIFParser(**self.dict())
 
 
+class CENOMEMassspectrometryParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nome_parser import MassspectrometryParser
+        return MassspectrometryParser(**self.dict())
+
+
 class CEWannseeMPTParserEntryPoint(ParserEntryPoint):
 
     def load(self):
@@ -131,6 +138,13 @@ ce_nome_tif_parser = CENOMETIFParserEntryPoint(
     description='Parser for CENOME tif files',
     mainfile_name_re='^(.*(\.tif|\.tiff))',
     mainfile_mime_re='image/.*'
+)
+
+ce_nome_massspectrometry_parser = CENOMEMassspectrometryParserEntryPoint(
+    name='MassspectrometryParser',
+    description='Parser for CE-NOME Massspectrometry files',
+    mainfile_name_re='^(.*(\.txt))',
+    mainfile_contents_re='^.*Spectra International Data File'
 )
 
 

@@ -30,6 +30,7 @@ src/nomad_chemical_energy/schema_packages/file_parser/mps_file_parser.py
 src/nomad_chemical_energy/schema_packages/file_parser/necc_excel_parser.py
 src/nomad_chemical_energy/schema_packages/file_parser/pfo_parser.py
 src/nomad_chemical_energy/schema_packages/file_parser/pumprate_parser.py
+src/nomad_chemical_energy/schema_packages/file_parser/spectra_international_parser.py
 src/nomad_chemical_energy/schema_packages/file_parser/xas_parser.py
 src/nomad_chemical_energy/schema_packages/utilities/ce_nsli_id.py
 tests/test_parser.py
