@@ -194,6 +194,6 @@ dlr_ec_eis_parser = DLRECEISParserEntryPoint(
 hzb_catlab_parser = CatlabParserEntryPoint(
     name='CatlabParser',
     description='Parser for Catlab files',
-    mainfile_name_re='^.*[0-9].*#.*$',
+    mainfile_name_re='^.*CatID[0-9].*#.*$',
     mainfile_mime_re='.*/.*'
 )
