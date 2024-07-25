@@ -47,7 +47,52 @@ from nomad.metainfo import (
     Section, SubSection, Quantity, SchemaPackage)
 # from nomad_measurements.catalytic_measurement.catalytic_measurement import ReactionConditions
 
+from unidecode import unidecode
+from nomad.datamodel.results import (
+    Results,
+    ELN
+)
+
 m_package = SchemaPackage()
+
+
+def export_lab_id(archive, lab_id):
+    if not archive.results:
+        archive.results = Results(eln=ELN())
+    if not archive.results.eln:
+        archive.results.eln = ELN()
+    if lab_id:
+        archive.results.eln.lab_ids = []
+        archive.results.eln.lab_ids = [lab_id, lab_id[:4]]
+
+
+def correct_lab_id(lab_id):
+    return lab_id[4:].isdigit() and len(lab_id[4:]) == 4
+
+
+def get_next_project_sample_number(data, entry_id):
+    '''Check the lab ids of a project id for project_sample_number (last digits of lab_id) and returns the next higher one'''
+    project_sample_numbers = []
+    for entry in data:
+        lab_ids = entry["results"]["eln"]["lab_ids"]
+        if entry["entry_id"] == entry_id and correct_lab_id(lab_ids[0]):
+            return int(lab_ids[0][4:])
+        project_sample_numbers.extend([int(lab_id[4:]) for lab_id in lab_ids if correct_lab_id(lab_id)])
+    return max(project_sample_numbers) + 1 if project_sample_numbers else 1
+
+
+def create_id(archive, lab_id_base):
+    from nomad.search import search
+    from nomad.app.v1.models import MetadataPagination
+
+    query = {'entry_type': "CatLab_Sample", 'results.eln.lab_ids': lab_id_base}
+    pagination = MetadataPagination()
+    pagination.page_size = 9999
+    search_result = search(owner='all', query=query, pagination=pagination,
+                           user_id=archive.metadata.main_author.user_id)
+    project_sample_number = get_next_project_sample_number(search_result.data, archive.metadata.entry_id)
+
+    return f"{lab_id_base}{project_sample_number:04d}"
 
 
 class CatLab_Sample(CatalysisSample, EntryData):
@@ -59,6 +104,29 @@ class CatLab_Sample(CatalysisSample, EntryData):
                     "name",
                     "lab_id",
                 ])))
+
+    lab_id = Quantity(
+        type=str,
+        description="""An ID string that is unique at least for the lab that produced this data.""",
+    )
+
+    def normalize(self, archive, logger):
+        super(
+            CatLab_Sample,
+            self).normalize(
+            archive,
+            logger)
+
+        if not self.lab_id:
+            author = archive.metadata.main_author
+            first_short, last_short = 'S', ''
+            try:
+                first_short = unidecode(author.first_name)[:2]
+                last_short = unidecode(author.last_name)[:2]
+            except:
+                pass
+            self.lab_id = create_id(archive, str(first_short) + str(last_short))
+        export_lab_id(archive, self.lab_id)
 
 
 class CatLab_Library(CatalysisLibrary, EntryData):
