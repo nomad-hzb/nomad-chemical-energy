@@ -58,13 +58,13 @@ def read_thermocouple_data(data, start_time, end_time):
     data['DateTime'] = data['Date'] + pd.to_timedelta(data['DateTime'].dt.strftime('%H:%M:%S'))
 
     data = data[(data['DateTime'] > start_time - time_grouping) & (data['DateTime'] <= end_time)]
-    data = data[['DateTime', 'bar(g)', 'øC  cathode?', 'øC  anode?']]
+    data = data[['DateTime', 'bar(g)', 'øC  cathode', 'øC  anode']]
     data = data.resample(time_grouping, on='DateTime', origin=start_time, closed='right', label='right').mean()
 
     datetimes = data.index
     pressure = data['bar(g)'].apply(_round_not_zero)
-    temperature_cathode = data['øC  cathode?'].apply(_round_not_zero)
-    temperature_anode = data['øC  anode?'].apply(_round_not_zero)
+    temperature_cathode = data['øC  cathode'].apply(_round_not_zero)
+    temperature_anode = data['øC  anode'].apply(_round_not_zero)
 
     return datetimes, pressure, temperature_cathode, temperature_anode
 
