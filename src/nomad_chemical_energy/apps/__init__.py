@@ -855,3 +855,373 @@ necc_compare_app = AppEntryPoint(
         }
     )
 )
+
+nome_oer_cp_app = AppEntryPoint(
+    name='ExploreOERCP',
+    description='Provides filters to explore OER CP entries of the NOME group.',
+    app=App(
+        # Label of the App
+        label='Explore OER CP',
+        # Path used in the URL, must be unique
+        path='nome-oer-cp',
+        # Used to categorize apps in the explore menu
+        category='NOME Data',
+        # Brief description used in the app menu
+        description='Provides filters to explore OER CP entries of the NOME group.',
+        # Longer description that can also use markdown
+        readme='Provides filters to explore OER CP entries of the NOME group.',
+        # Controls the available search filters. If you want to filter by
+        # quantities in a schema package, you need to load the schema package
+        # explicitly here. Note that you can use a glob syntax to load the
+        # entire package, or just a single schema from a package.
+        filters=Filters(
+            include=['*#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',]
+        ),
+        # Controls which columns are shown in the results table
+        columns=Columns(
+            selected=[
+                'entry_name',
+                'upload_name',
+                'data.outputs.samples.lab_id#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                'entry_type',
+                'entry_create_time',
+                'authors',
+            ],
+            options={
+                'entry_name': Column(label='Name', align='left'),
+                'upload_name': Column(label='Upload name', align='left'),
+                'data.outputs.samples.lab_id#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis': Column(label='Sample ID', align='left'),
+                'entry_type': Column(label='Entry type', align='left'),
+                'entry_create_time': Column(label='Entry time', align='left'),
+                'authors': Column(label='Authors', align='left'),
+            }
+        ),
+        # Dictionary of search filters that are always enabled for queries made
+        # within this app. This is especially important to narrow down the
+        # results to the wanted subset. Any available search filter can be
+        # targeted here. This example makes sure that only entries that use
+        # MySchema are included.
+        filters_locked={
+            "section_defs.definition_qualified_name":
+                "nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis"
+        },
+        # Controls the filter menus shown on the left
+        filter_menus=FilterMenus(
+            options={
+                'material': FilterMenu(label="Material", level=0),
+                'elements': FilterMenu(label="Elements / Formula", level=1, size='xl'),
+                'eln': FilterMenu(label="Electronic Lab Notebook", level=0),
+                'custom_quantities': FilterMenu(label="User Defined Quantities", level=0, size='l'),
+                'author': FilterMenu(label="Author / Origin / Dataset", level=0, size='m'),
+                'metadata': FilterMenu(label="Visibility / IDs / Schema", level=0),
+                'optimade': FilterMenu(label="Optimade", level=0, size='m'),
+            }
+        ),
+        # Controls the default dashboard shown in the search interface
+        dashboard={
+            'widgets': [
+                {
+                    'type': 'periodictable',
+                    'scale': 'linear',
+                    'quantity': 'results.material.elements',
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 9,
+                            'w': 12,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 9,
+                            'w': 12,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 9,
+                            'w': 12,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 9,
+                            'w': 12,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 9,
+                            'w': 12,
+                            'y': 0,
+                            'x': 0
+                        },
+                    }
+                },
+                {
+                    'type': 'terms',
+                    'showinput': True,
+                    'scale': 'linear',
+                    'quantity': 'data.outputs.reaction_type#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 0,
+                            'x': 12
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 5,
+                            'w': 6,
+                            'y': 9,
+                            'x': 0
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 5,
+                            'w': 6,
+                            'y': 12,
+                            'x': 0
+                        },
+                    }
+                },
+                {
+                    'type': 'terms',
+                    'showinput': True,
+                    'scale': 'linear',
+                    'title': 'Current Density',
+                    'quantity': 'data.outputs.current_density_string#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 0,
+                            'x': 6
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 0,
+                            'x': 6
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 0,
+                            'x': 18
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 5,
+                            'w': 6,
+                            'y': 9,
+                            'x': 6
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 5,
+                            'w': 6,
+                            'y': 12,
+                            'x': 6
+                        },
+                    },
+                },
+                {
+                    'type': 'histogram',
+                    'showinput': True,
+                    'autorange': False,
+                    'nbins': 30,
+                    'scale': 'linear',
+                    'title': 'Duration',
+                    'quantity': 'data.outputs.experiment_duration#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 3,
+                            'w': 8,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 3,
+                            'w': 8,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 3,
+                            'w': 12,
+                            'y': 6,
+                            'x': 12
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 3,
+                            'w': 12,
+                            'y': 14,
+                            'x': 0
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 3,
+                            'w': 12,
+                            'y': 9,
+                            'x': 0
+                        },
+                    },
+                },
+                {
+                    'type': 'histogram',
+                    'showinput': True,
+                    'autorange': False,
+                    'nbins': 30,
+                    'scale': 'linear',
+                    'title': 'Δj',
+                    'quantity': 'data.outputs.voltage_difference#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 3,
+                            'w': 8,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 3,
+                            'w': 8,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 12,
+                            'y': 9,
+                            'x': 12
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 8,
+                            'y': 17,
+                            'x': 10
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 5,
+                            'w': 6,
+                            'y': 17,
+                            'x': 6
+                        },
+                    },
+                },
+                {
+                    'type': 'scatterplot',
+                    'autorange': True,
+                    'size': 1000,
+                    'x': {
+                        'quantity': 'data.outputs[0].voltage_avg_first5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                        'unit': 'volt'
+                    },
+                    'y': {
+                        'quantity': 'data.outputs[0].voltage_avg_last5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                        'unit': 'volt'
+                    },
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 9,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 9,
+                            'y': 0,
+                            'x': 0
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 12,
+                            'y': 9,
+                            'x': 0
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 10,
+                            'y': 17,
+                            'x': 0
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 5,
+                            'w': 6,
+                            'y': 17,
+                            'x': 0
+                        },
+                    },
+                },
+            ]
+        }
+    )
+)
