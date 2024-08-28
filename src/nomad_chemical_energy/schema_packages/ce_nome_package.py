@@ -1306,7 +1306,6 @@ class CE_NOME_CPAnalysis(CPAnalysis, EntryData):
         a_eln=dict(
             hide=['location', 'lab_id', 'description', 'method', 'steps'],
             properties=dict(
-                order=[])))
-
+                order=['name'])))
 
 m_package.__init_metainfo__()

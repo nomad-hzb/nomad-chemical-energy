@@ -43,7 +43,8 @@ from nomad_chemical_energy.schema_packages.ce_nome_package import \
      CE_NOME_LinearSweepVoltammetry, CE_NOME_Measurement, CE_NOME_OpenCircuitVoltage,
      CE_NOME_PhaseFluorometryOxygen, CE_NOME_PumpRateMeasurement, CE_NOME_UVvismeasurement,
      Bessy2_KMC2_XASTransmission, Bessy2_KMC2_XASFluorescence, CE_NOME_GalvanodynamicSweep, CE_NOME_TIF_Image,
-     CE_NOME_Massspectrometry
+     CE_NOME_Massspectrometry,
+     CE_NOME_CPAnalysis,
      )
 
 
@@ -151,6 +152,12 @@ class GamryParser(MatchingParser):
         environment_ref = find_sample_by_id(archive, environment_id)
         setup_ref = find_sample_by_id(archive, setup_id)
 
+        if "TITLE" in metadata:
+            label = metadata.get("TITLE")
+            if "OER CP" in label:
+                file_name = "oer_cp_analysis.archive.json"
+                create_archive(CE_NOME_CPAnalysis(name=nickname), archive, file_name)
+
         if sample_ref is None:
             sample = search_class(archive, "CE_NOME_Sample")
             if sample is not None:
@@ -184,6 +191,8 @@ class GamryParser(MatchingParser):
             if setup_ref is not None:
                 measurement.setup = setup_ref
             name = name.replace("#", "run")
+            if label == "OER CP":
+                measurement.method = "OER Chronopotentiometry"
             create_archive(measurement, archive, name)
             refs.append(get_reference(archive.metadata.upload_id, eid))
 
