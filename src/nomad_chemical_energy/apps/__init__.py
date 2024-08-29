@@ -882,7 +882,7 @@ nome_oer_cp_app = AppEntryPoint(
             selected=[
                 'entry_name',
                 'upload_name',
-                'data.outputs.samples.lab_id#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                'results.eln.lab_ids#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
                 'entry_type',
                 'entry_create_time',
                 'authors',
@@ -890,7 +890,7 @@ nome_oer_cp_app = AppEntryPoint(
             options={
                 'entry_name': Column(label='Name', align='left'),
                 'upload_name': Column(label='Upload name', align='left'),
-                'data.outputs.samples.lab_id#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis': Column(label='Sample ID', align='left'),
+                'results.eln.lab_ids#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis': Column(label='Sample ID', align='left'),
                 'entry_type': Column(label='Entry type', align='left'),
                 'entry_create_time': Column(label='Entry time', align='left'),
                 'authors': Column(label='Authors', align='left'),
