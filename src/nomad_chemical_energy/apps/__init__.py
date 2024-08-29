@@ -979,7 +979,7 @@ nome_oer_cp_app = AppEntryPoint(
                             'h': 6,
                             'w': 6,
                             'y': 0,
-                            'x': 0
+                            'x': 12
                         },
                         'xl': {
                             'minH': 3,
@@ -987,7 +987,7 @@ nome_oer_cp_app = AppEntryPoint(
                             'h': 6,
                             'w': 6,
                             'y': 0,
-                            'x': 0
+                            'x': 12
                         },
                         'lg': {
                             'minH': 3,
@@ -1028,7 +1028,7 @@ nome_oer_cp_app = AppEntryPoint(
                             'h': 6,
                             'w': 6,
                             'y': 0,
-                            'x': 6
+                            'x': 18
                         },
                         'xl': {
                             'minH': 3,
@@ -1036,7 +1036,7 @@ nome_oer_cp_app = AppEntryPoint(
                             'h': 6,
                             'w': 6,
                             'y': 0,
-                            'x': 6
+                            'x': 18
                         },
                         'lg': {
                             'minH': 3,
@@ -1077,17 +1077,17 @@ nome_oer_cp_app = AppEntryPoint(
                             'minH': 3,
                             'minW': 3,
                             'h': 3,
-                            'w': 8,
-                            'y': 0,
-                            'x': 0
+                            'w': 12,
+                            'y': 6,
+                            'x': 12
                         },
                         'xl': {
                             'minH': 3,
                             'minW': 3,
                             'h': 3,
-                            'w': 8,
-                            'y': 0,
-                            'x': 0
+                            'w': 12,
+                            'y': 6,
+                            'x': 12
                         },
                         'lg': {
                             'minH': 3,
@@ -1127,18 +1127,18 @@ nome_oer_cp_app = AppEntryPoint(
                         'xxl': {
                             'minH': 3,
                             'minW': 3,
-                            'h': 3,
-                            'w': 8,
-                            'y': 0,
-                            'x': 0
+                            'h': 6,
+                            'w': 9,
+                            'y': 9,
+                            'x': 9
                         },
                         'xl': {
                             'minH': 3,
                             'minW': 3,
-                            'h': 3,
-                            'w': 8,
-                            'y': 0,
-                            'x': 0
+                            'h': 6,
+                            'w': 9,
+                            'y': 9,
+                            'x': 9
                         },
                         'lg': {
                             'minH': 3,
@@ -1184,7 +1184,7 @@ nome_oer_cp_app = AppEntryPoint(
                             'minW': 3,
                             'h': 6,
                             'w': 9,
-                            'y': 0,
+                            'y': 9,
                             'x': 0
                         },
                         'xl': {
@@ -1192,7 +1192,7 @@ nome_oer_cp_app = AppEntryPoint(
                             'minW': 3,
                             'h': 6,
                             'w': 9,
-                            'y': 0,
+                            'y': 9,
                             'x': 0
                         },
                         'lg': {
