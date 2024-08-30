@@ -152,11 +152,10 @@ class GamryParser(MatchingParser):
         environment_ref = find_sample_by_id(archive, environment_id)
         setup_ref = find_sample_by_id(archive, setup_id)
 
-        if "TITLE" in metadata:
-            label = metadata.get("TITLE")
-            if "OER CP" in label:
-                file_name = "oer_cp_analysis.archive.json"
-                create_archive(CE_NOME_CPAnalysis(name=nickname), archive, file_name)
+        label = metadata.get("TITLE", "")
+        if "OER CP" in label:
+            file_name = "oer_cp_analysis.archive.json"
+            create_archive(CE_NOME_CPAnalysis(name=nickname), archive, file_name)
 
         if sample_ref is None:
             sample = search_class(archive, "CE_NOME_Sample")
