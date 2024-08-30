@@ -965,7 +965,7 @@ nome_oer_cp_app = AppEntryPoint(
                             'y': 0,
                             'x': 0
                         },
-                    }
+                    },
                 },
                 {
                     'type': 'terms',
@@ -1013,7 +1013,7 @@ nome_oer_cp_app = AppEntryPoint(
                             'y': 12,
                             'x': 0
                         },
-                    }
+                    },
                 },
                 {
                     'type': 'terms',
@@ -1152,9 +1152,9 @@ nome_oer_cp_app = AppEntryPoint(
                             'minH': 3,
                             'minW': 3,
                             'h': 6,
-                            'w': 8,
+                            'w': 9,
                             'y': 17,
-                            'x': 10
+                            'x': 9
                         },
                         'sm': {
                             'minH': 3,
@@ -1207,7 +1207,7 @@ nome_oer_cp_app = AppEntryPoint(
                             'minH': 3,
                             'minW': 3,
                             'h': 6,
-                            'w': 10,
+                            'w': 9,
                             'y': 17,
                             'x': 0
                         },
@@ -1218,6 +1218,207 @@ nome_oer_cp_app = AppEntryPoint(
                             'w': 6,
                             'y': 17,
                             'x': 0
+                        },
+                    },
+                },
+                {
+                    'type': 'histogram',
+                    'showinput': True,
+                    'autorange': False,
+                    'nbins': 30,
+                    'scale': 'linear',
+                    'title': 'Voltage shift',
+                    'quantity': 'data.outputs.voltage_shift#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 9,
+                            'y': 15,
+                            'x': 0
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 5,
+                            'w': 9,
+                            'y': 15,
+                            'x': 0
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 12,
+                            'y': 15,
+                            'x': 0
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 9,
+                            'y': 23,
+                            'x': 0
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 5,
+                            'w': 6,
+                            'y': 22,
+                            'x': 0
+                        },
+                    },
+                },
+                {
+                    'type': 'histogram',
+                    'showinput': True,
+                    'autorange': False,
+                    'nbins': 30,
+                    'scale': 'linear',
+                    'title': 'R',
+                    'quantity': 'data.outputs.resistance#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 9,
+                            'y': 15,
+                            'x': 9
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 9,
+                            'y': 15,
+                            'x': 9
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 12,
+                            'y': 15,
+                            'x': 12
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 9,
+                            'y': 23,
+                            'x': 9
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 5,
+                            'w': 6,
+                            'y': 22,
+                            'x': 6
+                        },
+                    },
+                },
+                {
+                    'type': 'terms',
+                    'showinput': True,
+                    'scale': 'linear',
+                    'quantity': 'authors.name',
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 21,
+                            'x': 0
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 21,
+                            'x': 0
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 21,
+                            'x': 0
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 29,
+                            'x': 0
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 27,
+                            'x': 0
+                        },
+                    },
+                },
+                {
+                    'type': 'histogram',
+                    'showinput': True,
+                    'autorange': False,
+                    'nbins': 30,
+                    'scale': 'linear',
+                    'title': 'Entry Create Time',
+                    'quantity': 'entry_create_time',
+                    'layout': {
+                        'xxl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 12,
+                            'y': 21,
+                            'x': 6
+                        },
+                        'xl': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 12,
+                            'y': 21,
+                            'x': 6
+                        },
+                        'lg': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 21,
+                            'x': 6
+                        },
+                        'md': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 29,
+                            'x': 6
+                        },
+                        'sm': {
+                            'minH': 3,
+                            'minW': 3,
+                            'h': 6,
+                            'w': 6,
+                            'y': 27,
+                            'x': 6
                         },
                     },
                 },
