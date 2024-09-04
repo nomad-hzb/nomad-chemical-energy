@@ -135,4 +135,4 @@ dlr_ec_eis_parser = "nomad_chemical_energy.parsers:dlr_ec_eis_parser"
 
 necc_find_app = "nomad_chemical_energy.apps:necc_find_app"
 necc_compare_app = "nomad_chemical_energy.apps:necc_compare_app"
-
+nome_oer_cp_app = "nomad_chemical_energy.apps:nome_oer_cp_app"

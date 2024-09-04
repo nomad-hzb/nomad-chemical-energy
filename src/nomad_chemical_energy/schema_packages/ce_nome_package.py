@@ -67,6 +67,7 @@ from baseclasses.chemical_energy import (
     Chronoamperometry,
     Chronopotentiometry,
     Chronocoulometry,
+    CPAnalysis,
     OpenCircuitVoltage,
     ElectrochemicalImpedanceSpectroscopy,
     # PreparationProtocol,
@@ -1288,9 +1289,6 @@ class CE_NOME_Measurement(BaseMeasurement, EntryData):
         a_browser=dict(adaptor='RawFileAdaptor'))
 
 
-m_package.__init_metainfo__()
-
-
 class CE_NOME_UVvisConcentrationDetection(UVvisConcentrationDetection, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -1299,5 +1297,15 @@ class CE_NOME_UVvisConcentrationDetection(UVvisConcentrationDetection, EntryData
                 order=['name', 'uvvis_measurement', 'material_name', 'minimum_peak_value', 'maximum_peak_value',
                        'slope', 'intercept', 'blank_substraction'])))
 
+
+# %%####################################### Analysis
+
+
+class CE_NOME_CPAnalysis(CPAnalysis, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['location', 'lab_id', 'description', 'method', 'steps'],
+            properties=dict(
+                order=['name'])))
 
 m_package.__init_metainfo__()
