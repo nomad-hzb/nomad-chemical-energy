@@ -99,6 +99,13 @@ class CatlabParserEntryPoint(ParserEntryPoint):
         return CatlabParser(**self.dict())
 
 
+class GeneralMeasurementParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.hzb_general_parser import GeneralMeasurementParser
+        return GeneralMeasurementParser(**self.dict())
+
+
 ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     name='CENECCxlsxParser',
     description='Parser for CENECC xls files',
@@ -196,4 +203,10 @@ hzb_catlab_parser = CatlabParserEntryPoint(
     description='Parser for Catlab files',
     mainfile_name_re='^.*CatID[0-9].*#.*$',
     mainfile_mime_re='.*/.*'
+)
+
+hzb_general_measurement_parser = GeneralMeasurementParserEntryPoint(
+    name='GeneralMeasurementParser',
+    description='Parser for general measurement files starting with a sample id',
+    mainfile_name_re='^.*[A-Z][a-z][A-Z][a-z]\d{4}(-.*)?\.(?!.*\.*pynb$|.*\.*py$|.*\.*archive\.json$|.*\.*json$)[a-zA-Z0-9.]+$',
 )
