@@ -70,3 +70,42 @@ class GeneralMeasurementParser(MatchingParser):
         archive.data = ParsedGeneralMeasurementFile(activity=ref)
         archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
 
+        # TODO for new measurement parsers that should replace GeneralMeasurement entries you can use this code inside the parser
+        # file_name_archive = f'{file_name}.archive.json'
+        # new_entry_created = create_archive(entry, archive, file_name_archive)
+        # eid = get_entry_id_from_file_name(file_name_archive, archive)
+        # ref = get_reference(archive.metadata.upload_id, eid)
+        # if not new_entry_created:
+        #     entry = update_general_measurement_entries(entry, eid, archive, logger, TxtMeasurement())
+        #     create_archive(entry, archive, file_name_archive, overwrite=True)
+        # archive.data = ParsedTxtFile(activity=ref)
+        # archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
+
+
+def update_general_measurement_entries(entry, entry_id, archive, logger, entry_class):
+    from nomad.search import search
+    from nomad import files
+    query = {
+        'entry_id': entry_id,
+    }
+    search_result = search(
+        owner='all',
+        query=query,
+        user_id=archive.metadata.main_author.user_id)
+    entry_type = search_result.data[0].get('entry_type') if len(search_result.data) == 1 else None
+    if entry_type == 'HZB_GeneralMeasurement':
+        new_entry_dict = entry.m_to_dict()
+        res = search_result.data[0] if len(search_result.data) == 1 else None
+        try:
+            # Open Archives
+            with files.UploadFiles.get(upload_id=res["upload_id"]).read_archive(
+                    entry_id=res["entry_id"]) as archive:
+                entry_id = res["entry_id"]
+                entry_data = archive[entry_id]["data"]
+                entry_data.pop('m_def', None)
+                new_entry_dict.update(entry_data)
+        except Exception as e:
+            logger.error("Error in processing data: ", e)
+
+        new_entry = entry_class.m_from_dict(new_entry_dict)
+        return new_entry
