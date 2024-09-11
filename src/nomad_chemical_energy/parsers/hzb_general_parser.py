@@ -76,8 +76,9 @@ class GeneralMeasurementParser(MatchingParser):
         # eid = get_entry_id_from_file_name(file_name_archive, archive)
         # ref = get_reference(archive.metadata.upload_id, eid)
         # if not new_entry_created:
-        #     entry = update_general_measurement_entries(entry, eid, archive, logger, TxtMeasurement())
-        #     create_archive(entry, archive, file_name_archive, overwrite=True)
+        #     new_entry = update_general_measurement_entries(entry, eid, archive, logger, TxtMeasurement())
+        #     if new_entry is not None:
+        #         create_archive(new_entry, archive, file_name_archive, overwrite=True)
         # archive.data = ParsedTxtFile(activity=ref)
         # archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
 
