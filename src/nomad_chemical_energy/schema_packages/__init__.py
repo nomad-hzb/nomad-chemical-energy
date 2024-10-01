@@ -50,6 +50,13 @@ class DLRECPackageEntryPoint(SchemaPackageEntryPoint):
         return m_package
 
 
+class HZBGeneralPackageEntryPoint(SchemaPackageEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.schema_packages.hzb_general_measurement_package import m_package
+        return m_package
+
+
 ce_nome_package = CENOMEPackageEntryPoint(
     name='CE_NOME',
     description='Package for HZB group CE-NOME',
@@ -84,4 +91,9 @@ hzb_catlab_package = HZBCatlabPackageEntryPoint(
 dlr_ec_package = DLRECPackageEntryPoint(
     name='DLREC',
     description='Package for DLR EC Schemas',
+)
+
+hzb_general_measurement_package = HZBGeneralPackageEntryPoint(
+    name='HZBGeneral',
+    description='Package for general HZB Schema',
 )
