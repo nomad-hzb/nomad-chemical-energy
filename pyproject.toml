@@ -124,6 +124,7 @@ where = ["src"]
 [project.entry-points.'nomad.plugin']
 ce_nome_package = "nomad_chemical_energy.schema_packages:ce_nome_package"
 ce_necc_package = "nomad_chemical_energy.schema_packages:ce_necc_package"
+ce_nesd_package = "nomad_chemical_energy.schema_packages:ce_nesd_package"
 ce_nsli_package = "nomad_chemical_energy.schema_packages:ce_nsli_package"
 ce_wannsee_package = "nomad_chemical_energy.schema_packages:ce_wannsee_package"
 hzb_characterization_package = "nomad_chemical_energy.schema_packages:hzb_characterization_package"
@@ -134,6 +135,10 @@ tfc_package = "nomad_chemical_energy.schema_packages:tfc_schema_package"
 
 hzb_catlab_parser = "nomad_chemical_energy.parsers:hzb_catlab_parser"
 ce_necc_xlsx_parser = "nomad_chemical_energy.parsers:ce_necc_xlsx_parser"
+ce_nesd_biologic_parser = "nomad_chemical_energy.parsers:ce_nesd_biologic_parser"
+ce_nesd_labview_parser = "nomad_chemical_energy.parsers:ce_nesd_labview_parser"
+ce_nesd_palmsens_parser = "nomad_chemical_energy.parsers:ce_nesd_palmsens_parser"
+
 ce_nome_gamry_parser = "nomad_chemical_energy.parsers:ce_nome_gamry_parser"
 ce_nome_csv_parser = "nomad_chemical_energy.parsers:ce_nome_csv_parser"
 ce_nome_uvvis_parser = "nomad_chemical_energy.parsers:ce_nome_uvvis_parser"
