@@ -36,7 +36,7 @@ def _round_not_zero(number):
 
 def read_potentiostat_data(data):
 
-    datetimes = pd.to_datetime(data['time/s']).dropna()
+    datetimes = pd.to_datetime(data['time/s'], errors="coerce").dropna()
 
     if {'I/mA', 'Ewe/V'}.issubset(data.columns):
         current = data['I/mA'].dropna()
