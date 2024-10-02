@@ -30,7 +30,7 @@ from baseclasses.chemical_energy import (
     PotentiometryGasChromatographyMeasurement,
     NECCExperimentalProperties,
     GasChromatographyMeasurement,
-    PotentiostatMeasurement,
+    NECCPotentiostatMeasurement,
     ThermocoupleMeasurement,
     PotentiometryGasChromatographyResults
 )
@@ -173,7 +173,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                 if start_time is None or end_time is None:
                     start_time = datetimes.iat[0]
                     end_time = datetimes.iat[-1]
-                self.potentiometry = PotentiostatMeasurement(datetime=datetimes.to_list(),
+                self.potentiometry = NECCPotentiostatMeasurement(datetime=datetimes.to_list(),
                                                              current=current,
                                                              working_electrode_potential=working_electrode_potential)
                 from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_thermocouple_data
