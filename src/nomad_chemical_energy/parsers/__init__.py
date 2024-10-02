@@ -8,6 +8,27 @@ class CENECCxlsxParserEntryPoint(ParserEntryPoint):
         return NECCXlsxParser(**self.dict())
 
 
+class CENESDBioLogicParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDBioLogicParser
+        return CENESDBioLogicParser(**self.dict())
+
+
+class CENESDLabviewParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDLabviewParser
+        return CENESDLabviewParser(**self.dict())
+
+
+class CENESDPalmSensParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDPalmSensParser
+        return CENESDPalmSensParser(**self.dict())
+
+
 class CENOMEGamryParserEntryPoint(ParserEntryPoint):
 
     def load(self):
@@ -113,6 +134,24 @@ ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     mainfile_mime_re='(application|text)/.*'
 )
 
+ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
+    name='CENESDBioLogicParser',
+    description='Parser for CENESD csv and mpr files of BioLogic potentiostats',
+    mainfile_name_re='^.*\.mpr',
+)
+
+ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
+    name='CENESDLabviewParser',
+    description='Parser for CENESD LabVIEW Electrolyser files',
+    mainfile_name_re='^.*\.tdms',
+)
+
+ce_nesd_palmsens_parser = CENESDPalmSensParserEntryPoint(
+    name='CENESDPalmSensParser',
+    description='Parser for CENESD csv files of PalmSens potentiostats',
+    mainfile_name_re='^.*\.csv',
+)
+
 ce_nome_gamry_parser = CENOMEGamryParserEntryPoint(
     name='CENOMEGamryParser',
     description='Parser for CENOME Gamry files',
@@ -153,7 +192,6 @@ ce_nome_massspectrometry_parser = CENOMEMassspectrometryParserEntryPoint(
     mainfile_name_re='^(.*(\.txt))',
     mainfile_contents_re='^.*Spectra International Data File'
 )
-
 
 ce_wannsee_mpt_parser = CEWannseeMPTParserEntryPoint(
     name='CEWannseeMPTParser',

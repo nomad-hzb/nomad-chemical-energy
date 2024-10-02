@@ -202,4 +202,6 @@ def get_header_and_data(filename):
 
         header_length = f.tell()
 
+        print(_header, _curves)
+
     return _header, _curves
