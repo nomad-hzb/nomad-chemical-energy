@@ -53,10 +53,23 @@ class ParsedExcelFile(EntryData):
 
 class NECCXlsxParser(MatchingParser):
 
-    def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-        entry = None
-        file = mainfile.split('/')[-1]
+    def is_mainfile(
+        self,
+        filename: str,
+        mime: str,
+        buffer: bytes,
+        decoded_buffer: str,
+        compression: str = None,
+    ):
+        is_mainfile_super = super().is_mainfile(filename, mime, buffer, decoded_buffer, compression)
+        if not is_mainfile_super:
+            return False
+        excel_sheets = pd.ExcelFile(filename).sheet_names
+        required_sheets = ["Catalyst details", "Experimental details", "Raw Data", "Results"]
+        return all(sheet in excel_sheets for sheet in required_sheets)
 
+    def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
+        file = mainfile.split('/')[-1]
         if not file.endswith(".xlsx"):
             return
 

@@ -433,7 +433,7 @@ necc_compare_app = AppEntryPoint(
                             'minH': 3,
                             'minW': 3,
                             'h': 3,
-                            'w': 8,
+                            'w': 9,
                             'y': 6,
                             'x': 0
                         },
@@ -443,12 +443,19 @@ necc_compare_app = AppEntryPoint(
                     'type': 'scatterplot',
                     'autorange': True,
                     'size': 1000,
+                    'markers': {
+                        'color': {
+                            'quantity': 'data.properties.anolyte_type#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                        }
+                    },
                     'y': {
                         'title': 'CO FE (in%)',
                         'quantity': 'data.fe_results.gas_results[0].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'
                     },
                     'x': {
-                        'quantity': 'entry_create_time',
+                        'quantity': 'data.properties.anolyte_concentration#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                        'scale': 'linear',
+                        'unit': 'mol / l',
                     },
                     'title': 'CO FE',
                     'layout': {
@@ -690,12 +697,19 @@ necc_compare_app = AppEntryPoint(
                     'type': 'scatterplot',
                     'autorange': True,
                     'size': 1000,
+                    'markers': {
+                        'color': {
+                            'quantity': 'data.properties.anolyte_type#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                        }
+                    },
                     'y': {
                         'title': 'CH4 FE (in%)',
                         'quantity': 'data.fe_results.gas_results[1].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'
                     },
                     'x': {
-                        'quantity': 'entry_create_time',
+                        'quantity': 'data.properties.anolyte_concentration#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                        'scale': 'linear',
+                        'unit': 'mol / l',
                     },
                     'title': 'CH4 FE',
                     'layout': {
@@ -745,12 +759,19 @@ necc_compare_app = AppEntryPoint(
                     'type': 'scatterplot',
                     'autorange': True,
                     'size': 1000,
+                    'markers': {
+                        'color': {
+                            'quantity': 'data.properties.anolyte_type#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                        }
+                    },
                     'y': {
                         'title': 'C2H4 FE (in%)',
                         'quantity': 'data.fe_results.gas_results[2].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'
                     },
                     'x': {
-                        'quantity': 'entry_create_time',
+                        'quantity': 'data.properties.anolyte_concentration#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                        'scale': 'linear',
+                        'unit': 'mol / l',
                     },
                     'title': 'C2H4 FE',
                     'layout': {
@@ -800,12 +821,19 @@ necc_compare_app = AppEntryPoint(
                     'type': 'scatterplot',
                     'autorange': True,
                     'size': 1000,
+                    'markers': {
+                        'color': {
+                            'quantity': 'data.properties.anolyte_type#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                        }
+                    },
                     'y': {
                         'title': 'H2 FE (in%)',
                         'quantity': 'data.fe_results.gas_results[3].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'
                     },
                     'x': {
-                        'quantity': 'entry_create_time',
+                        'quantity': 'data.properties.anolyte_concentration#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                        'scale': 'linear',
+                        'unit': 'mol / l',
                     },
                     'title': 'H2 FE',
                     'layout': {
