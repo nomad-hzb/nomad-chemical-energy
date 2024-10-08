@@ -1042,13 +1042,14 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             try:
-                with archive.m_context.raw_file(self.data_file) as f:
-                    if os.path.splitext(self.data_file)[-1] == ".csv":
+                if os.path.splitext(self.data_file)[-1] == ".csv":
+                    with archive.m_context.raw_file(self.data_file, "rt") as f:
                         from nomad_chemical_energy.schema_packages.file_parser.pfo_parser import get_pfo_measurement_csv
                         from baseclasses.helper.archive_builder.pfo_archive import get_pfo_archive
                         data = get_pfo_measurement_csv(f)
                         get_pfo_archive(data, self)
-                    if os.path.splitext(self.data_file)[-1] == ".xlsx":
+                if os.path.splitext(self.data_file)[-1] == ".xlsx":
+                    with archive.m_context.raw_file(self.data_file, "rb") as f:
                         from nomad_chemical_energy.schema_packages.file_parser.pfo_parser import get_pfo_measurement_xlsx
                         from baseclasses.helper.archive_builder.pfo_archive import get_pfo_archive_xlsx
                         data = get_pfo_measurement_xlsx(f)
