@@ -160,16 +160,16 @@ class Wannsee_XRD_XY(XRD, EntryData):
     def normalize(self, archive, logger):
 
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
 
                 if os.path.splitext(self.data_file)[-1] == ".xy" and self.data is None:
                     import pandas as pd
                     if "Id" in f.readline():
                         skiprows = 1
-                        data = pd.read_csv(f.name, sep=" |\t", header=None, skiprows=skiprows)
+                        data = pd.read_csv(f, sep=" |\t", header=None, skiprows=skiprows)
                     else:
                         skiprows = 0
-                        data = pd.read_csv(f.name, sep=" |\t", header=None, skiprows=skiprows)
+                        data = pd.read_csv(f, sep=" |\t", header=None, skiprows=skiprows)
                     print(data)
                     self.data = XRDData(angle=data[0], intensity=data[1])
         super(Wannsee_XRD_XY, self).normalize(archive, logger)
@@ -216,21 +216,21 @@ class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
                         "fixedrange": False}},
             }])
 
-    def normalize(self, archive, logger):
-        if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+    # def normalize(self, archive, logger):
+    #     if self.data_file:
+    #         with archive.m_context.raw_file(self.data_file, "rt") as f:
 
-                if os.path.splitext(self.data_file)[-1] == ".mpt":
-                    from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import read_mpt_file
-                    from baseclasses.helper.archive_builder.mpt_get_archive import get_voltammetry_data, get_cv_properties
+    #             if os.path.splitext(self.data_file)[-1] == ".mpt":
+    #                 from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import read_mpt_file
+    #                 from baseclasses.helper.archive_builder.mpt_get_archive import get_voltammetry_data, get_cv_properties
 
-                    metadata, data, technique = read_mpt_file(f.name)
-                    get_voltammetry_data(data, self)
+    #                 metadata, data, technique = read_mpt_file(f)
+    #                 get_voltammetry_data(data, self)
 
-                    if "Cyclic" in technique and self.properties is None:
-                        self.properties = get_cv_properties(metadata)
-        super(Wannsee_B307_CyclicVoltammetry_ECLab,
-              self).normalize(archive, logger)
+    #                 if "Cyclic" in technique and self.properties is None:
+    #                     self.properties = get_cv_properties(metadata)
+    #     super(Wannsee_B307_CyclicVoltammetry_ECLab,
+    #           self).normalize(archive, logger)
 
 
 class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
@@ -274,23 +274,22 @@ class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
                         "fixedrange": False}},
             },])
 
-    def normalize(self, archive, logger):
-        if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
-                if os.path.splitext(self.data_file)[-1] == ".cor":
-                    from nomad_chemical_energy.schema_packages.file_parser.corr_ware_parser import get_header_data_corrware
-                    from baseclasses.helper.archive_builder.corr_ware_archive import \
-                        (get_core_ware_archive_properties, get_core_ware_archive)
+    # def normalize(self, archive, logger):
+    #     if self.data_file:
+    #         with archive.m_context.raw_file(self.data_file, "rt") as f:
+    #             if os.path.splitext(self.data_file)[-1] == ".cor":
+    #                 from nomad_chemical_energy.schema_packages.file_parser.corr_ware_parser import get_header_data_corrware
+    #                 from baseclasses.helper.archive_builder.corr_ware_archive import \
+    #                     (get_core_ware_archive_properties, get_core_ware_archive)
 
-                    metadata, data, technique = get_header_data_corrware(
-                        filename=f.name)
-                    get_core_ware_archive(self, metadata, data)
-                    if "Cyclic" in technique and self.properties is None:
-                        self.properties = get_core_ware_archive_properties(
-                            metadata)
+    #                 metadata, data, technique = get_header_data_corrware(f)
+    #                 get_core_ware_archive(self, metadata, data)
+    #                 if "Cyclic" in technique and self.properties is None:
+    #                     self.properties = get_core_ware_archive_properties(
+    #                         metadata)
 
-        super(Wannsee_B307_CyclicVoltammetry_CorrWare,
-              self).normalize(archive, logger)
+    #     super(Wannsee_B307_CyclicVoltammetry_CorrWare,
+    #           self).normalize(archive, logger)
 
 
 class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
@@ -333,27 +332,26 @@ class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
         ]
     )
 
-    def normalize(self, archive, logger):
-        if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+    # def normalize(self, archive, logger):
+    #     if self.data_file:
+    #         with archive.m_context.raw_file(self.data_file, "rt") as f:
 
-                if os.path.splitext(self.data_file)[-1] == ".mpt":
-                    from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import read_mpt_file
-                    from baseclasses.helper.archive_builder.mpt_get_archive import get_eis_data, get_meta_data, get_eis_properties
+    #             if os.path.splitext(self.data_file)[-1] == ".mpt":
+    #                 from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import read_mpt_file
+    #                 from baseclasses.helper.archive_builder.mpt_get_archive import get_eis_data, get_meta_data, get_eis_properties
 
-                    metadata, data, technique = read_mpt_file(
-                        filename=f.name)
-                    get_eis_data(data, self)
-                    get_meta_data(metadata, self)
+    #                 metadata, data, technique = read_mpt_file(f)
+    #                 get_eis_data(data, self)
+    #                 get_meta_data(metadata, self)
 
-                    if "Potentio" in technique and self.properties is None:
-                        self.properties = get_eis_properties(metadata)
+    #                 if "Potentio" in technique and self.properties is None:
+    #                     self.properties = get_eis_properties(metadata)
 
-        super(
-            Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab,
-            self).normalize(
-            archive,
-            logger)
+    #     super(
+    #         Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab,
+    #         self).normalize(
+    #         archive,
+    #         logger)
 
 
 class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
@@ -382,21 +380,21 @@ class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
                         "fixedrange": False}},
             }])
 
-    def normalize(self, archive, logger):
-        if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+    # def normalize(self, archive, logger):
+    #     if self.data_file:
+    #         with archive.m_context.raw_file(self.data_file, "rt") as f:
 
-                if os.path.splitext(self.data_file)[-1] == ".mpt":
-                    from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import read_mpt_file
-                    from baseclasses.helper.archive_builder.mpt_get_archive import get_voltammetry_data, get_ocv_properties
+    #             if os.path.splitext(self.data_file)[-1] == ".mpt":
+    #                 from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import read_mpt_file
+    #                 from baseclasses.helper.archive_builder.mpt_get_archive import get_voltammetry_data, get_ocv_properties
 
-                    metadata, data, technique = read_mpt_file(f.name)
-                    get_voltammetry_data(data, self)
+    #                 metadata, data, technique = read_mpt_file(f)
+    #                 get_voltammetry_data(data, self)
 
-                    if "Open Circuit Voltage" in technique and self.properties is None:
-                        self.properties = get_ocv_properties(metadata)
-        super(Wannsee_B307_OpenCircuitVoltage_ECLab,
-              self).normalize(archive, logger)
+    #                 if "Open Circuit Voltage" in technique and self.properties is None:
+    #                     self.properties = get_ocv_properties(metadata)
+    #     super(Wannsee_B307_OpenCircuitVoltage_ECLab,
+    #           self).normalize(archive, logger)
 
 
 m_package.__init_metainfo__()

@@ -118,9 +118,9 @@ class DLR_ElectrochemicalImpedanceSpectroscopy(
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".txt":
-                    data = pd.read_csv(f.name, sep="\t", skiprows=1, header=0)
+                    data = pd.read_csv(f, sep="\t", skiprows=1, header=0)
                     data.columns = ["Index", "Freq", "Zreal", "Zimag", "Zmod", "Zphz", "Time"]
                     data.Zimag *= -1
                     data.Zphz *= -1
@@ -173,9 +173,9 @@ class DLR_CyclicVoltammetry(CyclicVoltammetry, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".txt":
-                    data = pd.read_csv(f.name, sep="\t", skiprows=1, header=0)
+                    data = pd.read_csv(f, sep="\t", skiprows=1, header=0)
                     data.columns = ["Vf", "T", "Im", "Scan", "Index"]
                     unique_names = data.Scan.unique()
                     data_list = []
@@ -216,9 +216,9 @@ class DLR_Chronopotentiometry(Chronopotentiometry, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".txt":
-                    data = pd.read_csv(f.name, sep="\t", skiprows=1, header=0)
+                    data = pd.read_csv(f, sep="\t", skiprows=1, header=0)
                     data.columns = ["Tabs", "Vf", "T", "Index"]
 
                     from baseclasses.helper.archive_builder.gamry_archive import get_voltammetry_data
