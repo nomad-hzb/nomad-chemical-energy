@@ -1131,13 +1131,13 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
         import hyperspy.api as hs
         from datetime import datetime
         self.method = "Vis Image"
-        if self.image:
+        if self.image and not archive.metadata.published:
             with archive.m_context.raw_file(self.image) as f:
                 image_file_name = f.name
             tif_file = hs.load(image_file_name)
 
             png_file = os.path.splitext(image_file_name)[0] + '.png'
-            tif_file.save(png_file)
+            tif_file.save(png_file, overwrite=True)
             self.image_preview = os.path.basename(png_file)
 
         super(CE_NOME_TIF_Image, self).normalize(archive, logger)
