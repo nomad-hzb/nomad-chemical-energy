@@ -593,7 +593,7 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_eis_properties, get_eis_data, \
                         get_meta_data
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     get_eis_data(data["ZCURVE"][0], self)
                     get_meta_data(metadata, self)
                     if not self.properties:
@@ -670,7 +670,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cv_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self, multiple=True)
                     if not self.properties:
@@ -725,7 +725,7 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_lsv_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -780,7 +780,7 @@ class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_lsg_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -824,7 +824,7 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_ca_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -861,7 +861,7 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cp_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -902,7 +902,7 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cc_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -944,7 +944,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_ocv_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -981,8 +981,7 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
                         is_new_data = False
                         measurements.append(measurement)
                 if is_new_data:
-                    with archive.m_context.raw_file(data_file) as f:
-                        file_name = f.name
+
                     datetime_object = None
                     if os.path.splitext(data_file)[-1] not in [".ABS", ".csv"]:
                         continue
@@ -991,8 +990,9 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
                         delimiter = ','
                     if os.path.splitext(data_file)[-1] == ".ABS":
                         delimiter = '  '
-                    data = pd.read_csv(file_name, delimiter=delimiter, header=None, skiprows=2)
                     from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_concentration_archive
+                    with archive.m_context.raw_file(data_file) as f:
+                        data = pd.read_csv(f, delimiter=delimiter, header=None, skiprows=2)
                     measurements.append(get_uvvis_concentration_archive(data, datetime_object, data_file))
             self.measurements = measurements
 
@@ -1051,7 +1051,7 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
                     if os.path.splitext(self.data_file)[-1] == ".xlsx":
                         from nomad_chemical_energy.schema_packages.file_parser.pfo_parser import get_pfo_measurement_xlsx
                         from baseclasses.helper.archive_builder.pfo_archive import get_pfo_archive_xlsx
-                        data = get_pfo_measurement_xlsx(f.name)
+                        data = get_pfo_measurement_xlsx(f)
                         get_pfo_archive_xlsx(data, self)
 
             except Exception as e:
@@ -1161,11 +1161,10 @@ class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
         # self.method = "Vis Image"
         if self.data_file:
             with archive.m_context.raw_file(self.data_file) as f:
-                file_name = f.name
-            from nomad_chemical_energy.schema_packages.file_parser.spectra_international_parser import parse_spectrum
-            from baseclasses.helper.archive_builder.massspectrometry_archive import get_masssectromentry_archive
+                from nomad_chemical_energy.schema_packages.file_parser.spectra_international_parser import parse_spectrum
+                from baseclasses.helper.archive_builder.massspectrometry_archive import get_masssectromentry_archive
 
-            metadata, data = parse_spectrum(file_name)
+                metadata, data = parse_spectrum(f)
             self.settings, self.data = get_masssectromentry_archive(metadata, data)
             self.recipe = metadata.get("Recipe Name")
             self.time = data.Time.to_list()
@@ -1307,5 +1306,6 @@ class CE_NOME_CPAnalysis(CPAnalysis, EntryData):
             hide=['location', 'lab_id', 'description', 'method', 'steps'],
             properties=dict(
                 order=['name'])))
+
 
 m_package.__init_metainfo__()
