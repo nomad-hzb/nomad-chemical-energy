@@ -1129,12 +1129,18 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
 
     def normalize(self, archive, logger):
         import hyperspy.api as hs
-        from datetime import datetime
+        import tempfile
+
         self.method = "Vis Image"
-        if self.image and not archive.metadata.published:
-            with archive.m_context.raw_file(self.image) as f:
+        if self.image:
+            with archive.m_context.raw_file(self.image, "rb") as f:
                 image_file_name = f.name
-            tif_file = hs.load(image_file_name)
+                file_content = f.read()
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".tif") as temp_file:
+                    temp_file.write(file_content)
+                    temp_file_path = temp_file.name
+                tif_file = hs.load(temp_file_path)
 
             png_file = os.path.splitext(image_file_name)[0] + '.png'
             tif_file.save(png_file, overwrite=True)
