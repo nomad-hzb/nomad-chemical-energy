@@ -230,7 +230,7 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(ElectrolyserPerformanceEvaluatio
                 if os.path.splitext(self.data_file)[-1] == ".tdms":
                     from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import get_info_and_data
                     from baseclasses.helper.archive_builder.labview_archive import get_electrolyser_properties, get_tdms_archive
-                    metadata, data = get_info_and_data(filename=f.name)
+                    metadata, data = get_info_and_data(f)
                     get_tdms_archive(data, self)
 
                     get_electrolyser_properties(metadata)

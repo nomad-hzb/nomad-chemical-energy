@@ -90,7 +90,8 @@ class CENESDBioLogicParser(MatchingParser):
             return
 
         from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-        metadata, _ = get_header_and_data(filename=file)
+        with archive.m_context.raw_file(os.path.basename(mainfile)) as f:
+            metadata, _ = get_header_and_data(f)
         # TODO get method from metadata and create entry based on method
         technique = metadata.get('technique')
         match technique:
