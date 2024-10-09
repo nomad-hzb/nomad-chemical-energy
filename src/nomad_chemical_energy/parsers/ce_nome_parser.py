@@ -96,7 +96,8 @@ class GamryParser(MatchingParser):
         # Log a hello world, just to get us started. TODO remove from an actual
         # parser.
         from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
-        metadata, _ = get_header_and_data(filename=mainfile)
+        with archive.m_context.raw_file(os.path.basename(mainfile), "rt") as f:
+            metadata, _ = get_header_and_data(f)
 
         measurement_base, measurement_name = os.path.split(mainfile)
 
@@ -247,6 +248,11 @@ class CENOMEcsvParser(MatchingParser):
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         create_archive(entry, archive, file_name)
 
+        archive.data = ParsedTxtFile(activity=get_reference(
+            archive.metadata.upload_id,
+            get_entry_id_from_file_name(file_name, archive)
+        ))
+
 
 class UVvisParser(MatchingParser):
 
@@ -278,6 +284,11 @@ class UVvisParser(MatchingParser):
 
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         create_archive(uvvis, archive, file_name)
+
+        archive.data = ParsedTxtFile(activity=get_reference(
+            archive.metadata.upload_id,
+            get_entry_id_from_file_name(file_name, archive)
+        ))
 
 
 class MassspectrometryParser(MatchingParser):

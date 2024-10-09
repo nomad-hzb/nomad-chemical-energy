@@ -200,21 +200,21 @@ class HZB_XRD(XRD, EntryData):
                         "fixedrange": False}}},
         ])
 
-    def normalize(self, archive, logger):
+    # def normalize(self, archive, logger):
 
-        if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+    #     if self.data_file:
+    #         with archive.m_context.raw_file(self.data_file) as f:
 
-                if os.path.splitext(self.data_file)[-1] == ".xy" and self.data is None:
-                    import pandas as pd
-                    if "Id" in f.readline():
-                        skiprows = 1
-                        data = pd.read_csv(f.name, sep=" |\t", header=None, skiprows=skiprows)
-                    else:
-                        skiprows = 0
-                        data = pd.read_csv(f.name, sep=" |\t", header=None, skiprows=skiprows)
-                    self.data = XRDData(angle=data[0], intensity=data[1])
-        super(HZB_XRD, self).normalize(archive, logger)
+    #             if os.path.splitext(self.data_file)[-1] == ".xy" and self.data is None:
+    #                 import pandas as pd
+    #                 if "Id" in f.readline():
+    #                     skiprows = 1
+    #                     data = pd.read_csv(f.name, sep=" |\t", header=None, skiprows=skiprows)
+    #                 else:
+    #                     skiprows = 0
+    #                     data = pd.read_csv(f.name, sep=" |\t", header=None, skiprows=skiprows)
+    #                 self.data = XRDData(angle=data[0], intensity=data[1])
+    #     super(HZB_XRD, self).normalize(archive, logger)
 
 
 # class HZB_XRD2(XRayDiffraction, EntryData):

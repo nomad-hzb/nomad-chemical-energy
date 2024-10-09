@@ -129,77 +129,76 @@ def check_is_number(key, input_string):
         return input_string
 
 
-def get_header_and_data(filename):
+def get_header_and_data(f):
 
     _header = dict()
     _curve_units = dict()
     _curves = {}
 
     pos = 0
-    with open(file=filename, mode="r", encoding="utf8", errors="ignore") as f:
-        cur_line = f.readline().split("\t")
-        while True:
-            if f.tell() == pos:
-                break
-            pos = f.tell()
-            cur_line = f.readline().strip().split("\t")
-            if len(cur_line[0]) == 0:
-                pass
+    cur_line = f.readline().split("\t")
+    while True:
+        if f.tell() == pos:
+            break
+        pos = f.tell()
+        cur_line = f.readline().strip().split("\t")
+        if len(cur_line[0]) == 0:
+            pass
 
-            if len(cur_line) > 1:
+        if len(cur_line) > 1:
 
-                if "CURVE" in cur_line[0] and len(cur_line) > 2:
-                    table_length = get_number(cur_line[2])
-                    _curves[cur_line[0]] = [get_curve(
-                        f, _header, _curve_units, table_length)]
-                elif "CURVE" in cur_line[0]:
-                    curves = []
-                    while True:
-                        curve = get_curve(f, _header, _curve_units)
-                        if curve is None:
-                            break
-                        curves.append(curve)
-                    _curves[''.join((x for x in cur_line[0] if not x.isdigit()))] = curves
-                # data format: key, type, value
-                if cur_line[0].strip() in ["METHOD"]:
-                    _header[cur_line[0]] = cur_line[1]
-                if cur_line[1].strip() in ["LABEL", "PSTAT"]:
-                    _header[cur_line[0]] = check_is_number(cur_line[0], cur_line[2]) if len(cur_line) > 2 else ''
-                    if cur_line[0] in ["TITLE"] and len(cur_line) > 3:
-                        _header["SAMPLE_ID"] = cur_line[3]
-                elif cur_line[1] in ["POTEN"] and len(cur_line) == 5:
-                    tmp_value = get_number(cur_line[2])
-                    _header[cur_line[0]] = (tmp_value, cur_line[3] == "T")
+            if "CURVE" in cur_line[0] and len(cur_line) > 2:
+                table_length = get_number(cur_line[2])
+                _curves[cur_line[0]] = [get_curve(
+                    f, _header, _curve_units, table_length)]
+            elif "CURVE" in cur_line[0]:
+                curves = []
+                while True:
+                    curve = get_curve(f, _header, _curve_units)
+                    if curve is None:
+                        break
+                    curves.append(curve)
+                _curves[''.join((x for x in cur_line[0] if not x.isdigit()))] = curves
+            # data format: key, type, value
+            if cur_line[0].strip() in ["METHOD"]:
+                _header[cur_line[0]] = cur_line[1]
+            if cur_line[1].strip() in ["LABEL", "PSTAT"]:
+                _header[cur_line[0]] = check_is_number(cur_line[0], cur_line[2]) if len(cur_line) > 2 else ''
+                if cur_line[0] in ["TITLE"] and len(cur_line) > 3:
+                    _header["SAMPLE_ID"] = cur_line[3]
+            elif cur_line[1] in ["POTEN"] and len(cur_line) == 5:
+                tmp_value = get_number(cur_line[2])
+                _header[cur_line[0]] = (tmp_value, cur_line[3] == "T")
 
-                elif cur_line[1] in ["QUANT", "IQUANT", "POTEN"]:
+            elif cur_line[1] in ["QUANT", "IQUANT", "POTEN"]:
+                # locale-friendly alternative to float
+                _header[cur_line[0]] = get_number(cur_line[2])
+            elif cur_line[1] in ["IQUANT", "SELECTOR"]:
+                _header[cur_line[0]] = int(cur_line[2])
+            elif cur_line[1] in ["TOGGLE"]:
+                _header[cur_line[0]] = cur_line[2] == "T"
+            elif cur_line[1] in ["ONEPARAM"]:
+                tmp_value = get_number(cur_line[3])
+                _header[cur_line[0]] = (tmp_value, cur_line[2] == "T")
+            elif cur_line[1] == "TWOPARAM":
+                tmp_start = get_number(cur_line[3])
+                tmp_finish = get_number(cur_line[4])
+                _header[cur_line[0]] = {
+                    "enable": cur_line[2] == "T",
                     # locale-friendly alternative to float
-                    _header[cur_line[0]] = get_number(cur_line[2])
-                elif cur_line[1] in ["IQUANT", "SELECTOR"]:
-                    _header[cur_line[0]] = int(cur_line[2])
-                elif cur_line[1] in ["TOGGLE"]:
-                    _header[cur_line[0]] = cur_line[2] == "T"
-                elif cur_line[1] in ["ONEPARAM"]:
-                    tmp_value = get_number(cur_line[3])
-                    _header[cur_line[0]] = (tmp_value, cur_line[2] == "T")
-                elif cur_line[1] == "TWOPARAM":
-                    tmp_start = get_number(cur_line[3])
-                    tmp_finish = get_number(cur_line[4])
-                    _header[cur_line[0]] = {
-                        "enable": cur_line[2] == "T",
-                        # locale-friendly alternative to float
-                        "start": tmp_start,
-                        # locale-friendly alternative to float
-                        "finish": tmp_finish,
-                    }
-                elif cur_line[0] == "TAG":
-                    _header["TAG"] = cur_line[1]
-                elif cur_line[0] == "NOTES":
-                    n_notes = int(cur_line[2])
-                    note = ""
-                    for _ in range(n_notes):
-                        note += f.readline().strip() + "\n"
-                    _header[cur_line[0]] = note
+                    "start": tmp_start,
+                    # locale-friendly alternative to float
+                    "finish": tmp_finish,
+                }
+            elif cur_line[0] == "TAG":
+                _header["TAG"] = cur_line[1]
+            elif cur_line[0] == "NOTES":
+                n_notes = int(cur_line[2])
+                note = ""
+                for _ in range(n_notes):
+                    note += f.readline().strip() + "\n"
+                _header[cur_line[0]] = note
 
-        header_length = f.tell()
+    header_length = f.tell()
 
     return _header, _curves

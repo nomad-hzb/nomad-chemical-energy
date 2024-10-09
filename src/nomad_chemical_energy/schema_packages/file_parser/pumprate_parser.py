@@ -2,7 +2,7 @@ import pandas as pd
 
 
 def get_pump_rate_measurement_csv(file_obj):
-    data = pd.read_csv(file_obj.name, sep=";",
+    data = pd.read_csv(file_obj, sep=";",
                        header=0, skip_blank_lines=False)
 
     from baseclasses.helper.utilities import lookup

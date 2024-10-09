@@ -128,77 +128,74 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
     def normalize(self, archive, logger):
 
-        with archive.m_context.raw_file(archive.metadata.mainfile) as f:
-            path = os.path.dirname(f.name)
-
-        xls_file = pd.ExcelFile(os.path.join(path, self.data_file))
-
         if self.data_file:
+            with archive.m_context.raw_file(self.data_file, "rb") as f:
+                xls_file = pd.ExcelFile(f)
 
-            if self.properties is None:
+                if self.properties is None:
 
-                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_properties
-                experimental_properties_dict = read_properties(xls_file)
-                self.properties = NECCExperimentalProperties()
-                for attribute_name, value in experimental_properties_dict.items():
-                    # TODO setattr should be avoided but I don't know better way when having that many attributes
-                    setattr(self.properties, attribute_name, value)
+                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_properties
+                    experimental_properties_dict = read_properties(xls_file)
+                    self.properties = NECCExperimentalProperties()
+                    for attribute_name, value in experimental_properties_dict.items():
+                        # TODO setattr should be avoided but I don't know better way when having that many attributes
+                        setattr(self.properties, attribute_name, value)
 
-            if not self.thermocouple or not self.gaschromatographies or not self.potentiometry:
-                data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
+                if not self.thermocouple or not self.gaschromatographies or not self.potentiometry:
+                    data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
 
-                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_gaschromatography_data
-                gaschromatography_measurements = []
-                instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(
-                    data)
-                if datetimes.size > 0:
-                    start_time = datetimes.iat[0]
-                    end_time = datetimes.iat[-1]
-                for gas_index in range(len(gas_types)):
-                    file_index = 0 if gas_index < 4 else 1
-                    gas_type = gas_types.iat[gas_index]
-                    if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
-                        gaschromatography_measurements.append(GasChromatographyMeasurement(
-                            instrument_file_name=instrument_file_names.iloc[:, file_index],
-                            datetime=datetimes.to_list(),
-                            gas_type=gas_type,
-                            retention_time=retention_times.iloc[:, gas_index],
-                            area=areas.iloc[:, gas_index],
-                            ppm=ppms.iloc[:, gas_index]
-                        ))
-                self.gaschromatographies = gaschromatography_measurements
+                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_gaschromatography_data
+                    gaschromatography_measurements = []
+                    instrument_file_names, datetimes, gas_types, retention_times, areas, ppms = read_gaschromatography_data(
+                        data)
+                    if datetimes.size > 0:
+                        start_time = datetimes.iat[0]
+                        end_time = datetimes.iat[-1]
+                    for gas_index in range(len(gas_types)):
+                        file_index = 0 if gas_index < 4 else 1
+                        gas_type = gas_types.iat[gas_index]
+                        if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
+                            gaschromatography_measurements.append(GasChromatographyMeasurement(
+                                instrument_file_name=instrument_file_names.iloc[:, file_index],
+                                datetime=datetimes.to_list(),
+                                gas_type=gas_type,
+                                retention_time=retention_times.iloc[:, gas_index],
+                                area=areas.iloc[:, gas_index],
+                                ppm=ppms.iloc[:, gas_index]
+                            ))
+                    self.gaschromatographies = gaschromatography_measurements
 
-                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_potentiostat_data
-                datetimes, current, working_electrode_potential = read_potentiostat_data(data)
-                if start_time is None or end_time is None:
-                    start_time = datetimes.iat[0]
-                    end_time = datetimes.iat[-1]
-                self.potentiometry = NECCPotentiostatMeasurement(datetime=datetimes.to_list(),
-                                                             current=current,
-                                                             working_electrode_potential=working_electrode_potential)
-                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_thermocouple_data
-                data.columns = data.iloc[1]
-                try:
-                    datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(
-                        data.iloc[2:], start_time, end_time)
-                    self.thermocouple = ThermocoupleMeasurement(datetime=datetimes.to_list(),
-                                                                pressure=pressure,
-                                                                temperature_cathode=temperature_cathode,
-                                                                temperature_anode=temperature_anode)
-                except Exception as e:
-                    logger.info(e)
-                    self.thermocouple = ThermocoupleMeasurement()
+                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_potentiostat_data
+                    datetimes, current, working_electrode_potential = read_potentiostat_data(data)
+                    if start_time is None or end_time is None:
+                        start_time = datetimes.iat[0]
+                        end_time = datetimes.iat[-1]
+                    self.potentiometry = NECCPotentiostatMeasurement(datetime=datetimes.to_list(),
+                                                                     current=current,
+                                                                     working_electrode_potential=working_electrode_potential)
+                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_thermocouple_data
+                    data.columns = data.iloc[1]
+                    try:
+                        datetimes, pressure, temperature_cathode, temperature_anode = read_thermocouple_data(
+                            data.iloc[2:], start_time, end_time)
+                        self.thermocouple = ThermocoupleMeasurement(datetime=datetimes.to_list(),
+                                                                    pressure=pressure,
+                                                                    temperature_cathode=temperature_cathode,
+                                                                    temperature_anode=temperature_anode)
+                    except Exception as e:
+                        logger.info(e)
+                        self.thermocouple = ThermocoupleMeasurement()
 
-            if self.fe_results is None:
-                from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_results_data
-                datetimes, total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements = read_results_data(
-                    xls_file)
-                self.fe_results = PotentiometryGasChromatographyResults(datetime=datetimes.to_list(),
-                                                                        total_flow_rate=total_flow_rate,
-                                                                        cell_current=cell_current,
-                                                                        cell_voltage=cell_voltage,
-                                                                        gas_results=gas_measurements,
-                                                                        total_fe=total_fe)
+                if self.fe_results is None:
+                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_results_data
+                    datetimes, total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements = read_results_data(
+                        xls_file)
+                    self.fe_results = PotentiometryGasChromatographyResults(datetime=datetimes.to_list(),
+                                                                            total_flow_rate=total_flow_rate,
+                                                                            cell_current=cell_current,
+                                                                            cell_voltage=cell_voltage,
+                                                                            gas_results=gas_measurements,
+                                                                            total_fe=total_fe)
 
         self.properties.normalize(archive, logger)
         self.thermocouple.normalize(archive, logger)

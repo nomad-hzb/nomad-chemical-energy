@@ -514,7 +514,7 @@ class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             if os.path.splitext(self.data_file)[-1] == ".dat":
-                with archive.m_context.raw_file(self.data_file) as f:
+                with archive.m_context.raw_file(self.data_file, "rt") as f:
                     from nomad_chemical_energy.schema_packages.file_parser.xas_parser import get_xas_data
                     data, dateline = get_xas_data(f)
                 from baseclasses.helper.archive_builder.xas_archive import get_xas_archive
@@ -538,7 +538,7 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             if os.path.splitext(self.data_file)[-1] == ".dat":
-                with archive.m_context.raw_file(self.data_file) as f:
+                with archive.m_context.raw_file(self.data_file, "rt") as f:
                     from nomad_chemical_energy.schema_packages.file_parser.xas_parser import get_xas_data
                     data, dateline = get_xas_data(f)
                 from baseclasses.helper.archive_builder.xas_archive import get_xas_archive
@@ -588,12 +588,12 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_eis_properties, get_eis_data, \
                         get_meta_data
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     get_eis_data(data["ZCURVE"][0], self)
                     get_meta_data(metadata, self)
                     if not self.properties:
@@ -665,12 +665,12 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cv_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self, multiple=True)
                     if not self.properties:
@@ -720,12 +720,12 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_lsv_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -775,12 +775,12 @@ class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_lsg_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -819,12 +819,12 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_ca_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -856,12 +856,12 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cp_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -897,12 +897,12 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_cc_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -939,12 +939,12 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".DTA":
                     from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.gamry_archive import get_ocv_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get("METHOD"), self.function)
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
@@ -981,8 +981,7 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
                         is_new_data = False
                         measurements.append(measurement)
                 if is_new_data:
-                    with archive.m_context.raw_file(data_file) as f:
-                        file_name = f.name
+
                     datetime_object = None
                     if os.path.splitext(data_file)[-1] not in [".ABS", ".csv"]:
                         continue
@@ -991,8 +990,9 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
                         delimiter = ','
                     if os.path.splitext(data_file)[-1] == ".ABS":
                         delimiter = '  '
-                    data = pd.read_csv(file_name, delimiter=delimiter, header=None, skiprows=2)
                     from baseclasses.helper.archive_builder.uvvis_archive import get_uvvis_concentration_archive
+                    with archive.m_context.raw_file(data_file, "rt") as f:
+                        data = pd.read_csv(f, delimiter=delimiter, header=None, skiprows=2)
                     measurements.append(get_uvvis_concentration_archive(data, datetime_object, data_file))
             self.measurements = measurements
 
@@ -1042,16 +1042,17 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             try:
-                with archive.m_context.raw_file(self.data_file) as f:
-                    if os.path.splitext(self.data_file)[-1] == ".csv":
+                if os.path.splitext(self.data_file)[-1] == ".csv":
+                    with archive.m_context.raw_file(self.data_file, "rt") as f:
                         from nomad_chemical_energy.schema_packages.file_parser.pfo_parser import get_pfo_measurement_csv
                         from baseclasses.helper.archive_builder.pfo_archive import get_pfo_archive
                         data = get_pfo_measurement_csv(f)
                         get_pfo_archive(data, self)
-                    if os.path.splitext(self.data_file)[-1] == ".xlsx":
+                if os.path.splitext(self.data_file)[-1] == ".xlsx":
+                    with archive.m_context.raw_file(self.data_file, "rb") as f:
                         from nomad_chemical_energy.schema_packages.file_parser.pfo_parser import get_pfo_measurement_xlsx
                         from baseclasses.helper.archive_builder.pfo_archive import get_pfo_archive_xlsx
-                        data = get_pfo_measurement_xlsx(f.name)
+                        data = get_pfo_measurement_xlsx(f)
                         get_pfo_archive_xlsx(data, self)
 
             except Exception as e:
@@ -1089,7 +1090,7 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             try:
-                with archive.m_context.raw_file(self.data_file) as f:
+                with archive.m_context.raw_file(self.data_file, "rt") as f:
                     if os.path.splitext(self.data_file)[-1] == ".csv":
                         from nomad_chemical_energy.schema_packages.file_parser.pumprate_parser import get_pump_rate_measurement_csv
                         from baseclasses.helper.archive_builder.pumprate_archive import get_pump_rate_archive
@@ -1128,15 +1129,21 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
 
     def normalize(self, archive, logger):
         import hyperspy.api as hs
-        from datetime import datetime
+        import tempfile
+
         self.method = "Vis Image"
         if self.image:
-            with archive.m_context.raw_file(self.image) as f:
+            with archive.m_context.raw_file(self.image, "rb") as f:
                 image_file_name = f.name
-            tif_file = hs.load(image_file_name)
+                file_content = f.read()
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".tif") as temp_file:
+                    temp_file.write(file_content)
+                    temp_file_path = temp_file.name
+                tif_file = hs.load(temp_file_path)
 
             png_file = os.path.splitext(image_file_name)[0] + '.png'
-            tif_file.save(png_file)
+            tif_file.save(png_file, overwrite=True)
             self.image_preview = os.path.basename(png_file)
 
         super(CE_NOME_TIF_Image, self).normalize(archive, logger)
@@ -1160,12 +1167,11 @@ class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
         # from datetime import datetime
         # self.method = "Vis Image"
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
-                file_name = f.name
-            from nomad_chemical_energy.schema_packages.file_parser.spectra_international_parser import parse_spectrum
-            from baseclasses.helper.archive_builder.massspectrometry_archive import get_masssectromentry_archive
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
+                from nomad_chemical_energy.schema_packages.file_parser.spectra_international_parser import parse_spectrum
+                from baseclasses.helper.archive_builder.massspectrometry_archive import get_masssectromentry_archive
 
-            metadata, data = parse_spectrum(file_name)
+                metadata, data = parse_spectrum(f)
             self.settings, self.data = get_masssectromentry_archive(metadata, data)
             self.recipe = metadata.get("Recipe Name")
             self.time = data.Time.to_list()
@@ -1307,5 +1313,6 @@ class CE_NOME_CPAnalysis(CPAnalysis, EntryData):
             hide=['location', 'lab_id', 'description', 'method', 'steps'],
             properties=dict(
                 order=['name'])))
+
 
 m_package.__init_metainfo__()
