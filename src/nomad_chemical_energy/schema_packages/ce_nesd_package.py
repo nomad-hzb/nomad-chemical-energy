@@ -17,7 +17,6 @@
 #
 
 import os
-import pandas as pd
 
 from nomad.datamodel.metainfo.plot import PlotSection, PlotlyFigure
 import plotly.graph_objs as go
@@ -28,6 +27,8 @@ from nomad.metainfo import (
     Package,
     Quantity,
     Section, SubSection, SchemaPackage)
+
+from baseclasses import BaseMeasurement
 
 from baseclasses.chemical_energy import (
     CENOMESample, ElectroChemicalSetup, Environment, SampleIDCENOME,
@@ -94,6 +95,28 @@ class CE_NESD_Environment(Environment, EntryData):
     environment_id = SubSection(section_def=SampleIDCENOME)
 
 
+# %% ####################### Generic Entries
+
+
+class CE_NESD_Measurement(BaseMeasurement, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id', 'location', 'steps', 'instruments', 'results'
+                ],
+            properties=dict(
+                order=[
+                    'name', 'data_file', 'samples'
+                ])),
+    )
+
+    data_file = Quantity(
+        type=str,
+        shape=['*'],
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'))
+
+
 # %% ####################### Measurements
 
 
@@ -101,15 +124,48 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-
+                'metadata_file', 'lab_id', 'location',
+                'control', 'charge', 'charge_density',
+                'steps', 'cycles', 'instruments', 'results',
                 ],
             properties=dict(
                 order=[
                     'name',
-                    'data_file',])),
+                    'data_file',
+                    'environment', 'setup', 'samples',
+                    'station', 'voltage_shift', 'resistance'
+                ])),
     )
 
+    def make_current_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='Current', x=self.time, y=self.current,)])
+        fig.update_layout(title_text='Current over Time',
+                          xaxis={'fixedrange': False},
+                          yaxis={'fixedrange': False})
+        return fig
+
+    def make_current_density_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='Current', x=self.time, y=self.current_density,)])
+        fig.update_layout(title_text='Current Density over Time',
+                          xaxis={'fixedrange': False},
+                          yaxis={'fixedrange': False})
+        return fig
+
     def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
+                if os.path.splitext(self.data_file)[-1] == ".mpr":
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
+                        get_voltammetry_archive
+                    metadata, data = get_header_and_data(f)
+                    get_voltammetry_archive(data, metadata, self)
+                    if not self.properties:
+                        self.properties = get_biologic_properties(metadata)
+        fig1 = self.make_current_plot()
+        fig2 = self.make_current_density_plot()
+        self.figures = [PlotlyFigure(label='Current over Time', figure=fig1.to_plotly_json()),
+                        PlotlyFigure(label='Current Density over Time', figure=fig2.to_plotly_json())]
         super(CE_NESD_Chronoamperometry, self).normalize(archive, logger)
 
 
@@ -117,15 +173,38 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-
+                'metadata_file', 'lab_id', 'location',
+                'control', 'charge', 'charge_density',
+                'steps', 'cycles', 'instruments', 'results',
                 ],
             properties=dict(
                 order=[
-                    'name',
-                    'data_file',])),
+                    'name', 'data_file',
+                    'environment', 'setup', 'samples',
+                    'station', 'voltage_shift', 'resistance'
+                ])),
     )
 
+    def make_voltage_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='Voltage', x=self.time, y=self.voltage,)])
+        fig.update_layout(title_text='Voltage over Time',
+                          xaxis={'fixedrange': False},
+                          yaxis={'fixedrange': False})
+        return fig
+
     def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
+                if os.path.splitext(self.data_file)[-1] == ".mpr":
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
+                        get_voltammetry_archive
+                    metadata, data = get_header_and_data(f)
+                    get_voltammetry_archive(data, metadata, self)
+                    if not self.properties:
+                        self.properties = get_biologic_properties(metadata)
+        fig1 = self.make_voltage_plot()
+        self.figures = [PlotlyFigure(label='Voltage over Time', figure=fig1.to_plotly_json()),]
         super(CE_NESD_Chronopotentiometry, self).normalize(archive, logger)
 
 
@@ -133,15 +212,29 @@ class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-
+                'metadata_file', 'lab_id', 'location',
+                'control', 'charge', 'charge_density',
+                'steps', 'cycles', 'instruments', 'results',
                 ],
             properties=dict(
                 order=[
-                    'name',
-                    'data_file',])),
+                    'name', 'data_file',
+                    'environment', 'setup', 'samples',
+                    'station', 'voltage_shift', 'resistance'
+                ])),
     )
 
     def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
+                if os.path.splitext(self.data_file)[-1] == ".mpr":
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
+                        get_voltammetry_archive
+                    metadata, data = get_header_and_data(f)
+                    get_voltammetry_archive(data, metadata, self)
+                    if not self.properties:
+                        self.properties = get_biologic_properties(metadata)
         super(CE_NESD_ConstantCurrentMode, self).normalize(archive, logger)
 
 
@@ -150,15 +243,29 @@ class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-
+                'metadata_file', 'lab_id', 'location',
+                'control', 'charge', 'charge_density',
+                'steps', 'cycles', 'instruments', 'results',
                 ],
             properties=dict(
                 order=[
-                    'name',
-                    'data_file',])),
+                    'name', 'data_file',
+                    'environment', 'setup', 'samples',
+                    'station', 'voltage_shift', 'resistance'
+                ])),
     )
 
     def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
+                if os.path.splitext(self.data_file)[-1] == ".mpr":
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
+                        get_voltammetry_archive
+                    metadata, data = get_header_and_data(f)
+                    get_voltammetry_archive(data, metadata, self)
+                    if not self.properties:
+                        self.properties = get_biologic_properties(metadata)
         super(CE_NESD_ConstantVoltageMode, self).normalize(archive, logger)
 
 
@@ -179,14 +286,14 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     'data_file',])),
     )
 
-    def make_current_density_figure(self):
+    def make_current_density_plot(self):
         fig = go.Figure()
         for cycle in self.cycles:
             fig.add_traces(go.Scatter(name='Current Density', x=cycle.voltage_rhe_compensated, y=cycle.current_density,))
         fig.update_layout(title_text='Current Density over Voltage RHE', showlegend=True, xaxis={'fixedrange': False})
         return fig
 
-    def make_current_over_voltage_figure(self):
+    def make_current_over_voltage_plot(self):
         fig = go.Figure()
         for cycle in self.cycles:
             fig.add_traces(go.Scatter(name='Current', x=cycle.voltage, y=cycle.current,))
@@ -195,17 +302,17 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
                     from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
                     from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
                         get_voltammetry_archive
-                    metadata, data = get_header_and_data(filename=f.name)
+                    metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self, multiple=True)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
-        fig1 = self.make_current_density_figure()
-        fig2 = self.make_current_over_voltage_figure()
+        fig1 = self.make_current_density_plot()
+        fig2 = self.make_current_over_voltage_plot()
         self.figures = [PlotlyFigure(label='Current Density over Voltage RHE', figure=fig1.to_plotly_json()),
                         PlotlyFigure(label='Current over Voltage', figure=fig2.to_plotly_json())]
         super(CE_NESD_CyclicVoltammetry, self).normalize(archive, logger)
@@ -241,15 +348,50 @@ class CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy(Electrochemical
     m_def = Section(
         a_eln=dict(
             hide=[
+                'metadata_file', 'lab_id', 'location',
+                'steps', 'instruments', 'results'
 
                 ],
             properties=dict(
                 order=[
-                    'name',
-                    'data_file',])),
+                    'name', 'data_file',
+                    'environment', 'setup', 'samples',
+                    'station'
+                ])),
     )
 
+    def make_nyquist_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='Nyquist', x=self.z_real, y=self.z_imaginary,)])
+        fig.update_layout(title_text='Nyquist Plot',
+                          xaxis={'fixedrange': False, 'title': 'Re(Z) (Ω)'},
+                          yaxis={'fixedrange': False, 'title': '-Im(Z) (Ω)'})
+        return fig
+
+    def make_bode_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='|Z|', x=self.frequency, y=self.z_modulus,)])
+        fig.add_traces(go.Scatter(name='Phase(Z)', x=self.frequency, y=self.z_angle))
+        fig.update_layout(title_text='Bode Plot',
+                          showlegend=True,
+                          xaxis={'fixedrange': False, 'type': 'log'},
+                          yaxis={'fixedrange': False})
+        return fig
+
     def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
+                if os.path.splitext(self.data_file)[-1] == ".mpr":
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
+                        get_eis_data, get_meta_data
+                    metadata, data = get_header_and_data(f)
+                    get_eis_data(data, self)
+                    get_meta_data(metadata, self)
+                    if not self.properties:
+                        self.properties = get_biologic_properties(metadata)
+        fig1 = self.make_nyquist_plot()
+        fig2 = self.make_bode_plot()
+        self.figures = [PlotlyFigure(label='Nyquist Plot', figure=fig1.to_plotly_json()),
+                        PlotlyFigure(label='Bode Plot', figure=fig2.to_plotly_json())]
         super(CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy, self).normalize(archive, logger)
 
 
@@ -257,15 +399,49 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-
+                'metadata_file', 'lab_id', 'location',
+                'control', 'charge', 'charge_density',
+                'steps', 'cycles', 'instruments', 'results'
                 ],
             properties=dict(
                 order=[
-                    'name',
-                    'data_file',])),
+                    'name', 'data_file',
+                    'environment', 'setup', 'samples',
+                    'station', 'voltage_shift', 'resistance'
+                ])),
     )
 
+    def make_current_density_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='Current Density', x=self.voltage_rhe_compensated, y=self.current_density,)])
+        fig.update_layout(title_text='Current Density over Voltage RHE',
+                          showlegend=True,
+                          xaxis={'fixedrange': False},
+                          yaxis={'fixedrange': False})
+        return fig
+
+    def make_current_over_voltage_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='Current', x=self.voltage, y=self.current,)])
+        fig.update_layout(title_text='Current over Voltage',
+                          showlegend=True,
+                          xaxis={'fixedrange': False},
+                          yaxis={'fixedrange': False})
+        return fig
+
     def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
+                if os.path.splitext(self.data_file)[-1] == ".mpr":
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
+                        get_voltammetry_archive
+                    metadata, data = get_header_and_data(f)
+                    get_voltammetry_archive(data, metadata, self)
+                    if not self.properties:
+                        self.properties = get_biologic_properties(metadata)
+        fig1 = self.make_current_density_plot()
+        fig2 = self.make_current_over_voltage_plot()
+        self.figures = [PlotlyFigure(label='Current Density over Voltage RHE', figure=fig1.to_plotly_json()),
+                        PlotlyFigure(label='Current over Voltage', figure=fig2.to_plotly_json())]
         super(CE_NESD_LinearSweepVoltammetry, self).normalize(archive, logger)
 
 
@@ -273,15 +449,38 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-
+                'metadata_file', 'lab_id', 'location',
+                'control', 'charge', 'charge_density',
+                'steps', 'cycles', 'instruments', 'results'
                 ],
             properties=dict(
                 order=[
-                    'name',
-                    'data_file',])),
+                    'name', 'data_file',
+                    'environment', 'setup', 'samples',
+                    'station', 'voltage_shift', 'resistance'
+                ])),
     )
 
+    def make_voltage_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='Voltage', x=self.time, y=self.voltage,)])
+        fig.update_layout(title_text='Voltage over Time',
+                          xaxis={'fixedrange': False},
+                          yaxis={'fixedrange': False})
+        return fig
+
     def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
+                if os.path.splitext(self.data_file)[-1] == ".mpr":
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
+                        get_voltammetry_archive
+                    metadata, data = get_header_and_data(f)
+                    get_voltammetry_archive(data, metadata, self)
+                    if not self.properties:
+                        self.properties = get_biologic_properties(metadata)
+        fig1 = self.make_voltage_plot()
+        self.figures = [PlotlyFigure(label='Voltage over Time', figure=fig1.to_plotly_json()),]
         super(CE_NESD_OpenCircuitVoltage, self).normalize(archive, logger)
 
 
@@ -289,15 +488,49 @@ class CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy(Electrochemica
     m_def = Section(
         a_eln=dict(
             hide=[
-
-                ],
+                'metadata_file', 'lab_id', 'location',
+                'steps', 'instruments', 'results'
+            ],
             properties=dict(
                 order=[
-                    'name',
-                    'data_file',])),
+                    'name', 'data_file',
+                    'environment', 'setup', 'samples',
+                    'station'
+                ])),
     )
 
+    def make_nyquist_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='Nyquist', x=self.z_real, y=self.z_imaginary,)])
+        fig.update_layout(title_text='Nyquist Plot',
+                          xaxis={'fixedrange': False, 'title': 'Re(Z) (Ω)'},
+                          yaxis={'fixedrange': False, 'title': '-Im(Z) (Ω)'})
+        return fig
+
+    def make_bode_plot(self):
+        fig = go.Figure(data=[go.Scatter(name='|Z|', x=self.frequency, y=self.z_modulus,)])
+        fig.add_traces(go.Scatter(name='Phase(Z)', x=self.frequency, y=self.z_angle))
+        fig.update_layout(title_text='Bode Plot',
+                          showlegend=True,
+                          xaxis={'fixedrange': False, 'type': 'log'},
+                          yaxis={'fixedrange': False})
+        return fig
+
     def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, "rt") as f:
+                if os.path.splitext(self.data_file)[-1] == ".mpr":
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
+                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
+                        get_eis_data, get_meta_data
+                    metadata, data = get_header_and_data(f)
+                    get_eis_data(data, self)
+                    get_meta_data(metadata, self)
+                    if not self.properties:
+                        self.properties = get_biologic_properties(metadata)
+        fig1 = self.make_nyquist_plot()
+        fig2 = self.make_bode_plot()
+        self.figures = [PlotlyFigure(label='Nyquist Plot', figure=fig1.to_plotly_json()),
+                        PlotlyFigure(label='Bode Plot', figure=fig2.to_plotly_json())]
         super(CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy, self).normalize(archive, logger)
 
 
