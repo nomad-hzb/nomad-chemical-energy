@@ -305,34 +305,34 @@ class CE_NSLI_XRD_XY(XRD, EntryData):
         type=Reference(WetChemicalDeposition.m_def),
         a_eln=dict(component='ReferenceEditQuantity'))
 
-    def normalize(self, archive, logger):
+    # def normalize(self, archive, logger):
 
-        if self.data_file:
-            data_file_split = os.path.basename(self.data_file).split('.')
-            with archive.m_context.raw_file(self.data_file) as f:
-                file_name = f.name
+    #     if self.data_file:
+    #         data_file_split = os.path.basename(self.data_file).split('.')
+    #         with archive.m_context.raw_file(self.data_file) as f:
+    #             file_name = f.name
 
-            if os.path.splitext(self.data_file)[-1] == ".xy" and self.data is None:
-                import pandas as pd
-                skiprows = 0
-                data = pd.read_csv(file_name, sep=" |\t", header=None, skiprows=skiprows)
-                self.data = XRDData(angle=data[0], intensity=data[1])
+    #         if os.path.splitext(self.data_file)[-1] == ".xy" and self.data is None:
+    #             import pandas as pd
+    #             skiprows = 0
+    #             data = pd.read_csv(file_name, sep=" |\t", header=None, skiprows=skiprows)
+    #             self.data = XRDData(angle=data[0], intensity=data[1])
 
-                if len(data_file_split) > 2:
-                    if self.description:
-                        self.description += f"<br> Notes from file name: {data_file_split[1]}"
-                    else:
-                        self.description = f"Notes from file name: {data_file_split[1]}"
+    #             if len(data_file_split) > 2:
+    #                 if self.description:
+    #                     self.description += f"<br> Notes from file name: {data_file_split[1]}"
+    #                 else:
+    #                     self.description = f"Notes from file name: {data_file_split[1]}"
 
-            preparation_id = data_file_split[0]
-            if not self.sample_preparation:
-                self.sample_preparation = get_entry_reference(archive, self, preparation_id)
+    #         preparation_id = data_file_split[0]
+    #         if not self.sample_preparation:
+    #             self.sample_preparation = get_entry_reference(archive, self, preparation_id)
 
-            sample_id = "_".join(preparation_id.split("_")[:-1])
-            if not self.samples:
-                set_sample_reference(archive, self, sample_id)
+    #         sample_id = "_".join(preparation_id.split("_")[:-1])
+    #         if not self.samples:
+    #             set_sample_reference(archive, self, sample_id)
 
-        super(CE_NSLI_XRD_XY, self).normalize(archive, logger)
+    #     super(CE_NSLI_XRD_XY, self).normalize(archive, logger)
 
 # %%####################################### Measurements
 
@@ -512,53 +512,53 @@ class CE_NSLI_Photocurrent(PhotoCurrent, EntryData):
                         "fixedrange": False}}, "config": {
                     "scrollZoom": True}}])
 
-    def normalize(self, archive, logger):
-        super(CE_NSLI_Photocurrent, self).normalize(archive, logger)
+    # def normalize(self, archive, logger):
+    #     super(CE_NSLI_Photocurrent, self).normalize(archive, logger)
 
-        electro_measurements = {}
-        if self.data_files and len(self.data_files) > 0:
-            for data_file in self.data_files:
-                try:
-                    with archive.m_context.raw_file(data_file) as f:
-                        data_file_name = os.path.basename(f.name)
-                        file_name_split = os.path.splitext(data_file_name)
-                        if file_name_split[-1] == ".mpt":
-                            file_name = f'{file_name_split[0]}.archive.json'
-                            split_file_name = file_name_split[0].split("_")
-                            technique_number = int(split_file_name[-3])
-                            entity = None
-                            if split_file_name[-2] == "CA":
-                                entity = CE_NSLI_Chronoamperometry(
-                                    data_file=data_file_name,
-                                    metadata_file=self.electro_meta_data_file_name if self.electro_meta_data_file_name else None,
-                                    samples=self.samples if self.samples else [],
-                                    name=file_name_split[0].replace("_", " "))
-                            if split_file_name[-2] == "CV":
-                                entity = CE_NSLI_CyclicVoltammetry(
-                                    data_file=data_file_name,
-                                    metadata_file=self.electro_meta_data_file_name if self.electro_meta_data_file_name else None,
-                                    samples=self.samples if self.samples else [],
-                                    name=file_name_split[0].replace("_", " "))
-                            if split_file_name[-2] == "OCV":
-                                entity = CE_NSLI_OpenCircuitVoltage(
-                                    data_file=data_file_name,
-                                    metadata_file=self.electro_meta_data_file_name if self.electro_meta_data_file_name else None,
-                                    samples=self.samples if self.samples else [],
-                                    name=file_name_split[0].replace("_", " "))
-                            if entity:
-                                create_archive(entity, archive, file_name)
-                                electro_measurements.update(
-                                    {technique_number: f'../upload/archive/mainfile/{file_name}#data'})
+    #     electro_measurements = {}
+    #     if self.data_files and len(self.data_files) > 0:
+    #         for data_file in self.data_files:
+    #             try:
+    #                 with archive.m_context.raw_file(data_file) as f:
+    #                     data_file_name = os.path.basename(f.name)
+    #                     file_name_split = os.path.splitext(data_file_name)
+    #                     if file_name_split[-1] == ".mpt":
+    #                         file_name = f'{file_name_split[0]}.archive.json'
+    #                         split_file_name = file_name_split[0].split("_")
+    #                         technique_number = int(split_file_name[-3])
+    #                         entity = None
+    #                         if split_file_name[-2] == "CA":
+    #                             entity = CE_NSLI_Chronoamperometry(
+    #                                 data_file=data_file_name,
+    #                                 metadata_file=self.electro_meta_data_file_name if self.electro_meta_data_file_name else None,
+    #                                 samples=self.samples if self.samples else [],
+    #                                 name=file_name_split[0].replace("_", " "))
+    #                         if split_file_name[-2] == "CV":
+    #                             entity = CE_NSLI_CyclicVoltammetry(
+    #                                 data_file=data_file_name,
+    #                                 metadata_file=self.electro_meta_data_file_name if self.electro_meta_data_file_name else None,
+    #                                 samples=self.samples if self.samples else [],
+    #                                 name=file_name_split[0].replace("_", " "))
+    #                         if split_file_name[-2] == "OCV":
+    #                             entity = CE_NSLI_OpenCircuitVoltage(
+    #                                 data_file=data_file_name,
+    #                                 metadata_file=self.electro_meta_data_file_name if self.electro_meta_data_file_name else None,
+    #                                 samples=self.samples if self.samples else [],
+    #                                 name=file_name_split[0].replace("_", " "))
+    #                         if entity:
+    #                             create_archive(entity, archive, file_name)
+    #                             electro_measurements.update(
+    #                                 {technique_number: f'../upload/archive/mainfile/{file_name}#data'})
 
-                except Exception as e:
-                    logger.error(e)
+    #             except Exception as e:
+    #                 logger.error(e)
 
-        electro_measurements_list = []
-        if electro_measurements:
-            keys = sorted(electro_measurements.keys())
-            for key in keys:
-                electro_measurements_list.append(electro_measurements[key])
-        self.electro_measurements = electro_measurements_list
+    #     electro_measurements_list = []
+    #     if electro_measurements:
+    #         keys = sorted(electro_measurements.keys())
+    #         for key in keys:
+    #             electro_measurements_list.append(electro_measurements[key])
+    #     self.electro_measurements = electro_measurements_list
 
 
 class CE_NSLI_SPV(SPV, EntryData):

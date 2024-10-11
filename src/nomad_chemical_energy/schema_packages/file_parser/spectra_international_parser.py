@@ -9,25 +9,24 @@ def to_float(value):
         return value
 
 
-def parse_spectrum(file):
+def parse_spectrum(f):
     metadata = {}
-    with open(file, "r") as f:
-        while True:
-            line = f.readline()
+    while True:
+        line = f.readline()
 
-            if "Scan Data" in line:
-                break
+        if "Scan Data" in line:
+            break
 
-            if "\t" not in line or len(line.strip().strip("\t").split("\t")) != 2:
-                continue
+        if "\t" not in line or len(line.strip().strip("\t").split("\t")) != 2:
+            continue
 
-            key,  value = line.split("\t")
-            metadata.update({key.strip().strip('"'):  to_float(value.strip().strip('"'))})
+        key,  value = line.split("\t")
+        metadata.update({key.strip().strip('"'):  to_float(value.strip().strip('"'))})
 
-        data = pd.read_csv(f, sep="\t", header=0, on_bad_lines="skip")
-        data.Time = pd.to_datetime(data.Time, errors="coerce")
-        data = data[pd.notnull(data.Time)]
-        data[data == "Skipped"] = np.nan
+    data = pd.read_csv(f, sep="\t", header=0, on_bad_lines="skip")
+    data.Time = pd.to_datetime(data.Time, errors="coerce")
+    data = data[pd.notnull(data.Time)]
+    data[data == "Skipped"] = np.nan
     return metadata, data
 
 
