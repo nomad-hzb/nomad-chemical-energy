@@ -31,7 +31,7 @@ from nomad.metainfo import (
 from nomad.datamodel.data import EntryData
 
 from nomad.datamodel.metainfo.eln import Substance
-from nomad.datamodel.metainfo.basesections import PubChemPureSubstanceSection
+from baseclasses import PubChemPureSubstanceSectionCustom
 
 
 from nomad.datamodel.metainfo.basesections import (
@@ -346,11 +346,11 @@ def set_environment(row):
         name=get_parameter(row, "name"),
         ph_value=get_parameter(row, "ph_value"),
         description=get_parameter(row, "description"),
-        solvent=PubChemPureSubstanceSection(
+        solvent=PubChemPureSubstanceSectionCustom(
             name=row["solvent_name"], load_data=False) if not pd.isna(row[f"solvent_name"]) else None,
         purging=Purging(time=get_parameter(row, "purging_time"), temperature=get_parameter(row, "purging_temperature"),
-                        gas=PubChemPureSubstanceSection(name=get_parameter(row, "purging_gas_name"),
-                                                        load_data=False)) if not pd.isna(
+                        gas=PubChemPureSubstanceSectionCustom(name=get_parameter(row, "purging_gas_name"),
+                                                              load_data=False)) if not pd.isna(
             row[f"purging_gas_name"]) else None,
         substances=[SubstanceWithConcentration(
             concentration_mmol_per_l=float(get_parameter(row, f"concentration_M_{i}")) * 1000 if get_parameter(row,
@@ -359,7 +359,7 @@ def set_environment(row):
                 row, f"concentration_g_per_l_{i}"),
             amount_relative=get_parameter(
                 row, f"amount_relative_{i}"),
-            substance=PubChemPureSubstanceSection(name=get_parameter(row, f"substance_name_{i}"), load_data=False))
+            substance=PubChemPureSubstanceSectionCustom(name=get_parameter(row, f"substance_name_{i}"), load_data=False))
             for i in range(number_of_substances_per_env) if not pd.isna(row[f"substance_name_{i}"])],
     )
 
@@ -388,7 +388,7 @@ def set_sample(row):
                                          row, f"concentration_g_per_l_{i}"),
                                          amount_relative=get_parameter(
                                          row, f"amount_relative_{i}"),
-                                         substance=PubChemPureSubstanceSection(
+                                         substance=PubChemPureSubstanceSectionCustom(
                                          name=get_parameter(row,
                                                             f"substance_name_{i}"),
                                          load_data=False))
