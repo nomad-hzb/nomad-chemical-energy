@@ -141,7 +141,7 @@ class CE_NSLI_MXene_Solution(MXeneSolution, EntryData):
     create_overview = Quantity(
         type=bool,
         default=False,
-        a_eln=dict(component='ButtonEditQuantity')
+        a_eln=dict(component='BoolEditQuantity')
     )
 
     overview = Quantity(
