@@ -35,16 +35,13 @@ from nomad_chemical_energy.schema_packages.hzb_characterization_package import (
 )
 
 from nomad.datamodel.data import EntryData
-from nomad.datamodel.metainfo.annotations import (
-    ELNAnnotation,
-)
+
 from nomad.datamodel.metainfo.basesections import (
     CompositeSystemReference
 )
-from nomad.datamodel.metainfo.basesections import PubChemPureSubstanceSection
 # from nomad.units import ureg
 from nomad.metainfo import (
-    Section, SubSection, Quantity, SchemaPackage)
+    Section, Quantity, SchemaPackage)
 # from nomad_measurements.catalytic_measurement.catalytic_measurement import ReactionConditions
 
 from unidecode import unidecode
