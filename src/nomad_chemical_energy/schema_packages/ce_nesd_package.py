@@ -162,6 +162,8 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData):
                     metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
+                        metadata_device_settings = json.loads(data.attrs.get('original_metadata')).get('params', {})
+                        # TODO use CA Properties with metadata_device_settings attribute
                         self.properties = get_biologic_properties(metadata)
         fig1 = self.make_current_plot()
         fig2 = self.make_current_density_plot()
