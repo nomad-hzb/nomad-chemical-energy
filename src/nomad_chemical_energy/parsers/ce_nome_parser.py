@@ -415,7 +415,7 @@ class GeneralNomeParser(MatchingParser):
         entry.data_file = [file_name]
 
         archive.metadata.entry_name = file_name
-        set_sample_reference(archive, entry, sample_id, archive.metadata.upload_id)
+        set_sample_reference(archive, entry, sample_id)
         file_name_archive = f'{file_name}.archive.json'
         create_archive(entry, archive, file_name_archive)
 
