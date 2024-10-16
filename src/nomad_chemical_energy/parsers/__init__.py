@@ -106,6 +106,13 @@ class GeneralProcessParserEntryPoint(ParserEntryPoint):
         return GeneralProcessParser(**self.dict())
 
 
+class GeneralNomeParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nome_parser import GeneralNomeParser
+        return GeneralNomeParser(**self.dict())
+
+
 ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     name='CENECCxlsxParser',
     description='Parser for CENECC xls files',
@@ -211,8 +218,9 @@ hzb_general_process_parser = GeneralProcessParserEntryPoint(
     mainfile_name_re='^.*[A-Z][a-z][A-Z][a-z]\d{4}(-.*)?\.(?!.*\.*pynb$|.*\.*py$|.*\.*archive\.json$|.*\.*json$)[a-zA-Z0-9.]+$',
 )
 
-hzb_general_nome_parser = GeneralProcessParserEntryPoint(
+ce_nome_general_parser = GeneralNomeParserEntryPoint(
     name='GeneralNomeParser',
     description='Parser for general files starting with a NOME sample id',
-    mainfile_name_re='^.*[A-Z][a-z][A-Z][a-z]\d{4}(-.*)?\.(?!.*\.*pynb$|.*\.*py$|.*\.*archive\.json$|.*\.*json$)[a-zA-Z0-9.]+$',
+    mainfile_name_re='^.*CE-NOME_[A-Z][a-z][A-Z][a-z]_\d{6}_\d{4}(?!.*\.json$|.*\.*py$|.*\.*pynb$)[a-zA-Z0-9.]+$',
+    level=2
 )

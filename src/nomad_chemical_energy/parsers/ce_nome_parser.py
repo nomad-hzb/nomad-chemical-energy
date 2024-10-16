@@ -90,6 +90,15 @@ class ParsedTifFile(EntryData):
     )
 
 
+class ParsedGeneralNomeFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        )
+    )
+
+
 class GamryParser(MatchingParser):
 
     def parse(self, mainfile: str, archive: EntryArchive, logger):
@@ -392,3 +401,25 @@ class CENOMETIFParser(MatchingParser):
                 get_entry_id_from_file_name(file_name, archive)
             ))
             archive.metadata.entry_name = measurement_name
+
+
+class GeneralNomeParser(MatchingParser):
+
+    def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
+
+        file_name = mainfile.split('/')[-1]
+        sample_id = file_name[:24]
+
+        entry = CE_NOME_Measurement()
+        entry.name = file_name
+        entry.data_file = [file_name]
+
+        archive.metadata.entry_name = file_name
+        set_sample_reference(archive, entry, sample_id, archive.metadata.upload_id)
+        file_name_archive = f'{file_name}.archive.json'
+        create_archive(entry, archive, file_name_archive)
+
+        eid = get_entry_id_from_file_name(file_name_archive, archive)
+        ref = get_reference(archive.metadata.upload_id, eid)
+        archive.data = ParsedGeneralNomeFile(activity=ref)
+        archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
