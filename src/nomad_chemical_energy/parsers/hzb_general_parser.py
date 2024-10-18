@@ -36,10 +36,10 @@ from nomad.datamodel.metainfo.basesections import (
 from baseclasses.helper.utilities import (create_archive, get_entry_id_from_file_name,
                                           get_reference, set_sample_reference)
 
-from nomad_chemical_energy.schema_packages.hzb_general_measurement_package import (HZB_GeneralMeasurement)
+from nomad_chemical_energy.schema_packages.hzb_general_process_package import (HZB_GeneralProcess)
 
 
-class ParsedGeneralMeasurementFile(EntryData):
+class ParsedGeneralProcessFile(EntryData):
 
     activity = Quantity(
         type=Activity,
@@ -49,14 +49,14 @@ class ParsedGeneralMeasurementFile(EntryData):
     )
 
 
-class GeneralMeasurementParser(MatchingParser):
+class GeneralProcessParser(MatchingParser):
 
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
 
         file_name = mainfile.split('/')[-1]
         sample_id = file_name.split(".")[0].split("-")[0]
 
-        entry = HZB_GeneralMeasurement()
+        entry = HZB_GeneralProcess()
         entry.name = file_name
         entry.data_file = file_name
 
@@ -67,23 +67,23 @@ class GeneralMeasurementParser(MatchingParser):
 
         eid = get_entry_id_from_file_name(file_name_archive, archive)
         ref = get_reference(archive.metadata.upload_id, eid)
-        archive.data = ParsedGeneralMeasurementFile(activity=ref)
+        archive.data = ParsedGeneralProcessFile(activity=ref)
         archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
 
-        # TODO for new measurement parsers that should replace GeneralMeasurement entries you can use this code inside the parser
+        # TODO for new measurement parsers that should replace GeneralProcess entries you can use this code inside the parser
         # file_name_archive = f'{file_name}.archive.json'
         # new_entry_created = create_archive(entry, archive, file_name_archive)
         # eid = get_entry_id_from_file_name(file_name_archive, archive)
         # ref = get_reference(archive.metadata.upload_id, eid)
         # if not new_entry_created:
-        #     new_entry = update_general_measurement_entries(entry, eid, archive, logger, TxtMeasurement())
+        #     new_entry = update_general_process_entries(entry, eid, archive, logger, TxtMeasurement())
         #     if new_entry is not None:
         #         create_archive(new_entry, archive, file_name_archive, overwrite=True)
         # archive.data = ParsedTxtFile(activity=ref)
         # archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
 
 
-def update_general_measurement_entries(entry, entry_id, archive, logger, entry_class):
+def update_general_process_entries(entry, entry_id, archive, logger, entry_class):
     from nomad.search import search
     from nomad import files
     query = {
@@ -94,7 +94,7 @@ def update_general_measurement_entries(entry, entry_id, archive, logger, entry_c
         query=query,
         user_id=archive.metadata.main_author.user_id)
     entry_type = search_result.data[0].get('entry_type') if len(search_result.data) == 1 else None
-    if entry_type != 'HZB_GeneralMeasurement':
+    if entry_type != 'HZB_GeneralProcess':
         return None
     new_entry_dict = entry.m_to_dict()
     res = search_result.data[0]

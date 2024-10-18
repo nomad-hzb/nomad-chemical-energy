@@ -22,7 +22,7 @@ from nomad.metainfo import (
 from nomad.datamodel.data import EntryData
 
 from baseclasses.chemical_energy import (
-    GeneralMeasurement,
+    GeneralProcess,
 )
 
 m_package = SchemaPackage()
@@ -30,7 +30,7 @@ m_package = SchemaPackage()
 # %% ####################### Entities
 
 
-class HZB_GeneralMeasurement(GeneralMeasurement, EntryData):
+class HZB_GeneralProcess(GeneralProcess, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['lab_id', 'location', 'steps', 'atmosphere', 'instruments', 'results'],
@@ -39,7 +39,7 @@ class HZB_GeneralMeasurement(GeneralMeasurement, EntryData):
     )
 
     def normalize(self, archive, logger):
-        super(HZB_GeneralMeasurement, self).normalize(archive, logger)
+        super(HZB_GeneralProcess, self).normalize(archive, logger)
 
 
 m_package.__init_metainfo__()

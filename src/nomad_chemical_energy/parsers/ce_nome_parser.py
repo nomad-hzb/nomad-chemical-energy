@@ -33,6 +33,7 @@ from nomad.datamodel.metainfo.basesections import (
 )
 import os
 import datetime
+import re
 
 from baseclasses.helper.utilities import (find_sample_by_id, create_archive, get_entry_id_from_file_name, get_reference,
                                           search_class, set_sample_reference)
@@ -82,6 +83,15 @@ class ParsedKMC2File(EntryData):
 
 
 class ParsedTifFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        )
+    )
+
+
+class ParsedGeneralNomeFile(EntryData):
     activity = Quantity(
         type=Activity,
         a_eln=ELNAnnotation(
@@ -392,3 +402,36 @@ class CENOMETIFParser(MatchingParser):
                 get_entry_id_from_file_name(file_name, archive)
             ))
             archive.metadata.entry_name = measurement_name
+
+
+class GeneralNomeParser(MatchingParser):
+
+    def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
+
+        file_name = mainfile.split('/')[-1]
+        # environment ids have a length of 17 and sample ids a length of 24
+        sample_id = None
+        other_id = file_name[:17]
+        if len(file_name) >= 24:
+            sample_id = file_name[:24]
+            # since we also want to support file names with environment ids we have to check if it is a sample id
+            sample_id_regex = r"^CE-NOME_[A-Z][a-z][A-Z][a-z]_\d{6}_\d{4}$"
+            if not re.match(sample_id_regex, sample_id):
+                sample_id = None
+
+        entry = CE_NOME_Measurement()
+        entry.name = file_name
+        entry.data_file = [file_name]
+
+        archive.metadata.entry_name = file_name
+        if sample_id:
+            set_sample_reference(archive, entry, sample_id)
+        else:
+            set_sample_reference(archive, entry, other_id)
+        file_name_archive = f'{file_name}.archive.json'
+        create_archive(entry, archive, file_name_archive)
+
+        eid = get_entry_id_from_file_name(file_name_archive, archive)
+        ref = get_reference(archive.metadata.upload_id, eid)
+        archive.data = ParsedGeneralNomeFile(activity=ref)
+        archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")

@@ -99,11 +99,18 @@ class CatlabParserEntryPoint(ParserEntryPoint):
         return CatlabParser(**self.dict())
 
 
-class GeneralMeasurementParserEntryPoint(ParserEntryPoint):
+class GeneralProcessParserEntryPoint(ParserEntryPoint):
 
     def load(self):
-        from nomad_chemical_energy.parsers.hzb_general_parser import GeneralMeasurementParser
-        return GeneralMeasurementParser(**self.dict())
+        from nomad_chemical_energy.parsers.hzb_general_parser import GeneralProcessParser
+        return GeneralProcessParser(**self.dict())
+
+
+class GeneralNomeParserEntryPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nome_parser import GeneralNomeParser
+        return GeneralNomeParser(**self.dict())
 
 
 ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
@@ -205,8 +212,15 @@ hzb_catlab_parser = CatlabParserEntryPoint(
     mainfile_mime_re='.*/.*'
 )
 
-hzb_general_measurement_parser = GeneralMeasurementParserEntryPoint(
-    name='GeneralMeasurementParser',
-    description='Parser for general measurement files starting with a sample id',
+hzb_general_process_parser = GeneralProcessParserEntryPoint(
+    name='GeneralProcessParser',
+    description='Parser for general files starting with a sample id',
     mainfile_name_re='^.*[A-Z][a-z][A-Z][a-z]\d{4}(-.*)?\.(?!.*\.*pynb$|.*\.*py$|.*\.*archive\.json$|.*\.*json$)[a-zA-Z0-9.]+$',
+)
+
+ce_nome_general_parser = GeneralNomeParserEntryPoint(
+    name='GeneralNomeParser',
+    description='Parser for general files starting with a NOME sample id',
+    mainfile_name_re='^.*CE-NOME_[A-Z][a-z][A-Z][a-z](_\d{6})?_\d{4}(?!.*\.json$|.*\.*py$|.*\.*pynb$)[a-zA-Z0-9.]+$',
+    level=2
 )
