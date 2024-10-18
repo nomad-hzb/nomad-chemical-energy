@@ -221,6 +221,6 @@ hzb_general_process_parser = GeneralProcessParserEntryPoint(
 ce_nome_general_parser = GeneralNomeParserEntryPoint(
     name='GeneralNomeParser',
     description='Parser for general files starting with a NOME sample id',
-    mainfile_name_re='^.*CE-NOME_[A-Z][a-z][A-Z][a-z]_\d{6}_\d{4}(?!.*\.json$|.*\.*py$|.*\.*pynb$)[a-zA-Z0-9.]+$',
+    mainfile_name_re='^.*CE-NOME_[A-Z][a-z][A-Z][a-z](_\d{6})?_\d{4}(?!.*\.json$|.*\.*py$|.*\.*pynb$)[a-zA-Z0-9.]+$',
     level=2
 )
