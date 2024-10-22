@@ -166,13 +166,15 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                     self.gaschromatographies = gaschromatography_measurements
 
                     from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_potentiostat_data
-                    datetimes, current, working_electrode_potential = read_potentiostat_data(data)
+                    datetimes, current, working_electrode_potential, counter_electrode_potential, ewe_ece_difference = read_potentiostat_data(data)
                     if start_time is None or end_time is None:
                         start_time = datetimes.iat[0]
                         end_time = datetimes.iat[-1]
                     self.potentiometry = NECCPotentiostatMeasurement(datetime=datetimes.to_list(),
                                                                      current=current,
-                                                                     working_electrode_potential=working_electrode_potential)
+                                                                     working_electrode_potential=working_electrode_potential,
+                                                                     counter_electrode_potential=counter_electrode_potential,
+                                                                     ewe_ece_difference=ewe_ece_difference)
                     from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import read_thermocouple_data
                     data.columns = data.iloc[1]
                     try:
