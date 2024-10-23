@@ -33,21 +33,21 @@ def _round_not_zero(number):
         return number
     return rounded_num
 
+def _process_potentiostat_column(data, column_name):
+    if column_name in data.columns:
+        return data[column_name].dropna().apply(_round_not_zero)
+    return None
 
 def read_potentiostat_data(data):
 
     datetimes = pd.to_datetime(data['time/s'], errors="coerce").dropna()
 
-    if {'I/mA', 'Ewe/V'}.issubset(data.columns):
-        current = data['I/mA'].dropna()
-        current = current.apply(_round_not_zero)
-        working_electrode_potential = data['Ewe/V'].dropna()
-        working_electrode_potential = working_electrode_potential.apply(_round_not_zero)
-    else:
-        current = None
-        working_electrode_potential = None
+    current = _process_potentiostat_column(data, 'I/mA')
+    working_electrode_potential = _process_potentiostat_column(data, 'Ewe/V')
+    counter_electrode_potential = _process_potentiostat_column(data, 'Ece/V')
+    ewe_ece_difference = _process_potentiostat_column(data, 'Ewe-Ece/V')
 
-    return datetimes, current, working_electrode_potential
+    return datetimes, current, working_electrode_potential, counter_electrode_potential, ewe_ece_difference
 
 
 def read_thermocouple_data(data, start_time, end_time):
