@@ -1,11 +1,79 @@
-import os.path
-from nomad.client import parse, normalize_all
+import os
+import nomad.search
+import pytest
+from nomad.client import normalize_all, parse
+from nomad.app.v1.models.models import (
+    MetadataResponse)
 
-def test_parser():
-    test_file = os.path.join(os.path.dirname(__file__), 'data', 'test.example-format.txt')
-    entry_archive = parse(test_file)[0]
-    normalize_all(entry_archive)
 
-    assert entry_archive.data.pattern.tolist() == [
-        [1.0, 0.0, 1.0], [1.0, 1.0, 1.0], [1.0, 0.0, 1.0]
+@pytest.fixture(
+    params=[
+        '20230223_080542_NiOx_MW_Co10_1_1_Co_001_0_merged.dat',
+         '20230224_011729_Co3O4_ref_tm_001_0_merged.dat',
+         '230531-CA-test2.DTA',
+         '3stepCACA.DTA',
+         'calib_30min_0.1ppm.ABS',
+         'CE-NOME_FrJo_240815_0001.0 H2O Au000001.txt',
+         'CE-NOME_MiGo_240429_0001.SA_5_MM.csv',
+         'CHRONOA.DTA',
+         'CHRONOP.DTA',
+         'CV__#3.DTA',
+         'CVCA.DTA',
+         'CVCAHintereinander_Pos1.DTA',
+         'CVCP.DTA',
+         'CVCPHintereinander_pos2.DTA',
+         'CV.DTA',
+         'EISPOT.DTA',
+         'LSG.DTA',
+         'LSVCA.DTA',
+         'LSV.DTA',
+         'necc_test_no_properties.xlsx',
+         'OCP.DTA',
+         'P-O2D109.pump.csv',
+         'test1234.test2.txt',
+         'test1234.test.txt',
+         'test double PTFETape 3 100724000001.txt',
+         'testO2.oxy.xlsx'
     ]
+)
+def parsed_archive(request, monkeypatch):
+    """
+    Sets up data for testing and cleans up after the test.
+    """
+    def mockreturn_search(*args):
+        return None
+    monkeypatch.setattr('nomad_chemical_energy.parsers.ce_nome_parser.search_class', mockreturn_search)
+    monkeypatch.setattr('nomad_chemical_energy.parsers.ce_nome_parser.set_sample_reference', mockreturn_search)
+    monkeypatch.setattr('nomad_chemical_energy.parsers.ce_nome_parser.find_sample_by_id', mockreturn_search)
+    monkeypatch.setattr('nomad_chemical_energy.parsers.ce_necc_parser.set_sample_reference', mockreturn_search)
+
+    rel_file = os.path.join('tests', 'data', request.param)
+    file_archive = parse(rel_file)[0]
+    measurement = os.path.join(
+        'tests', 'data', request.param + '.archive.json'
+    )
+    assert file_archive.data.activity
+    archive_json = ''
+    for file in os.listdir(os.path.join("tests/data")):
+        if not "archive.json" in file or request.param.replace("#", "run") not in file:
+            continue
+        archive_json = file 
+        measurement = os.path.join(
+            'tests', 'data', archive_json
+        )
+        measurement_archive = parse(measurement)[0]
+
+
+        if os.path.exists(measurement):
+            os.remove(measurement)
+    print(measurement_archive)
+    yield measurement_archive
+
+    assert archive_json
+   
+    
+
+
+def test_normalize_all(parsed_archive, monkeypatch):
+    normalize_all(parsed_archive)
+   
