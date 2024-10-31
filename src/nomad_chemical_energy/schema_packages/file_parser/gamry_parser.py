@@ -31,7 +31,8 @@ from pandas.api.types import is_numeric_dtype
 def _read_curve_data(fid, curve_length) -> tuple:
     """helper function to process an EXPLAIN Table
     Args:
-        fid (int): a file handle pointer to the table position in the data files
+        fid (int): a file handle pointer to the table position in the 
+        data files
     Returns:
         keys (list): column identifier (e.g. Vf)
         units (list): column unit type (e.g. V)
@@ -78,7 +79,7 @@ def get_number(value_str):
 
 def get_curve(f, _header, _curve_units, curve_length=None):
     curve_keys, curve_units, curve = _read_curve_data(f, curve_length)
-    REQUIRED_UNITS: dict = dict(CV=dict(Vf="V vs. Ref.", Im="A"))
+    dict(CV=dict(Vf="V vs. Ref.", Im="A"))
     if curve.empty:
         return None
 
@@ -98,29 +99,13 @@ def get_curve(f, _header, _curve_units, curve_length=None):
                 curve[key] = curve[key].apply(
                     lambda x: x.replace(",", "."))
                 curve[key] = curve[key].map(locale.atof)
-    # print(curve_keys, curve_units)
-    # print(_curve_units, curve_units)
-
-    # if not bool(_curve_units.items()):
-    #     exp_type = _header["TAG"]
-    #     for key, unit in zip(curve_keys, curve_units):
-    #         if exp_type in REQUIRED_UNITS.keys():
-    #             if key in REQUIRED_UNITS[exp_type].keys():
-    #                 assert (
-    #                     unit == REQUIRED_UNITS[exp_type][key]
-    #                 ), "Unit error for '{}': Expected '{}', found '{}'!".format(
-    #                     key, REQUIRED_UNITS[exp_type][key], unit
-    #                 )
-    #         _curve_units[key] = unit
-    # else:
-    #     for key, unit in zip(curve_keys, curve_units):
-    #         assert _curve_units[key] == unit, "Unit mismatch found!"
-
+    
     return curve
 
 
 def check_is_number(key, input_string):
-    if key in ["NICK", "PSTATSERIALNO", "PSTATSECTION", "SAMPLEID", "ENVIRONMENTID", "ECSETUPID", "DCCALDATE", "ACCALDATE"]:
+    if key in ["NICK", "PSTATSERIALNO", "PSTATSECTION", "SAMPLEID", 
+               "ENVIRONMENTID", "ECSETUPID", "DCCALDATE", "ACCALDATE"]:
         return input_string
     try:
         return float(input_string)
@@ -157,12 +142,15 @@ def get_header_and_data(f):
                     if curve is None:
                         break
                     curves.append(curve)
-                _curves[''.join(x for x in cur_line[0] if not x.isdigit())] = curves
+                _curves[''.join(x for x in cur_line[0] if not x.isdigit())]\
+                    = curves
             # data format: key, type, value
             if cur_line[0].strip() in ["METHOD"]:
                 _header[cur_line[0]] = cur_line[1]
             if cur_line[1].strip() in ["LABEL", "PSTAT"]:
-                _header[cur_line[0]] = check_is_number(cur_line[0], cur_line[2]) if len(cur_line) > 2 else ''
+                _header[cur_line[0]]\
+                    = check_is_number(cur_line[0], cur_line[2])\
+                    if len(cur_line) > 2 else ''
                 if cur_line[0] in ["TITLE"] and len(cur_line) > 3:
                     _header["SAMPLE_ID"] = cur_line[3]
             elif cur_line[1] in ["POTEN"] and len(cur_line) == 5:
@@ -198,6 +186,6 @@ def get_header_and_data(f):
                     note += f.readline().strip() + "\n"
                 _header[cur_line[0]] = note
 
-    header_length = f.tell()
+    f.tell()
 
     return _header, _curves

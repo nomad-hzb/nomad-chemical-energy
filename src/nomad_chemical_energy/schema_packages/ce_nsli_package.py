@@ -49,10 +49,10 @@ from baseclasses.wet_chemical_deposition import (
 )
 from nomad.datamodel.data import EntryData
 from nomad.metainfo import (
-    Quantity, 
-    Reference, 
-    SchemaPackage, 
-    Section, 
+    Quantity,
+    Reference,
+    SchemaPackage,
+    Section,
     SubSection,
 )
 
@@ -146,7 +146,7 @@ class CE_NSLI_MXene_Solution(MXeneSolution, EntryData):
         section_def=CENSLIIdentifier)
 
     def normalize(self, archive, logger):
-        super(CE_NSLI_MXene_Solution, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
         if self.create_overview and self.lab_id:
             self.create_overview = False
@@ -222,7 +222,7 @@ class CE_NSLI_DropCasting(DropCasting, EntryData):
 
     def normalize(self, archive, logger):
         assign_id(self, archive, "dc")
-        super(CE_NSLI_DropCasting, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NSLI_SpinCoating(SpinCoating, EntryData):
@@ -247,7 +247,7 @@ class CE_NSLI_SpinCoating(SpinCoating, EntryData):
 
     def normalize(self, archive, logger):
         assign_id(self, archive, "sc")
-        super(CE_NSLI_SpinCoating, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NSLI_SEM(SEM_Microscope_Merlin, EntryData):

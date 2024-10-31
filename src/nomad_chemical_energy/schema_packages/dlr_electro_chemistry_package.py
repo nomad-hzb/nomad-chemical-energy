@@ -86,8 +86,7 @@ class DLR_ElectrochemicalImpedanceSpectroscopy(
                     )
                     get_eis_data(data, self)
 
-        super(DLR_ElectrochemicalImpedanceSpectroscopy,
-              self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class DLR_CyclicVoltammetry(CyclicVoltammetry, EntryData):
@@ -150,7 +149,7 @@ class DLR_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                         get_voltammetry_data(curve, cycle)
                         self.cycles.append(cycle)
 
-        super(DLR_CyclicVoltammetry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class DLR_Chronopotentiometry(Chronopotentiometry, EntryData):
@@ -187,7 +186,7 @@ class DLR_Chronopotentiometry(Chronopotentiometry, EntryData):
                     )
                     get_voltammetry_data(data, self)
 
-        super(DLR_Chronopotentiometry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 m_package.__init_metainfo__()

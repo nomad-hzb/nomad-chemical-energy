@@ -37,7 +37,7 @@ class HZB_GeneralProcess(GeneralProcess, EntryData):
     )
 
     def normalize(self, archive, logger):
-        super(HZB_GeneralProcess, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 m_package.__init_metainfo__()

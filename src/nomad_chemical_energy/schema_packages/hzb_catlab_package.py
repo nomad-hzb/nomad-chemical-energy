@@ -87,9 +87,7 @@ class CatLab_Sample(CatalysisSample, EntryData):
     )
 
     def normalize(self, archive, logger):
-        super(
-            CatLab_Sample,
-            self).normalize(
+        super().normalize(
             archive,
             logger)
 

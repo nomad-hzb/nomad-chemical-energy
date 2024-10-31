@@ -286,10 +286,6 @@ class UVvisParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
 
-        from baseclasses.helper.utilities import get_encoding
-        with open(mainfile, "br") as f:
-            encoding = get_encoding(f)
-
         mainfile_split = os.path.basename(mainfile).split('.')
         notes = ''
         if len(mainfile_split) > 2:

@@ -88,18 +88,21 @@ class CE_NOME_Sample(CENOMESample, EntryData):
 
 class CE_NOME_Electrode(Electrode, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", 
+                         "components"],
                    properties=dict(
                        order=[
                            "name", "lab_id",
-                           "chemical_composition_or_formulas", "producer", "location"
+                           "chemical_composition_or_formulas", "producer", 
+                           "location"
                        ]))
     )
 
 
 class CE_NOME_Equipment(Equipment, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"],
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", 
+                         "components"],
                    properties=dict(
                        order=[
                            "name", "lab_id",
@@ -147,7 +150,8 @@ class CE_NOME_Environment(Environment, EntryData):
 
 class CE_NOME_Chemical(Substance, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components"]))
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", 
+                         "components"]))
 
 
 # class CE_NOME_ElectroChemicalCell(ElectroChemicalCell, EntryData):
@@ -171,7 +175,8 @@ class CE_NOME_Chemical(Substance, EntryData):
 
 class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin', "elemental_composition", "components", "substrate"],
+        a_eln=dict(hide=['users', 'origin', "elemental_composition", 
+                         "components", "substrate"],
                    properties=dict(
                        order=[
                            "name",
@@ -202,7 +207,7 @@ class CE_NOME_Annealing(Process, EntryData):
 
     def normalize(self, archive, logger):
         self.method = "Annealing"
-        super(CE_NOME_Annealing, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 # class CE_NOME_Batch(CENOMESample, EntryData):
@@ -391,12 +396,12 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     "number_of_substances_per_env", "number_of_substances_per_synthesis"])))
 
     def normalize(self, archive, logger):
-        super(CE_NOME_DocumentationTool, self).normalize(archive, logger)
+        super().normalize(archive, logger)
         if self.identifier is None:
             author = archive.metadata.main_author
             self.identifier = SampleIDCENOME(owner=f"{author.first_name} {author.last_name}")
             self.identifier.normalize(archive, logger)
-            super(CE_NOME_DocumentationTool, self).normalize(archive, logger)
+            super().normalize(archive, logger)
 
         if self.create_entries and self.data_file:
             if not self.lab_id:
@@ -430,7 +435,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     ce_nome_sample = set_sample(row)
                     ce_nome_sample.lab_id = f"{id_base_sample}_{next_free_id_sample + counter_sample:04d}" if not edit else row[0]
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_sample_{idx}.archive.json"
-                    created = create_archive(ce_nome_sample, archive, file_name, overwrite=edit)
+                    create_archive(ce_nome_sample, archive, file_name, overwrite=edit)
                     samples.at[idx, "id"] = ce_nome_sample.lab_id
 
                     if not edit:
@@ -446,7 +451,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     ce_nome_envs = set_environment(row)
                     ce_nome_envs.lab_id = f"{id_base}_{next_free_id + counter:04d}" if not edit else row[0]
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_env_{idx}.archive.json"
-                    created = create_archive(ce_nome_envs, archive, file_name, overwrite=edit)
+                    create_archive(ce_nome_envs, archive, file_name, overwrite=edit)
                     envs.at[idx, "id"] = ce_nome_envs.lab_id
 
                     if not edit:
@@ -463,7 +468,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     ce_nome_setup = set_setup(archive, row)
                     ce_nome_setup.lab_id = f"{id_base}_{next_free_id + counter:04d}" if not edit else row[0]
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_setup_{idx}.archive.json"
-                    created = create_archive(ce_nome_setup, archive, file_name, overwrite=edit)
+                    create_archive(ce_nome_setup, archive, file_name, overwrite=edit)
                     setups.at[idx, "id"] = ce_nome_setup.lab_id
 
                     if not edit:
@@ -506,7 +511,7 @@ class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
                 )
                 get_xas_archive(data, dateline, self)
 
-        super(Bessy2_KMC2_XASFluorescence, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
@@ -533,7 +538,7 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
                     get_xas_archive,
                 )
                 get_xas_archive(data, dateline, self)
-        super(Bessy2_KMC2_XASTransmission, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
@@ -594,8 +599,7 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
                     get_meta_data(metadata, self)
                     if not self.properties:
                         self.properties = get_eis_properties(metadata)
-        super(CE_NOME_ElectrochemicalImpedanceSpectroscopy,
-              self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 def get_curve_tag(methods, function):
@@ -616,7 +620,7 @@ class CE_NOME_VoilaNotebook(VoilaNotebook, EntryData):
     )
 
     def normalize(self, archive, logger):
-        super(CE_NOME_VoilaNotebook, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
@@ -677,7 +681,7 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     if not self.properties:
                         self.properties = get_cv_properties(metadata)
 
-        super(CE_NOME_CyclicVoltammetry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
@@ -737,7 +741,7 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
                     if not self.properties:
                         self.properties = get_lsv_properties(metadata)
 
-        super(CE_NOME_LinearSweepVoltammetry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
@@ -797,7 +801,7 @@ class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
                     if not self.properties:
                         self.properties = get_lsg_properties(metadata)
 
-        super(CE_NOME_GalvanodynamicSweep, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
@@ -845,7 +849,7 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
                         self.properties = get_ca_properties(metadata)
-        super(CE_NOME_Chronoamperometry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
@@ -887,7 +891,7 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
                         self.properties = get_cp_properties(metadata)
-        super(CE_NOME_Chronopotentiometry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
@@ -933,7 +937,7 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
                         self.properties = get_cc_properties(metadata)
-        super(CE_NOME_Chronocoulometry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
@@ -980,7 +984,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
                         self.properties = get_ocv_properties(metadata)
-        super(CE_NOME_OpenCircuitVoltage, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
@@ -1042,7 +1046,7 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
                               title_text='UVvis')
             self.figures = [PlotlyFigure(label='figure 1', figure=fig.to_plotly_json())]
 
-        super(CE_NOME_UVvismeasurement, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
@@ -1101,7 +1105,7 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
             except Exception as e:
                 raise e
 
-        super(CE_NOME_PhaseFluorometryOxygen, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
@@ -1147,7 +1151,7 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
 
             except Exception as e:
                 logger.error(e)
-        super(CE_NOME_PumpRateMeasurement, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
@@ -1195,7 +1199,7 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
             tif_file.save(png_file, overwrite=True)
             self.image_preview = os.path.basename(png_file)
 
-        super(CE_NOME_TIF_Image, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
@@ -1278,7 +1282,7 @@ class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
             )
             self.figures = result_figures
 
-        super(CE_NOME_Massspectrometry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 # %%####################################### Generic Entries

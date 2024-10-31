@@ -115,7 +115,7 @@ class Wannsee_D8_XRD_Bruker(XRD, EntryData):
 
     def normalize(self, archive, logger):
         self.identifier = "HZB_WANNSEE"
-        super(Wannsee_D8_XRD_Bruker, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class Wannsee_XRD_XY(XRD, EntryData):
@@ -163,7 +163,7 @@ class Wannsee_XRD_XY(XRD, EntryData):
                         data = pd.read_csv(f, sep=" |\t", header=None, skiprows=skiprows)
                     print(data)
                     self.data = XRDData(angle=data[0], intensity=data[1])
-        super(Wannsee_XRD_XY, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):

@@ -209,7 +209,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         self.properties.normalize(archive, logger)
         self.thermocouple.normalize(archive, logger)
         self.fe_results.normalize(archive, logger)
-        super(CE_NECC_EC_GC, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
         date_strings = [date.strftime("%Y-%m-%d %H:%M:%S") for date in self.fe_results.datetime]
 

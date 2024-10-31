@@ -107,7 +107,7 @@ class HZB_XRR(XRR, EntryData):
                     "samples"])))
 
     def normalize(self, archive, logger):
-        super(HZB_XRR, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class HZB_XRR_Library(XRRLibrary, EntryData):
@@ -126,7 +126,7 @@ class HZB_XRR_Library(XRRLibrary, EntryData):
                     "samples"])))
 
     def normalize(self, archive, logger):
-        super(HZB_XRR_Library, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class HZB_XRF(XRF, EntryData):
@@ -147,7 +147,7 @@ class HZB_XRF(XRF, EntryData):
                     "samples"])))
 
     def normalize(self, archive, logger):
-        super(HZB_XRF, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class HZB_XRF_Library(XRFLibrary, EntryData):
@@ -168,7 +168,7 @@ class HZB_XRF_Library(XRFLibrary, EntryData):
                     "samples"])))
 
     def normalize(self, archive, logger):
-        super(HZB_XRF_Library, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class HZB_XRD(XRD, EntryData):
@@ -257,7 +257,7 @@ class HZB_XRD_Library(XRDLibrary, EntryData):
                     "samples"])))
 
     def normalize(self, archive, logger):
-        super(HZB_XRD_Library, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class HZB_XPS(XPS, EntryData):
