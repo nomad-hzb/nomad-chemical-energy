@@ -217,10 +217,10 @@ class GamryParser(MatchingParser):
                 measurement.environment = environment_ref
             if setup_ref is not None:
                 measurement.setup = setup_ref
-            name = name.replace("#", "run")
+            name_replaced = name.replace("#", "run")
             if label == "OER CP":
                 measurement.method = "OER Chronopotentiometry"
-            create_archive(measurement, archive, name)
+            create_archive(measurement, archive, name_replaced)
             refs.append(get_reference(archive.metadata.upload_id, eid))
 
         archive.data = ParsedGamryFile(activity=refs)

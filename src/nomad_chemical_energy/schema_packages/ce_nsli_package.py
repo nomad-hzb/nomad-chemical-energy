@@ -101,9 +101,9 @@ def get_processes(archive, entry_id, lab_id):
     processes = []
     for res in search_result.data:
         with files.UploadFiles.get(upload_id=res["upload_id"])\
-            .read_archive(entry_id=res["entry_id"]) as archive:
+            .read_archive(entry_id=res["entry_id"]) as archive_entry:
             entry_id = res["entry_id"]
-            entry_data = archive[entry_id]["data"]
+            entry_data = archive_entry[entry_id]["data"]
             if "lab_id" in entry_data\
                 and entry_data.get("lab_id").startswith(lab_id):
                 processes.append((entry_data.get("lab_id"), 

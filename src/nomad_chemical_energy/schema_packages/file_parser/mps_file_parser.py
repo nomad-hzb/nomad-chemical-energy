@@ -15,14 +15,15 @@ def headeranddelimiter(file):
     decimal = "."
     with open(file, "br") as f:
         for i, line in enumerate(f):
-            line = line.decode(encoding)
-            if line.startswith("mode") or line.startswith("freq/Hz"):
+            line_decode = line.decode(encoding)
+            if line_decode.startswith("mode") or\
+                line_decode.startswith("freq/Hz"):
                 header = i
                 header_found = True
             if header_found:
-                if "," in line and "." not in line:
+                if "," in line_decode and "." not in line_decode:
                     decimal = ","
-                if "." in line and decimal == ",":
+                if "." in line_decode and decimal == ",":
                     raise Exception("decimal delimiter . and , found")
 
     return header, decimal
@@ -83,23 +84,23 @@ def read_mpt_file(filename, encoding="iso-8859-1"):
     key = ''
     with open(filename, 'rb') as file:
         for line in file.readlines():
-            line = line.decode(encoding)
+            line_decode = line.decode(encoding)
             if count == 3:
-                technique = line.strip()
+                technique = line_decode.strip()
             count += 1
-            if line.startswith("mode"):
+            if line_decode.startswith("mode"):
                 break
-            if line.startswith("vs."):
+            if line_decode.startswith("vs."):
                 key_old = key
-            if line.strip() == '':
+            if line_decode.strip() == '':
                 continue
 
-            if ":" in line:
+            if ":" in line_decode:
                 separator = ":"
             else:
                 separator = "  "
 
-            key, value = parse_line(line, separator, encoding)
+            key, value = parse_line(line_decode, separator, encoding)
             try:
                 value = float(value)
             except BaseException:
@@ -107,7 +108,7 @@ def read_mpt_file(filename, encoding="iso-8859-1"):
             if key is None and value is None:
                 continue
 
-            if line.startswith("vs."):
+            if line_decode.startswith("vs."):
                 metadata.update({f"{key_old} {key}": value})
                 continue
             metadata.update({key: value})
