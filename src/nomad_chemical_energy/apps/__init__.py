@@ -1,5 +1,12 @@
 from nomad.config.models.plugins import AppEntryPoint
-from nomad.config.models.ui import App, Column, Columns, FilterMenu, FilterMenus, Filters
+from nomad.config.models.ui import (
+    App,
+    Column,
+    Columns,
+    FilterMenu,
+    FilterMenus,
+    Filters,
+)
 
 necc_find_app = AppEntryPoint(
     name='FindNECCExperiments',

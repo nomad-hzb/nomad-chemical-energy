@@ -18,26 +18,17 @@
 
 import os
 
-# from nomad.units import ureg
-from nomad.metainfo import (
-    SchemaPackage,
-    Section)
-from nomad.datamodel.data import EntryData
-
-
-from baseclasses.characterizations import (
-    XRD, XRDData
-)
-
+from baseclasses.characterizations import XRD, XRDData
+from baseclasses.characterizations.electron_microscopy import SEM_Microscope_Merlin
 from baseclasses.chemical_energy import (
     CyclicVoltammetry,
-    OpenCircuitVoltage,
     ElectrochemicalImpedanceSpectroscopy,
+    OpenCircuitVoltage,
 )
+from nomad.datamodel.data import EntryData
 
-from baseclasses.characterizations.electron_microscopy import (
-    SEM_Microscope_Merlin
-)
+# from nomad.units import ureg
+from nomad.metainfo import SchemaPackage, Section
 
 m_package = SchemaPackage()
 

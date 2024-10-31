@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import re
 import locale
+import re
 from io import StringIO
 
 import pandas as pd
@@ -91,14 +91,13 @@ def get_curve(f, _header, _curve_units, curve_length=None):
         elif key == "Pt":
             if not is_numeric_dtype(curve.index):
                 curve.index = curve.index.map(int)
-        else:
-            if not is_numeric_dtype(curve[key]):
-                try:
-                    curve[key] = curve[key].map(locale.atof)
-                except:
-                    curve[key] = curve[key].apply(
-                        lambda x: x.replace(",", "."))
-                    curve[key] = curve[key].map(locale.atof)
+        elif not is_numeric_dtype(curve[key]):
+            try:
+                curve[key] = curve[key].map(locale.atof)
+            except:
+                curve[key] = curve[key].apply(
+                    lambda x: x.replace(",", "."))
+                curve[key] = curve[key].map(locale.atof)
     # print(curve_keys, curve_units)
     # print(_curve_units, curve_units)
 
@@ -158,7 +157,7 @@ def get_header_and_data(f):
                     if curve is None:
                         break
                     curves.append(curve)
-                _curves[''.join((x for x in cur_line[0] if not x.isdigit()))] = curves
+                _curves[''.join(x for x in cur_line[0] if not x.isdigit())] = curves
             # data format: key, type, value
             if cur_line[0].strip() in ["METHOD"]:
                 _header[cur_line[0]] = cur_line[1]

@@ -16,62 +16,39 @@
 # limitations under the License.
 #
 
-import os
-import numpy as np
 
 # from nomad.units import ureg
-from nomad.metainfo import (
-    SchemaPackage,
-    Quantity,
-    SubSection,
-    Section,
-    Reference)
-from nomad.datamodel.data import EntryData
-
-from baseclasses.solution import Solution
-from baseclasses.mxene_solution import MXeneSolution
-
-from .utilities.ce_nsli_id import CENSLIIdentifier
-
 from baseclasses.characterizations import (
-    Raman,
     SPV,
-    SEM,
-    TEM,
     SXM,
+    TEM,
     XAS,
     XPEEM,
-    InfraredSpectroscopy
+    XRD,
+    InfraredSpectroscopy,
+    Raman,
 )
-
-from baseclasses.characterizations import (
-    XRD, XRDData
-)
-from baseclasses.characterizations.electron_microscopy import (
-    SEM_Microscope_Merlin
-)
-
-
+from baseclasses.characterizations.electron_microscopy import SEM_Microscope_Merlin
 from baseclasses.chemical_energy import (
-    Cleaning, SolutionCleaning, SubstrateProperties,
-    DiamondSample,
-    CENSLISample,
-    # WaterBath,
-    CyclicVoltammetry,
     Chronoamperometry,
+    ConstantPotential,
+    CyclicVoltammetry,
+    DiamondSample,
     OpenCircuitVoltage,
     OpticalMicorscopy,
     PhotoCurrent,
-    ConstantPotential
+    SubstrateProperties,
 )
-
-from baseclasses.helper.utilities import create_archive, set_sample_reference, get_entry_reference
-
+from baseclasses.mxene_solution import MXeneSolution
 from baseclasses.wet_chemical_deposition import (
     DropCasting,
     SpinCoating,
-    WetChemicalDeposition
+    WetChemicalDeposition,
 )
+from nomad.datamodel.data import EntryData
+from nomad.metainfo import Quantity, Reference, SchemaPackage, Section, SubSection
+
+from .utilities.ce_nsli_id import CENSLIIdentifier
 
 m_package = SchemaPackage()
 
@@ -99,11 +76,10 @@ def assign_id(obj, archive, method):
 
 
 def get_processes(archive, entry_id, lab_id):
-    from nomad.search import search
-    from nomad.app.v1.models import MetadataPagination
+
     from nomad import files
-    import baseclasses
-    import inspect
+    from nomad.app.v1.models import MetadataPagination
+    from nomad.search import search
 
     # search for all archives referencing this archive
     query = {

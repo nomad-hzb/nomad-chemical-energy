@@ -17,29 +17,32 @@
 #
 
 import datetime
-from baseclasses.helper.utilities import set_sample_reference, create_archive
-from nomad_chemical_energy.schema_packages.ce_wannsee_package import (Wannsee_XRD_XY)
-from nomad.datamodel import EntryArchive
-from nomad.parsing import MatchingParser
-from baseclasses.helper.utilities import find_sample_by_id, get_entry_id_from_file_name, get_reference
-
 import os
-from nomad.datamodel.metainfo.basesections import CompositeSystemReference
 
+from baseclasses.helper.utilities import (
+    create_archive,
+    find_sample_by_id,
+    get_entry_id_from_file_name,
+    get_reference,
+    set_sample_reference,
+)
+from nomad.datamodel import EntryArchive
 from nomad.datamodel.data import (
     EntryData,
+)
+from nomad.datamodel.metainfo.annotations import (
+    ELNAnnotation,
+)
+from nomad.datamodel.metainfo.basesections import (
+    Activity,
+    CompositeSystemReference,
 )
 from nomad.metainfo import (
     Quantity,
 )
+from nomad.parsing import MatchingParser
 
-from nomad.datamodel.metainfo.basesections import (
-    Activity,
-)
-
-from nomad.datamodel.metainfo.annotations import (
-    ELNAnnotation,
-)
+from nomad_chemical_energy.schema_packages.ce_wannsee_package import Wannsee_XRD_XY
 
 '''
 This is a hello world style example for an example parser/converter.
@@ -83,19 +86,27 @@ class MPTParser(MatchingParser):
             notes = mainfile_split[1]
         cam_measurements = None
 
-        from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import read_mpt_file
+        from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import (
+            read_mpt_file,
+        )
         metadata, _, technique = read_mpt_file(mainfile)
 
         if "Cyclic Voltammetry" in technique:
-            from nomad_chemical_energy.schema_packages.ce_wannsee_package import Wannsee_B307_CyclicVoltammetry_ECLab
+            from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
+                Wannsee_B307_CyclicVoltammetry_ECLab,
+            )
             cam_measurements = Wannsee_B307_CyclicVoltammetry_ECLab()
 
         if "Open Circuit Voltage" in technique:
-            from nomad_chemical_energy.schema_packages.ce_wannsee_package import Wannsee_B307_OpenCircuitVoltage_ECLab
+            from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
+                Wannsee_B307_OpenCircuitVoltage_ECLab,
+            )
             cam_measurements = Wannsee_B307_OpenCircuitVoltage_ECLab()
 
         if "Potentio Electrochemical Impedance Spectroscopy" in technique:
-            from nomad_chemical_energy.schema_packages.ce_wannsee_package import Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab
+            from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
+                Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab,
+            )
             cam_measurements = Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab()
 
         archive.metadata.entry_name = os.path.basename(mainfile)
@@ -152,7 +163,9 @@ class CORParser(MatchingParser):
         if len(mainfile_split) > 2:
             notes = mainfile_split[1]
 
-        from nomad_chemical_energy.schema_packages.ce_wannsee_package import Wannsee_B307_CyclicVoltammetry_CorrWare
+        from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
+            Wannsee_B307_CyclicVoltammetry_CorrWare,
+        )
         cam_measurements = Wannsee_B307_CyclicVoltammetry_CorrWare()
 
         archive.metadata.entry_name = os.path.basename(mainfile)

@@ -16,30 +16,35 @@
 # limitations under the License.
 #
 
-from nomad.datamodel.metainfo.basesections import CompositeSystemReference
+import datetime
+import os
+
+from baseclasses.helper.utilities import (
+    create_archive,
+    get_entry_id_from_file_name,
+    get_reference,
+    set_sample_reference,
+)
 from nomad.datamodel import EntryArchive
-from nomad.parsing import MatchingParser
+from nomad.datamodel.data import (
+    EntryData,
+)
 from nomad.datamodel.metainfo.annotations import (
     ELNAnnotation,
 )
-from nomad.datamodel.data import (
-    EntryData,
+from nomad.datamodel.metainfo.basesections import (
+    Activity,
 )
 from nomad.metainfo import (
     Quantity,
 )
-from nomad.datamodel.metainfo.basesections import (
-    Activity, CompositeSystemReference,
+from nomad.parsing import MatchingParser
+
+from nomad_chemical_energy.schema_packages.dlr_electro_chemistry_package import (
+    DLR_Chronopotentiometry,
+    DLR_CyclicVoltammetry,
+    DLR_ElectrochemicalImpedanceSpectroscopy,
 )
-import os
-import datetime
-
-from baseclasses.helper.utilities import (find_sample_by_id, create_archive, get_entry_id_from_file_name, get_reference,
-                                          search_class, set_sample_reference)
-
-from nomad_chemical_energy.schema_packages.dlr_electro_chemistry_package import \
-    (DLR_Chronopotentiometry, DLR_CyclicVoltammetry, DLR_ElectrochemicalImpedanceSpectroscopy)
-
 
 '''
 This is a hello world style example for an example parser/converter.

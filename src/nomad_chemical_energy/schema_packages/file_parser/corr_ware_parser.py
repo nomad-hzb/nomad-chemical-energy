@@ -28,7 +28,7 @@ def get_header_data_corrware(filename):
 
     _header = dict()
     _working = _header
-    with open(file=filename, mode="r", encoding="utf8", errors="ignore") as f:
+    with open(file=filename, encoding="utf8", errors="ignore") as f:
         line = f.readline()
         count = -1
         _technique = ''

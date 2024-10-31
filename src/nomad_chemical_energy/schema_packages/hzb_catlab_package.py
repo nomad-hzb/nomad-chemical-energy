@@ -16,39 +16,18 @@
 # limitations under the License.
 #
 
-import datetime
-import os
 
-import numpy as np
-from baseclasses import SingleSampleExperiment, BaseMeasurement
-from baseclasses.catalysis import (
-    CatalysisLibrary, CatalysisSample
-)
-from baseclasses.helper.utilities import create_archive, rewrite_json, get_entry_id_from_file_name, get_reference
-from baseclasses.vapour_based_deposition import (
-    MultiTargetSputtering, SputteringProcess, PECVDeposition, PECVDProcess
-
-)
-from nomad_chemical_energy.schema_packages.hzb_characterization_package import (
-    HZB_SEM_Merlin, HZB_TGA, HZB_XPS, HZB_XRD, HZB_XRR, HZB_XRF, HZB_Ellipsometry,
-    HZB_XRD_Library, HZB_XPS_Library, HZB_XRR_Library, HZB_XRF_Library, HZB_Ellipsometry_Library
-)
-
+from baseclasses import BaseMeasurement
+from baseclasses.catalysis import CatalysisLibrary, CatalysisSample
+from baseclasses.vapour_based_deposition import MultiTargetSputtering, PECVDeposition
 from nomad.datamodel.data import EntryData
+from nomad.datamodel.results import ELN, Results
 
-from nomad.datamodel.metainfo.basesections import (
-    CompositeSystemReference
-)
 # from nomad.units import ureg
-from nomad.metainfo import (
-    Section, Quantity, SchemaPackage)
-# from nomad_measurements.catalytic_measurement.catalytic_measurement import ReactionConditions
+from nomad.metainfo import Quantity, SchemaPackage, Section
 
+# from nomad_measurements.catalytic_measurement.catalytic_measurement import ReactionConditions
 from unidecode import unidecode
-from nomad.datamodel.results import (
-    Results,
-    ELN
-)
 
 m_package = SchemaPackage()
 
@@ -79,8 +58,8 @@ def get_next_project_sample_number(data, entry_id):
 
 
 def create_id(archive, lab_id_base):
-    from nomad.search import search
     from nomad.app.v1.models import MetadataPagination
+    from nomad.search import search
 
     query = {'entry_type': "CatLab_Sample", 'results.eln.lab_ids': lab_id_base}
     pagination = MetadataPagination()

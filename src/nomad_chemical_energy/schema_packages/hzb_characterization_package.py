@@ -16,26 +16,27 @@
 # limitations under the License.
 #
 
-import os
 
 
 # from nomad.units import ureg
-from nomad.metainfo import (
-    SchemaPackage,
-    Section)
-from nomad.datamodel.data import EntryData
-
 from baseclasses.characterizations import (
-    XRD, XRDData, XPS, TGA, XRR, XRF, Ellipsometry,
-    XRDLibrary, XPSLibrary, XRRLibrary, XRFLibrary, EllipsometryLibrary
+    TGA,
+    XPS,
+    XRD,
+    XRF,
+    XRR,
+    Ellipsometry,
+    EllipsometryLibrary,
+    XPSLibrary,
+    XRDLibrary,
+    XRFLibrary,
+    XRRLibrary,
 )
-
 
 # from nomad_measurements.xrd import XRayDiffraction
-
-from baseclasses.characterizations.electron_microscopy import (
-    SEM_Microscope_Merlin
-)
+from baseclasses.characterizations.electron_microscopy import SEM_Microscope_Merlin
+from nomad.datamodel.data import EntryData
+from nomad.metainfo import SchemaPackage, Section
 
 m_package = SchemaPackage()
 

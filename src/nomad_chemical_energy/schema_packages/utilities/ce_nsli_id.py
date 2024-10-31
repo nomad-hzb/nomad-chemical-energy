@@ -1,55 +1,25 @@
-from typing import TYPE_CHECKING, Iterable
 import datetime
-import re
 from typing import (
-    Dict,
-    List,
+    TYPE_CHECKING,
 )
 
-import numpy as np
-from ase.data import (
-    chemical_symbols,
-    atomic_numbers,
-    atomic_masses,
-)
-import requests
-
-from nomad.datamodel.metainfo.workflow import Link, Task, TaskReference, Workflow
 if TYPE_CHECKING:
     from structlog.stdlib import (
         BoundLogger,
     )
-from nomad.atomutils import (
-    Formula,
+from nomad.datamodel.data import (
+    ArchiveSection,
 )
-from nomad import (
-    utils,
-)
-from nomad.units import (
-    ureg,
+from nomad.datamodel.results import (
+    ELN,
+    Results,
 )
 from nomad.metainfo import (
-    Quantity,
     Datetime,
-    Reference,
-    Section,
-    SubSection,
+    Quantity,
 )
 from nomad.metainfo.util import (
     MEnum,
-)
-from nomad.datamodel.data import (
-    ArchiveSection,
-    EntryData,
-)
-from nomad.datamodel.results import (
-    Results,
-    ELN,
-    ElementalComposition as ResultsElementalComposition,
-    Material,
-)
-from nomad.datamodel.metainfo.annotations import (
-    ELNAnnotation,
 )
 
 

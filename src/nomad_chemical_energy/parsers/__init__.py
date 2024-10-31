@@ -74,21 +74,27 @@ class CEWannseeXRDParserEntryPoint(ParserEntryPoint):
 class DLRECCPParserEntryPoint(ParserEntryPoint):
 
     def load(self):
-        from nomad_chemical_energy.parsers.dlr_electro_chemistry_parser import DLRECCPParser
+        from nomad_chemical_energy.parsers.dlr_electro_chemistry_parser import (
+            DLRECCPParser,
+        )
         return DLRECCPParser(**self.dict())
 
 
 class DLRECCVParserEntryPoint(ParserEntryPoint):
 
     def load(self):
-        from nomad_chemical_energy.parsers.dlr_electro_chemistry_parser import DLRECCVParser
+        from nomad_chemical_energy.parsers.dlr_electro_chemistry_parser import (
+            DLRECCVParser,
+        )
         return DLRECCVParser(**self.dict())
 
 
 class DLRECEISParserEntryPoint(ParserEntryPoint):
 
     def load(self):
-        from nomad_chemical_energy.parsers.dlr_electro_chemistry_parser import DLRECEISParser
+        from nomad_chemical_energy.parsers.dlr_electro_chemistry_parser import (
+            DLRECEISParser,
+        )
         return DLRECEISParser(**self.dict())
 
 
@@ -102,7 +108,9 @@ class CatlabParserEntryPoint(ParserEntryPoint):
 class GeneralProcessParserEntryPoint(ParserEntryPoint):
 
     def load(self):
-        from nomad_chemical_energy.parsers.hzb_general_parser import GeneralProcessParser
+        from nomad_chemical_energy.parsers.hzb_general_parser import (
+            GeneralProcessParser,
+        )
         return GeneralProcessParser(**self.dict())
 
 

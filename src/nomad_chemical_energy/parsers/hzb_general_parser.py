@@ -16,27 +16,30 @@
 # limitations under the License.
 #
 
+from baseclasses.helper.utilities import (
+    create_archive,
+    get_entry_id_from_file_name,
+    get_reference,
+    set_sample_reference,
+)
 from nomad.datamodel import EntryArchive
+from nomad.datamodel.data import (
+    EntryData,
+)
+from nomad.datamodel.metainfo.annotations import (
+    ELNAnnotation,
+)
+from nomad.datamodel.metainfo.basesections import (
+    Activity,
+)
 from nomad.metainfo import (
     Quantity,
 )
 from nomad.parsing import MatchingParser
-from nomad.datamodel.data import (
-    EntryData,
+
+from nomad_chemical_energy.schema_packages.hzb_general_process_package import (
+    HZB_GeneralProcess,
 )
-
-from nomad.datamodel.metainfo.annotations import (
-    ELNAnnotation,
-)
-
-from nomad.datamodel.metainfo.basesections import (
-    Activity,
-)
-
-from baseclasses.helper.utilities import (create_archive, get_entry_id_from_file_name,
-                                          get_reference, set_sample_reference)
-
-from nomad_chemical_energy.schema_packages.hzb_general_process_package import (HZB_GeneralProcess)
 
 
 class ParsedGeneralProcessFile(EntryData):
@@ -84,8 +87,8 @@ class GeneralProcessParser(MatchingParser):
 
 
 def update_general_process_entries(entry, entry_id, archive, logger, entry_class):
-    from nomad.search import search
     from nomad import files
+    from nomad.search import search
     query = {
         'entry_id': entry_id,
     }

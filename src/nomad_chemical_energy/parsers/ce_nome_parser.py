@@ -16,38 +16,53 @@
 # limitations under the License.
 #
 
-from nomad.datamodel.metainfo.basesections import CompositeSystemReference
+import datetime
+import os
+import re
+
+from baseclasses.helper.utilities import (
+    create_archive,
+    find_sample_by_id,
+    get_entry_id_from_file_name,
+    get_reference,
+    search_class,
+    set_sample_reference,
+)
 from nomad.datamodel import EntryArchive
-from nomad.parsing import MatchingParser
+from nomad.datamodel.data import (
+    EntryData,
+)
 from nomad.datamodel.metainfo.annotations import (
     ELNAnnotation,
 )
-from nomad.datamodel.data import (
-    EntryData,
+from nomad.datamodel.metainfo.basesections import (
+    Activity,
+    CompositeSystemReference,
 )
 from nomad.metainfo import (
     Quantity,
 )
-from nomad.datamodel.metainfo.basesections import (
-    Activity, CompositeSystemReference,
+from nomad.parsing import MatchingParser
+
+from nomad_chemical_energy.schema_packages.ce_nome_package import (
+    Bessy2_KMC2_XASFluorescence,
+    Bessy2_KMC2_XASTransmission,
+    CE_NOME_Chronoamperometry,
+    CE_NOME_Chronocoulometry,
+    CE_NOME_Chronopotentiometry,
+    CE_NOME_CPAnalysis,
+    CE_NOME_CyclicVoltammetry,
+    CE_NOME_ElectrochemicalImpedanceSpectroscopy,
+    CE_NOME_GalvanodynamicSweep,
+    CE_NOME_LinearSweepVoltammetry,
+    CE_NOME_Massspectrometry,
+    CE_NOME_Measurement,
+    CE_NOME_OpenCircuitVoltage,
+    CE_NOME_PhaseFluorometryOxygen,
+    CE_NOME_PumpRateMeasurement,
+    CE_NOME_TIF_Image,
+    CE_NOME_UVvismeasurement,
 )
-import os
-import datetime
-import re
-
-from baseclasses.helper.utilities import (find_sample_by_id, create_archive, get_entry_id_from_file_name, get_reference,
-                                          search_class, set_sample_reference)
-
-from nomad_chemical_energy.schema_packages.ce_nome_package import \
-    (CE_NOME_Chronoamperometry, CE_NOME_CyclicVoltammetry, CE_NOME_Chronopotentiometry,
-     CE_NOME_Chronocoulometry, CE_NOME_ElectrochemicalImpedanceSpectroscopy,
-     CE_NOME_LinearSweepVoltammetry, CE_NOME_Measurement, CE_NOME_OpenCircuitVoltage,
-     CE_NOME_PhaseFluorometryOxygen, CE_NOME_PumpRateMeasurement, CE_NOME_UVvismeasurement,
-     Bessy2_KMC2_XASTransmission, Bessy2_KMC2_XASFluorescence, CE_NOME_GalvanodynamicSweep, CE_NOME_TIF_Image,
-     CE_NOME_Massspectrometry,
-     CE_NOME_CPAnalysis,
-     )
-
 
 '''
 This is a hello world style example for an example parser/converter.
@@ -105,7 +120,9 @@ class GamryParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual
         # parser.
-        from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import get_header_and_data
+        from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import (
+            get_header_and_data,
+        )
         with archive.m_context.raw_file(os.path.basename(mainfile), "rt") as f:
             metadata, _ = get_header_and_data(f)
 

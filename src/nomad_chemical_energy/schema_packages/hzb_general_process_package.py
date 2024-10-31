@@ -16,14 +16,11 @@
 # limitations under the License.
 #
 
-from nomad.metainfo import (
-    SchemaPackage,
-    Section)
-from nomad.datamodel.data import EntryData
-
 from baseclasses.chemical_energy import (
     GeneralProcess,
 )
+from nomad.datamodel.data import EntryData
+from nomad.metainfo import SchemaPackage, Section
 
 m_package = SchemaPackage()
 

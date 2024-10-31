@@ -1,9 +1,7 @@
 import os
-import nomad.search
+
 import pytest
 from nomad.client import normalize_all, parse
-from nomad.app.v1.models.models import (
-    MetadataResponse)
 
 
 @pytest.fixture(
@@ -55,7 +53,7 @@ def parsed_archive(request, monkeypatch):
     assert file_archive.data.activity
     archive_json = ''
     for file in os.listdir(os.path.join("tests/data")):
-        if not "archive.json" in file or request.param.replace("#", "run") not in file:
+        if "archive.json" not in file or request.param.replace("#", "run") not in file:
             continue
         archive_json = file 
         measurement = os.path.join(

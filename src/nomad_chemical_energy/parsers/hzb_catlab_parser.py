@@ -16,29 +16,26 @@
 # limitations under the License.
 #
 
-import pandas as pd
-import datetime
 
+from baseclasses.helper.utilities import (
+    create_archive,
+    get_entry_id_from_file_name,
+    get_reference,
+)
 from nomad.datamodel import EntryArchive
+from nomad.datamodel.data import (
+    EntryData,
+)
+from nomad.datamodel.metainfo.basesections import (
+    CompositeSystem,
+    CompositeSystemReference,
+)
 from nomad.metainfo import (
     Quantity,
 )
 from nomad.parsing import MatchingParser
-from nomad.datamodel.metainfo.annotations import (
-    ELNAnnotation,
-)
-from nomad.datamodel.data import (
-    EntryData,
-)
 
-from nomad.datamodel.metainfo.basesections import (
-    Activity, CompositeSystem, CompositeSystemReference
-)
-
-from baseclasses.helper.utilities import (create_archive, get_entry_id_from_file_name,
-                                          get_reference, set_sample_reference)
-
-from nomad_chemical_energy.schema_packages.hzb_catlab_package import (CatLab_Sample)
+from nomad_chemical_energy.schema_packages.hzb_catlab_package import CatLab_Sample
 
 
 def find_sample_by_id(archive, sample_id):
@@ -78,9 +75,8 @@ class ParsedCatlabFile(EntryData):
 
 
 def search_samples_in_upload(archive):
+
     from nomad.search import search
-    import inspect
-    import baseclasses
 
     query = {
         'entry_type': "CatLab_Sample",

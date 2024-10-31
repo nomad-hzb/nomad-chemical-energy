@@ -32,7 +32,9 @@ class CEWannseePackageEntryPoint(SchemaPackageEntryPoint):
 class HZBCharacterizationPackageEntryPoint(SchemaPackageEntryPoint):
 
     def load(self):
-        from nomad_chemical_energy.schema_packages.hzb_characterization_package import m_package
+        from nomad_chemical_energy.schema_packages.hzb_characterization_package import (
+            m_package,
+        )
         return m_package
 
 
@@ -46,14 +48,18 @@ class HZBCatlabPackageEntryPoint(SchemaPackageEntryPoint):
 class DLRECPackageEntryPoint(SchemaPackageEntryPoint):
 
     def load(self):
-        from nomad_chemical_energy.schema_packages.dlr_electro_chemistry_package import m_package
+        from nomad_chemical_energy.schema_packages.dlr_electro_chemistry_package import (
+            m_package,
+        )
         return m_package
 
 
 class HZBGeneralPackageEntryPoint(SchemaPackageEntryPoint):
 
     def load(self):
-        from nomad_chemical_energy.schema_packages.hzb_general_process_package import m_package
+        from nomad_chemical_energy.schema_packages.hzb_general_process_package import (
+            m_package,
+        )
         return m_package
 
 

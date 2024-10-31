@@ -16,62 +16,19 @@
 # limitations under the License.
 #
 
-import numpy as np
 import os
+
 import pandas as pd
-
-from nomad.datamodel.metainfo.plot import PlotSection, PlotlyFigure
-import plotly.graph_objs as go
-
-# from nomad.units import ureg
-from nomad.metainfo import (
-    Package,
-    Quantity,
-    Section, SubSection, SchemaPackage)
+from baseclasses.chemical_energy import (
+    Chronopotentiometry,
+    CyclicVoltammetry,
+    ElectrochemicalImpedanceSpectroscopy,
+    VoltammetryCycleWithPlot,
+)
 from nomad.datamodel.data import EntryData
 
-from nomad.datamodel.metainfo.eln import Substance
-from nomad.datamodel.metainfo.basesections import PubChemPureSubstanceSection
-from baseclasses import (
-    BaseProcess, BaseMeasurement
-)
-
-from baseclasses.design1 import Design
-from baseclasses.documentation_tool import DocumentationTool
-
-from baseclasses.characterizations import (
-    XASFluorescence, XASTransmission
-)
-
-from baseclasses.voila import (
-    VoilaNotebook
-)
-
-from baseclasses.solar_energy import UVvisMeasurement
-
-from baseclasses.chemical_energy import (
-    CENOMESample, SampleIDCENOME, Electrode, Electrolyte, ElectroChemicalCell, SubstrateProperties, Equipment,
-    CatalystSynthesis,
-    ElectroChemicalSetup, Environment, Purging, SubstanceWithConcentration,
-    get_next_project_sample_number,
-    CyclicVoltammetry, VoltammetryCycleWithPlot,
-    Chronoamperometry,
-    Chronopotentiometry,
-    Chronocoulometry,
-    OpenCircuitVoltage,
-    ElectrochemicalImpedanceSpectroscopy,
-    # PreparationProtocol,
-    GalvanodynamicSweep,
-    PhaseFluorometryOxygen,
-    PumpRateMeasurement,
-    LinearSweepVoltammetry,
-    UVvisDataConcentration
-)
-
-from baseclasses.data_transformations import UVvisConcentrationDetection
-
-from baseclasses.helper.utilities import create_archive, rewrite_json, find_sample_by_id
-from datetime import datetime
+# from nomad.units import ureg
+from nomad.metainfo import SchemaPackage, Section
 
 m_package = SchemaPackage()
 
@@ -124,7 +81,9 @@ class DLR_ElectrochemicalImpedanceSpectroscopy(
                     data.columns = ["Index", "Freq", "Zreal", "Zimag", "Zmod", "Zphz", "Time"]
                     data.Zimag *= -1
                     data.Zphz *= -1
-                    from baseclasses.helper.archive_builder.gamry_archive import get_eis_data
+                    from baseclasses.helper.archive_builder.gamry_archive import (
+                        get_eis_data,
+                    )
                     get_eis_data(data, self)
 
         super(DLR_ElectrochemicalImpedanceSpectroscopy,
@@ -182,7 +141,9 @@ class DLR_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                     for key in unique_names:
                         data_list.append(data[:][data.Scan == key])
 
-                    from baseclasses.helper.archive_builder.gamry_archive import get_voltammetry_data
+                    from baseclasses.helper.archive_builder.gamry_archive import (
+                        get_voltammetry_data,
+                    )
                     self.cycles = []
                     for curve in data_list:
                         cycle = VoltammetryCycleWithPlot()
@@ -221,7 +182,9 @@ class DLR_Chronopotentiometry(Chronopotentiometry, EntryData):
                     data = pd.read_csv(f, sep="\t", skiprows=1, header=0)
                     data.columns = ["Tabs", "Vf", "T", "Index"]
 
-                    from baseclasses.helper.archive_builder.gamry_archive import get_voltammetry_data
+                    from baseclasses.helper.archive_builder.gamry_archive import (
+                        get_voltammetry_data,
+                    )
                     get_voltammetry_data(data, self)
 
         super(DLR_Chronopotentiometry, self).normalize(archive, logger)

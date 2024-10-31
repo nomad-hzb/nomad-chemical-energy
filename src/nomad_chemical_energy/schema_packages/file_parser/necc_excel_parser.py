@@ -21,10 +21,8 @@
 # SOFTWARE.
 
 import pandas as pd
-
+from baseclasses.chemical_energy import GasFEResults, NECCFeedGas
 from nomad.datamodel.metainfo.basesections import CompositeSystemReference
-
-from baseclasses.chemical_energy import NECCFeedGas, GasFEResults
 
 
 def _round_not_zero(number):
