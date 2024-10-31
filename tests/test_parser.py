@@ -4,6 +4,22 @@ import pytest
 from nomad.client import normalize_all, parse
 
 
+def set_monkey_patch(monkeypatch): 
+    def mockreturn_search(*args):
+        return None
+    monkeypatch.setattr(
+     'nomad_chemical_energy.parsers.ce_nome_parser.search_class', 
+     mockreturn_search)
+    monkeypatch.setattr(
+     'nomad_chemical_energy.parsers.ce_nome_parser.set_sample_reference', 
+     mockreturn_search)
+    monkeypatch.setattr(
+     'nomad_chemical_energy.parsers.ce_nome_parser.find_sample_by_id', 
+     mockreturn_search)
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_necc_parser.set_sample_reference', 
+        mockreturn_search)
+
 @pytest.fixture(
     params=[
         '20230223_080542_NiOx_MW_Co10_1_1_Co_001_0_merged.dat',
@@ -38,20 +54,8 @@ def parsed_archive(request, monkeypatch):
     """
     Sets up data for testing and cleans up after the test.
     """
-    def mockreturn_search(*args):
-        return None
-    monkeypatch.setattr(
-        'nomad_chemical_energy.parsers.ce_nome_parser.search_class', 
-        mockreturn_search)
-    monkeypatch.setattr(
-        'nomad_chemical_energy.parsers.ce_nome_parser.set_sample_reference', 
-        mockreturn_search)
-    monkeypatch.setattr(
-        'nomad_chemical_energy.parsers.ce_nome_parser.find_sample_by_id', 
-        mockreturn_search)
-    monkeypatch.setattr(
-        'nomad_chemical_energy.parsers.ce_necc_parser.set_sample_reference', 
-        mockreturn_search)
+   
+    set_monkey_patch(monkeypatch)
 
     rel_file = os.path.join('tests', 'data', request.param)
     file_archive = parse(rel_file)[0]
@@ -83,4 +87,52 @@ def parsed_archive(request, monkeypatch):
 
 def test_normalize_all(parsed_archive, monkeypatch):
     normalize_all(parsed_archive)
+
+    
+def get_archive(file_base, monkeypatch):
+    set_monkey_patch(monkeypatch)
+    file_name =  os.path.join('tests', 'data',file_base)
+    file_archive = parse(file_name)[0]
+    for file in os.listdir(os.path.join("tests/data")):
+        if "archive.json" not in file\
+            or file_base.replace("#", "run") not in file:
+            continue
+        measurement = os.path.join(
+            'tests', 'data', file
+        )
+        measurement_archive = parse(measurement)[0]
+
+
+        if os.path.exists(measurement):
+            os.remove(measurement)
+        break
+    normalize_all(measurement_archive)
+    return measurement_archive
+
+def test_gamry_EIS_parser(monkeypatch):
+    file = 'EISPOT.DTA'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.properties
+    assert archive.data.frequency[0]
+    assert archive.data.z_real[0]
+    assert archive.data.atmosphere[0].temperature.magnitude == 25
+    assert archive.data.properties.initial_frequency.magnitude == 2*1e6
+    
+def test_gamry_CV_parser(monkeypatch):
+    file = 'CV.DTA'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.properties
+    assert archive.data.cycles[0].voltage[0]
+    assert archive.data.atmosphere[0].temperature.magnitude == 25
+    assert archive.data.properties.limit_potential_1.magnitude == 0.5
+
+   
+
+   
+
+    
+    
+    
    
