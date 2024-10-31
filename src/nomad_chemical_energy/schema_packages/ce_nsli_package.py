@@ -28,7 +28,9 @@ from baseclasses.characterizations import (
     InfraredSpectroscopy,
     Raman,
 )
-from baseclasses.characterizations.electron_microscopy import SEM_Microscope_Merlin
+from baseclasses.characterizations.electron_microscopy import (
+    SEM_Microscope_Merlin,
+)
 from baseclasses.chemical_energy import (
     Chronoamperometry,
     ConstantPotential,
@@ -46,7 +48,13 @@ from baseclasses.wet_chemical_deposition import (
     WetChemicalDeposition,
 )
 from nomad.datamodel.data import EntryData
-from nomad.metainfo import Quantity, Reference, SchemaPackage, Section, SubSection
+from nomad.metainfo import (
+    Quantity, 
+    Reference, 
+    SchemaPackage, 
+    Section, 
+    SubSection,
+)
 
 from .utilities.ce_nsli_id import CENSLIIdentifier
 
@@ -71,7 +79,8 @@ def find_id(archive, lab_id, method):
 
 
 def assign_id(obj, archive, method):
-    if not obj.lab_id and obj.solution and obj.solution[0].solution and obj.solution[0].solution.lab_id:
+    if not obj.lab_id and obj.solution and obj.solution[0].solution\
+        and obj.solution[0].solution.lab_id:
         obj.lab_id = find_id(archive, obj.solution[0].solution.lab_id, method)
 
 
@@ -91,11 +100,14 @@ def get_processes(archive, entry_id, lab_id):
                            user_id=archive.metadata.main_author.user_id)
     processes = []
     for res in search_result.data:
-        with files.UploadFiles.get(upload_id=res["upload_id"]).read_archive(entry_id=res["entry_id"]) as archive:
+        with files.UploadFiles.get(upload_id=res["upload_id"])\
+            .read_archive(entry_id=res["entry_id"]) as archive:
             entry_id = res["entry_id"]
             entry_data = archive[entry_id]["data"]
-            if "lab_id" in entry_data and entry_data.get("lab_id").startswith(lab_id):
-                processes.append((entry_data.get("lab_id"), entry_data.get("name")))
+            if "lab_id" in entry_data\
+                and entry_data.get("lab_id").startswith(lab_id):
+                processes.append((entry_data.get("lab_id"), 
+                                  entry_data.get("name")))
     return sorted(processes, key=lambda pair: pair[0])
 # %% ####################### Entities
 
@@ -110,7 +122,12 @@ class CE_NSLI_MXene_Solution(MXeneSolution, EntryData):
                     "name",
                     "create_overview",
                     "overview",
-                    "MAX_phase", "etching", "delamination", "washing", "concentration", "properties"
+                    "MAX_phase", 
+                    "etching", 
+                    "delamination", 
+                    "washing", 
+                    "concentration", 
+                    "properties"
                 ],
             )))
 
@@ -134,7 +151,8 @@ class CE_NSLI_MXene_Solution(MXeneSolution, EntryData):
         if self.create_overview and self.lab_id:
             self.create_overview = False
 
-            data = [[p[0], p[1]] for p in get_processes(archive,  archive.entry_id, self.lab_id)]
+            data = [[p[0], p[1]] for p in 
+                    get_processes(archive,  archive.entry_id, self.lab_id)]
             import pandas as pd
             df = pd.DataFrame(data, columns=["process_id", "process_name"])
             export_file_name = f"list_of_sample_preparations_{self.lab_id}.csv"
@@ -212,7 +230,9 @@ class CE_NSLI_SpinCoating(SpinCoating, EntryData):
         a_eln=dict(
             hide=[
                 'users',
-                'end_time',  'steps', 'instruments', 'results', 'recipe', "samples",
+                'end_time',  
+                'steps', 
+                'instruments', 'results', 'recipe', "samples",
                 "positon_in_experimental_plan", "present", "batch", "layer"],
             properties=dict(
                 order=[
@@ -235,7 +255,9 @@ class CE_NSLI_SEM(SEM_Microscope_Merlin, EntryData):
         a_eln=dict(hide=['lab_id',
                          'users',
                          "location",
-                         'end_time',  'steps', 'instruments', 'results', "detector_data_folder", "external_sample_url"],
+                         'end_time',  'steps', 'instruments', 
+                         'results', "detector_data_folder", 
+                         "external_sample_url"],
                    properties=dict(
             order=[
                 "name",
@@ -254,14 +276,16 @@ class CE_NSLI_XRD_XY(XRD, EntryData):
                 'lab_id',
                 'users',
                 "location",
-                'end_time',  'steps', 'instruments', 'results',  'steps', 'instruments', 'results',
+                'end_time',  'steps', 'instruments', 'results',  
+                'steps', 'instruments', 'results',
                 "metadata_file",
                 "shifted_data",
                 "identifier"],
             properties=dict(
                 order=[
                     "name",
-                    "data_file", "datetime", "description", "sample_preparation",
+                    "data_file", "datetime", "description", 
+                    "sample_preparation",
                     "samples"])),
         a_plot=[
             {
@@ -480,7 +504,8 @@ class CE_NSLI_Photocurrent(PhotoCurrent, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
-                'lab_id', 'solution', 'users', "location", "end_time"]), a_plot=[
+                'lab_id', 'solution', 'users', "location", "end_time"]), 
+            a_plot=[
             {
                 'label': 'Energy', 'x': 'energy', 'y': 'voltage', 'layout': {
                     'yaxis': {

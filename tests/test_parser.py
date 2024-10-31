@@ -40,10 +40,18 @@ def parsed_archive(request, monkeypatch):
     """
     def mockreturn_search(*args):
         return None
-    monkeypatch.setattr('nomad_chemical_energy.parsers.ce_nome_parser.search_class', mockreturn_search)
-    monkeypatch.setattr('nomad_chemical_energy.parsers.ce_nome_parser.set_sample_reference', mockreturn_search)
-    monkeypatch.setattr('nomad_chemical_energy.parsers.ce_nome_parser.find_sample_by_id', mockreturn_search)
-    monkeypatch.setattr('nomad_chemical_energy.parsers.ce_necc_parser.set_sample_reference', mockreturn_search)
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_nome_parser.search_class', 
+        mockreturn_search)
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_nome_parser.set_sample_reference', 
+        mockreturn_search)
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_nome_parser.find_sample_by_id', 
+        mockreturn_search)
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_necc_parser.set_sample_reference', 
+        mockreturn_search)
 
     rel_file = os.path.join('tests', 'data', request.param)
     file_archive = parse(rel_file)[0]
@@ -53,7 +61,8 @@ def parsed_archive(request, monkeypatch):
     assert file_archive.data.activity
     archive_json = ''
     for file in os.listdir(os.path.join("tests/data")):
-        if "archive.json" not in file or request.param.replace("#", "run") not in file:
+        if "archive.json" not in file\
+            or request.param.replace("#", "run") not in file:
             continue
         archive_json = file 
         measurement = os.path.join(

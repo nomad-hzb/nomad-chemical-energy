@@ -30,7 +30,8 @@ m_package = SchemaPackage()
 class HZB_GeneralProcess(GeneralProcess, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'location', 'steps', 'atmosphere', 'instruments', 'results'],
+            hide=['lab_id', 'location', 'steps', 'atmosphere', 'instruments', 
+                  'results'],
             properties=dict(
                 order=[])),
     )
