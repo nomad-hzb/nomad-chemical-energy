@@ -63,6 +63,15 @@ class HZBGeneralPackageEntryPoint(SchemaPackageEntryPoint):
         return m_package
 
 
+class TFCPackageEntryPoint(SchemaPackageEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.schema_packages.tfc_package import (
+            m_package,
+        )
+        return m_package
+
+
 ce_nome_package = CENOMEPackageEntryPoint(
     name='CE_NOME',
     description='Package for HZB group CE-NOME',
@@ -102,4 +111,9 @@ dlr_ec_package = DLRECPackageEntryPoint(
 hzb_general_process_package = HZBGeneralPackageEntryPoint(
     name='HZBGeneral',
     description='Package for general HZB Schema',
+)
+
+tfc_package = TFCPackageEntryPoint(
+    name='TFC',
+    description='Package for Thin Film Catalysts Group',
 )

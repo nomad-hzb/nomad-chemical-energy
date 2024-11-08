@@ -121,6 +121,7 @@ hzb_characterization_package = "nomad_chemical_energy.schema_packages:hzb_charac
 hzb_catlab_package = "nomad_chemical_energy.schema_packages:hzb_catlab_package"
 dlr_ec_package = "nomad_chemical_energy.schema_packages:dlr_ec_package"
 hzb_general_process_package = "nomad_chemical_energy.schema_packages:hzb_general_process_package"
+tfc_package = "nomad_chemical_energy.schema_packages:tfc_package"
 
 hzb_catlab_parser = "nomad_chemical_energy.parsers:hzb_catlab_parser"
 ce_necc_xlsx_parser = "nomad_chemical_energy.parsers:ce_necc_xlsx_parser"
@@ -138,6 +139,7 @@ dlr_ec_cv_parser = "nomad_chemical_energy.parsers:dlr_ec_cv_parser"
 dlr_ec_cp_parser = "nomad_chemical_energy.parsers:dlr_ec_cp_parser"
 dlr_ec_eis_parser = "nomad_chemical_energy.parsers:dlr_ec_eis_parser"
 hzb_general_process_parser = "nomad_chemical_energy.parsers:hzb_general_process_parser"
+tfc_sputtering_parser = "nomad_chemical_energy.parsers:tfc_sputtering_parser"
 
 necc_find_app = "nomad_chemical_energy.apps:necc_find_app"
 necc_compare_app = "nomad_chemical_energy.apps:necc_compare_app"

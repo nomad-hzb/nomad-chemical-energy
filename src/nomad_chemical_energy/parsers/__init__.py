@@ -121,6 +121,13 @@ class GeneralNomeParserEntryPoint(ParserEntryPoint):
         return GeneralNomeParser(**self.dict())
 
 
+class TFCSputteringParserEntyPoint(ParserEntryPoint):
+
+    def load(self):
+        from nomad_chemical_energy.parsers.tfc_parser import TFCSputteringParser
+        return TFCSputteringParser(**self.dict())
+
+
 ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     name='CENECCxlsxParser',
     description='Parser for CENECC xls files',
@@ -224,3 +231,17 @@ ce_nome_general_parser = GeneralNomeParserEntryPoint(
     mainfile_name_re=r'^.*CE-NOME_[A-Z][a-z][A-Z][a-z](_\d{6})?_\d{4}(?!.*\.json$|.*\.*py$|.*\.*pynb$)[a-zA-Z0-9.]+$',
     level=2
 )
+
+tfc_sputtering_parser = TFCSputteringParserEntyPoint(
+    name='TFCSputteringParser',
+    description='Parse ods files with sputtering information. Files are defined for the Thin Film Catalysis Group.',
+    mainfile_name_re=r'.+\.xlsx',
+    mainfile_mime_re=r'^(application\/vnd\.(openxmlformats-officedocument\.spreadsheetml\.sheet|oasis\.opendocument\.spreadsheet))$',
+    mainfile_contents_dict={
+        'Parameters': {'__has_all_keys': ['Process/Steps  (i.e., layer)']},
+        'Observables': {'__has_all_keys': ['Sputtering', 'Values']},
+        '__comment_symbol': '#',
+    },
+)
+
+
