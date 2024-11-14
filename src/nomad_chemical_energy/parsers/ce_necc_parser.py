@@ -49,12 +49,11 @@ class ParsedExcelFile(EntryData):
         shape=['*'],
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
-        )
+        ),
     )
 
 
 class NECCXlsxParser(MatchingParser):
-
     def is_mainfile(
         self,
         filename: str,
@@ -67,12 +66,12 @@ class NECCXlsxParser(MatchingParser):
         if not is_mainfile_super:
             return False
         excel_sheets = pd.ExcelFile(filename).sheet_names
-        required_sheets = ["Catalyst details", "Experimental details", "Raw Data", "Results"]
+        required_sheets = ['Catalyst details', 'Experimental details', 'Raw Data', 'Results']
         return all(sheet in excel_sheets for sheet in required_sheets)
 
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
         file = mainfile.split('/')[-1]
-        if not file.endswith(".xlsx"):
+        if not file.endswith('.xlsx'):
             return
 
         xls_file = pd.ExcelFile(mainfile)
@@ -81,10 +80,10 @@ class NECCXlsxParser(MatchingParser):
             return
         entry = CE_NECC_EC_GC(data_file=file)
 
-        search_id = file.split("#")[0]
+        search_id = file.split('#')[0]
         set_sample_reference(archive, entry, search_id)
-        entry.datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
-        entry.name = f"{search_id}"
+        entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        entry.name = f'{search_id}'
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)
 

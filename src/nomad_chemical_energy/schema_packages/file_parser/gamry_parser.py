@@ -31,7 +31,7 @@ from pandas.api.types import is_numeric_dtype
 def _read_curve_data(fid, curve_length) -> tuple:
     """helper function to process an EXPLAIN Table
     Args:
-        fid (int): a file handle pointer to the table position in the 
+        fid (int): a file handle pointer to the table position in the
         data files
     Returns:
         keys (list): column identifier (e.g. Vf)
@@ -39,16 +39,16 @@ def _read_curve_data(fid, curve_length) -> tuple:
         curve (DataFrame): Table data saved as a pandas Dataframe
     """
     pos = 0
-    curve = fid.readline().strip() + "\n"  # grab header data
-    if len(curve) <= 1 or "CURVE" in curve:
+    curve = fid.readline().strip() + '\n'  # grab header data
+    if len(curve) <= 1 or 'CURVE' in curve:
         return [], [], pd.DataFrame()
 
-    units = fid.readline().strip().split("\t")
+    units = fid.readline().strip().split('\t')
     cur_line = fid.readline().strip()
     line_count = 0
-    while not re.search(r"(CURVE|EXPERIMENTABORTED)", cur_line):
+    while not re.search(r'(CURVE|EXPERIMENTABORTED)', cur_line):
         line_count += 1
-        curve += cur_line + "\n"
+        curve += cur_line + '\n'
         if curve_length is not None and curve_length == line_count:
             break
         pos = fid.tell()
@@ -56,11 +56,9 @@ def _read_curve_data(fid, curve_length) -> tuple:
         if fid.tell() == pos:
             break
     try:
-        curve = pd.read_csv(StringIO(curve), delimiter="\t",
-                            header=0, index_col=0)
+        curve = pd.read_csv(StringIO(curve), delimiter='\t', header=0, index_col=0)
     except:
-        curve = pd.read_csv(StringIO(curve), delimiter="\t",
-                            header=0, index_col=0, decimal=",")
+        curve = pd.read_csv(StringIO(curve), delimiter='\t', header=0, index_col=0, decimal=',')
 
     keys = curve.columns.values.tolist()
     units = units[1:]
@@ -69,8 +67,8 @@ def _read_curve_data(fid, curve_length) -> tuple:
 
 
 def get_number(value_str):
-    if "," in value_str:
-        return get_number(value_str.replace(",", "."))
+    if ',' in value_str:
+        return get_number(value_str.replace(',', '.'))
     try:
         return locale.atof(value_str)
     except:
@@ -79,33 +77,31 @@ def get_number(value_str):
 
 def get_curve(f, _header, _curve_units, curve_length=None):
     curve_keys, curve_units, curve = _read_curve_data(f, curve_length)
-    dict(CV=dict(Vf="V vs. Ref.", Im="A"))
+    dict(CV=dict(Vf='V vs. Ref.', Im='A'))
     if curve.empty:
         return None
 
     for key in curve_keys:
         nonnumeric_keys = [
-            "Over",
+            'Over',
         ]
         if key in nonnumeric_keys:
             continue
-        elif key == "Pt":
+        elif key == 'Pt':
             if not is_numeric_dtype(curve.index):
                 curve.index = curve.index.map(int)
         elif not is_numeric_dtype(curve[key]):
             try:
                 curve[key] = curve[key].map(locale.atof)
             except:
-                curve[key] = curve[key].apply(
-                    lambda x: x.replace(",", "."))
+                curve[key] = curve[key].apply(lambda x: x.replace(',', '.'))
                 curve[key] = curve[key].map(locale.atof)
-    
+
     return curve
 
 
 def check_is_number(key, input_string):
-    if key in ["NICK", "PSTATSERIALNO", "PSTATSECTION", "SAMPLEID", 
-               "ENVIRONMENTID", "ECSETUPID", "DCCALDATE", "ACCALDATE"]:
+    if key in ['NICK', 'PSTATSERIALNO', 'PSTATSECTION', 'SAMPLEID', 'ENVIRONMENTID', 'ECSETUPID', 'DCCALDATE', 'ACCALDATE']:
         return input_string
     try:
         return float(input_string)
@@ -114,76 +110,70 @@ def check_is_number(key, input_string):
 
 
 def get_header_and_data(f):
-
     _header = dict()
     _curve_units = dict()
     _curves = {}
 
     pos = 0
-    cur_line = f.readline().split("\t")
+    cur_line = f.readline().split('\t')
     while True:
         if f.tell() == pos:
             break
         pos = f.tell()
-        cur_line = f.readline().strip().split("\t")
+        cur_line = f.readline().strip().split('\t')
         if len(cur_line[0]) == 0:
             pass
 
         if len(cur_line) > 1:
-
-            if "CURVE" in cur_line[0] and len(cur_line) > 2:
+            if 'CURVE' in cur_line[0] and len(cur_line) > 2:
                 table_length = get_number(cur_line[2])
-                _curves[cur_line[0]] = [get_curve(
-                    f, _header, _curve_units, table_length)]
-            elif "CURVE" in cur_line[0]:
+                _curves[cur_line[0]] = [get_curve(f, _header, _curve_units, table_length)]
+            elif 'CURVE' in cur_line[0]:
                 curves = []
                 while True:
                     curve = get_curve(f, _header, _curve_units)
                     if curve is None:
                         break
                     curves.append(curve)
-                _curves[''.join(x for x in cur_line[0] if not x.isdigit())]\
-                    = curves
+                _curves[''.join(x for x in cur_line[0] if not x.isdigit())] = curves
             # data format: key, type, value
-            if cur_line[0].strip() in ["METHOD"]:
+            if cur_line[0].strip() in ['METHOD']:
                 _header[cur_line[0]] = cur_line[1]
-            if cur_line[1].strip() in ["LABEL", "PSTAT"]:
-                _header[cur_line[0]]\
-                    = check_is_number(cur_line[0], cur_line[2])\
-                    if len(cur_line) > 2 else ''
-                if cur_line[0] in ["TITLE"] and len(cur_line) > 3:
-                    _header["SAMPLE_ID"] = cur_line[3]
-            elif cur_line[1] in ["POTEN"] and len(cur_line) == 5:
+            if cur_line[1].strip() in ['LABEL', 'PSTAT']:
+                _header[cur_line[0]] = check_is_number(cur_line[0], cur_line[2]) if len(cur_line) > 2 else ''
+                if cur_line[0] in ['TITLE'] and len(cur_line) > 3:
+                    _header['SAMPLE_ID'] = cur_line[3]
+            elif cur_line[1] in ['POTEN'] and len(cur_line) == 5:
                 tmp_value = get_number(cur_line[2])
-                _header[cur_line[0]] = (tmp_value, cur_line[3] == "T")
+                _header[cur_line[0]] = (tmp_value, cur_line[3] == 'T')
 
-            elif cur_line[1] in ["QUANT", "IQUANT", "POTEN"]:
+            elif cur_line[1] in ['QUANT', 'IQUANT', 'POTEN']:
                 # locale-friendly alternative to float
                 _header[cur_line[0]] = get_number(cur_line[2])
-            elif cur_line[1] in ["IQUANT", "SELECTOR"]:
+            elif cur_line[1] in ['IQUANT', 'SELECTOR']:
                 _header[cur_line[0]] = int(cur_line[2])
-            elif cur_line[1] in ["TOGGLE"]:
-                _header[cur_line[0]] = cur_line[2] == "T"
-            elif cur_line[1] in ["ONEPARAM"]:
+            elif cur_line[1] in ['TOGGLE']:
+                _header[cur_line[0]] = cur_line[2] == 'T'
+            elif cur_line[1] in ['ONEPARAM']:
                 tmp_value = get_number(cur_line[3])
-                _header[cur_line[0]] = (tmp_value, cur_line[2] == "T")
-            elif cur_line[1] == "TWOPARAM":
+                _header[cur_line[0]] = (tmp_value, cur_line[2] == 'T')
+            elif cur_line[1] == 'TWOPARAM':
                 tmp_start = get_number(cur_line[3])
                 tmp_finish = get_number(cur_line[4])
                 _header[cur_line[0]] = {
-                    "enable": cur_line[2] == "T",
+                    'enable': cur_line[2] == 'T',
                     # locale-friendly alternative to float
-                    "start": tmp_start,
+                    'start': tmp_start,
                     # locale-friendly alternative to float
-                    "finish": tmp_finish,
+                    'finish': tmp_finish,
                 }
-            elif cur_line[0] == "TAG":
-                _header["TAG"] = cur_line[1]
-            elif cur_line[0] == "NOTES":
+            elif cur_line[0] == 'TAG':
+                _header['TAG'] = cur_line[1]
+            elif cur_line[0] == 'NOTES':
                 n_notes = int(cur_line[2])
-                note = ""
+                note = ''
                 for _ in range(n_notes):
-                    note += f.readline().strip() + "\n"
+                    note += f.readline().strip() + '\n'
                 _header[cur_line[0]] = note
 
     f.tell()

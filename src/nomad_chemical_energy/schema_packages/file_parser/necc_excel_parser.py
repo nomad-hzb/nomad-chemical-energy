@@ -31,14 +31,15 @@ def _round_not_zero(number):
         return number
     return rounded_num
 
+
 def _process_potentiostat_column(data, column_name):
     if column_name in data.columns:
         return data[column_name].dropna().apply(_round_not_zero)
     return None
 
-def read_potentiostat_data(data):
 
-    datetimes = pd.to_datetime(data['time/s'], errors="coerce").dropna()
+def read_potentiostat_data(data):
+    datetimes = pd.to_datetime(data['time/s'], errors='coerce').dropna()
 
     current = _process_potentiostat_column(data, 'I/mA')
     working_electrode_potential = _process_potentiostat_column(data, 'Ewe/V')
@@ -68,7 +69,6 @@ def read_thermocouple_data(data, start_time, end_time):
 
 
 def read_gaschromatography_data(data):
-
     instrument_file_names = data.loc[:, data.columns.str.startswith('Experiment name')]
     instrument_file_names.dropna(axis=0, how='all', inplace=True)
 
@@ -103,18 +103,20 @@ def read_results_data(file):
     cell_voltage = data['Cell Voltage'].dropna()
 
     gas_measurements = []
-    current_column_headers = [col for col in data.columns if col.endswith("I (mA)")]
+    current_column_headers = [col for col in data.columns if col.endswith('I (mA)')]
 
     for col_header in current_column_headers:
         gas_type = col_header.split(' ', 1)[0]
         current = data[col_header].dropna()
-        fe = data[" ".join([gas_type, 'FE (%)'])].dropna()
-        gas_measurements.append(GasFEResults(
-            gas_type=gas_type,
-            datetime=datetimes.to_list(),
-            current=current,
-            faradaic_efficiency=fe,
-        ))
+        fe = data[' '.join([gas_type, 'FE (%)'])].dropna()
+        gas_measurements.append(
+            GasFEResults(
+                gas_type=gas_type,
+                datetime=datetimes.to_list(),
+                current=current,
+                faradaic_efficiency=fe,
+            )
+        )
 
     return datetimes, total_flow_rate, total_fe, cell_current, cell_voltage, gas_measurements
 
@@ -147,16 +149,13 @@ def read_properties(file):
         'chronoanalysis_method': data.loc['CP/CA', 1],
     }
 
-    experimental_properties_dict = {key: value for key,
-                                    value in experimental_properties_dict.items() if not pd.isna(value)}
+    experimental_properties_dict = {key: value for key, value in experimental_properties_dict.items() if not pd.isna(value)}
 
     feed_gases = []
     if not pd.isna(data.loc['Feed gas 1', 1] and data.loc['Feed gas flow rate (ml/min)', 1].iat[0]):
-        feed_gases.append(NECCFeedGas(name=data.loc['Feed gas 1', 1],
-                          flow_rate=data.loc['Feed gas flow rate (ml/min)', 1].iat[0]))
+        feed_gases.append(NECCFeedGas(name=data.loc['Feed gas 1', 1], flow_rate=data.loc['Feed gas flow rate (ml/min)', 1].iat[0]))
     if not pd.isna(data.loc['Feed gas 2', 1] and data.loc['Feed gas flow rate (ml/min)', 1].iat[1]):
-        feed_gases.append(NECCFeedGas(name=data.loc['Feed gas 2', 1],
-                          flow_rate=data.loc['Feed gas flow rate (ml/min)', 1].iat[1]))
+        feed_gases.append(NECCFeedGas(name=data.loc['Feed gas 2', 1], flow_rate=data.loc['Feed gas flow rate (ml/min)', 1].iat[1]))
     experimental_properties_dict.update({'feed_gases': feed_gases})
 
     if not pd.isna(data.loc['Anode ID', 1]):
