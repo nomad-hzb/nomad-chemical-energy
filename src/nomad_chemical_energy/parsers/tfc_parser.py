@@ -20,7 +20,6 @@ from baseclasses.helper.utilities import (
     create_archive,
     get_entry_id_from_file_name,
     get_reference,
-    set_sample_reference,
 )
 from nomad.datamodel import EntryArchive
 from nomad.datamodel.data import (
@@ -41,6 +40,7 @@ from nomad_chemical_energy.schema_packages.tfc_package import (
     TFC_Sputtering,
 )
 
+from nomad_chemical_energy.parsers.hzb_general_parser import update_general_process_entries
 
 class ParsedSputteringFile(EntryData):
 
@@ -57,14 +57,12 @@ class TFCSputteringParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
 
         file_name = mainfile.split('/')[-1]
-        sample_id = file_name.split(".")[0].split("-")[0]
 
         entry = TFC_Sputtering()
         entry.name = file_name
         entry.data_file = file_name
 
         archive.metadata.entry_name = file_name
-        set_sample_reference(archive, entry, sample_id, archive.metadata.upload_id)
         file_name_archive = f'{file_name}.archive.json'
         create_archive(entry, archive, file_name_archive)
 
@@ -73,15 +71,15 @@ class TFCSputteringParser(MatchingParser):
         archive.data = ParsedSputteringFile(activity=ref)
         archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
 
-        # TODO for new measurement parsers that should replace GeneralProcess entries you can use this code inside the parser
-        # file_name_archive = f'{file_name}.archive.json'
-        # new_entry_created = create_archive(entry, archive, file_name_archive)
-        # eid = get_entry_id_from_file_name(file_name_archive, archive)
-        # ref = get_reference(archive.metadata.upload_id, eid)
-        # if not new_entry_created:
-        #     new_entry = update_general_process_entries(entry, eid, archive, logger, TxtMeasurement())
-        #     if new_entry is not None:
-        #         create_archive(new_entry, archive, file_name_archive, overwrite=True)
-        # archive.data = ParsedTxtFile(activity=ref)
-        # archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
+        # TODO remove the next code block if all GeneralProcess entries matching the TFC_Sputtering are replaced
+        file_name_archive = f'{file_name}.archive.json'
+        new_entry_created = create_archive(entry, archive, file_name_archive)
+        eid = get_entry_id_from_file_name(file_name_archive, archive)
+        ref = get_reference(archive.metadata.upload_id, eid)
+        if not new_entry_created:
+            new_entry = update_general_process_entries(entry, eid, archive, logger, TFC_Sputtering())
+            if new_entry is not None:
+                create_archive(new_entry, archive, file_name_archive, overwrite=True)
+        archive.data = ParsedSputteringFile(activity=ref)
+        archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
 
