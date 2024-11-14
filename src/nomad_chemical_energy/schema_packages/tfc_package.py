@@ -77,7 +77,6 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
                 self.datetime = information_values.get('Date') if self.datetime is None else self.datetime
                 self.sample_lab_label = information_values.get('Notes')
                 self.holder = information_values.get('Holder')
-                # TODO set reference for next 3
                 self.substrate = information_values.get('Substrate')
                 self.sample_owner = information_values.get('Sample Owner')
                 self.process_user = information_values.get('Process user')
