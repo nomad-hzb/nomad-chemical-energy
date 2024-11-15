@@ -115,6 +115,7 @@ def test_gamry_CV_parser(monkeypatch):
     assert archive.data.atmosphere[0].temperature.magnitude == 25
     assert archive.data.properties.limit_potential_1.magnitude == 0.5
 
+
 def test_tfc_sputtering_parser(monkeypatch):
     file = 'tfc_sputtering.xlsx'
     archive = get_archive(file, monkeypatch)
