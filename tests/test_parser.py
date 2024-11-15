@@ -1,5 +1,6 @@
 import os
 
+import nomad_chemical_energy.schema_packages.tfc_package
 import pytest
 from nomad.client import normalize_all, parse
 
@@ -12,6 +13,8 @@ def set_monkey_patch(monkeypatch):
     monkeypatch.setattr('nomad_chemical_energy.parsers.ce_nome_parser.set_sample_reference', mockreturn_search)
     monkeypatch.setattr('nomad_chemical_energy.parsers.ce_nome_parser.find_sample_by_id', mockreturn_search)
     monkeypatch.setattr('nomad_chemical_energy.parsers.ce_necc_parser.set_sample_reference', mockreturn_search)
+    monkeypatch.setattr('nomad_chemical_energy.parsers.hzb_general_parser.update_general_process_entries', mockreturn_search)
+    monkeypatch.setattr('nomad_chemical_energy.schema_packages.tfc_package.set_sample_reference', mockreturn_search)
 
 
 @pytest.fixture(
@@ -111,3 +114,15 @@ def test_gamry_CV_parser(monkeypatch):
     assert archive.data.cycles[0].voltage[0]
     assert archive.data.atmosphere[0].temperature.magnitude == 25
     assert archive.data.properties.limit_potential_1.magnitude == 0.5
+
+def test_tfc_sputtering_parser(monkeypatch):
+    file = 'tfc_sputtering.xlsx'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.targets
+    assert archive.data.process_properties
+    assert archive.data.observables
+    assert archive.data.holder == '6" Wafer'
+    assert archive.data.process_properties[0].sputter_pressure.magnitude == 0.0167
+    assert archive.data.targets[0].name == '1) Al'
+    assert archive.data.observables[0].temperature.magnitude == 25
