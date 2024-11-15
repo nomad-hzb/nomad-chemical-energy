@@ -75,7 +75,7 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
                 information_values = information_df['Value'].where(pd.notna(information_df['Value']), None)
                 self.name = information_values.get('Process') if self.name is None else self.name
                 self.datetime = information_values.get('Date') if self.datetime is None else self.datetime
-                self.sample_lab_label = information_values.get('Notes')
+                self.sample_lab_label = information_values.get('Sample Lab label')
                 self.holder = information_values.get('Holder')
                 self.substrate = information_values.get('Substrate')
                 self.sample_owner = information_values.get('Sample Owner')
