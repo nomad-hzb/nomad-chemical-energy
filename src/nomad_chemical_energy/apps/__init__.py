@@ -1206,11 +1206,11 @@ nome_oer_cp_app = AppEntryPoint(
                     'autorange': True,
                     'size': 1000,
                     'x': {
-                        'quantity': 'data.outputs[0].voltage_avg_first5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                        'quantity': 'data.outputs[*].voltage_avg_first5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
                         'unit': 'volt'
                     },
                     'y': {
-                        'quantity': 'data.outputs[0].voltage_avg_last5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                        'quantity': 'data.outputs[*].voltage_avg_last5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
                         'unit': 'volt'
                     },
                     'layout': {
