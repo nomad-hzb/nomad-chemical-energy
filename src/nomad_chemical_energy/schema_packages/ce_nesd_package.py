@@ -335,7 +335,7 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(ElectrolyserPerformanceEvaluatio
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file) as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 # TODO difference to tdms_index files
                 if os.path.splitext(self.data_file)[-1] == ".tdms":
                     from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import get_info_and_data
