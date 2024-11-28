@@ -75,15 +75,46 @@ class CE_NOME_Design(Design, EntryData):
 
 
 class CE_NOME_Sample(CENOMESample, EntryData):
-    m_def = Section(a_eln=dict(hide=['users', 'elemental_composition', 'components'], properties=dict(order=['name', 'lab_id', 'chemical_composition_or_formulas', 'id_of_preparation_protocol'])), label_quantity='sample_id')
+    m_def = Section(
+        a_eln=dict(
+            hide=['users', 'elemental_composition', 'components'],
+            properties=dict(
+                order=[
+                    'name',
+                    'lab_id',
+                    'chemical_composition_or_formulas',
+                    'id_of_preparation_protocol',
+                ]
+            ),
+        ),
+        label_quantity='sample_id',
+    )
 
 
 class CE_NOME_Electrode(Electrode, EntryData):
-    m_def = Section(a_eln=dict(hide=['users', 'origin', 'elemental_composition', 'components'], properties=dict(order=['name', 'lab_id', 'chemical_composition_or_formulas', 'producer', 'location'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=['users', 'origin', 'elemental_composition', 'components'],
+            properties=dict(
+                order=[
+                    'name',
+                    'lab_id',
+                    'chemical_composition_or_formulas',
+                    'producer',
+                    'location',
+                ]
+            ),
+        )
+    )
 
 
 class CE_NOME_Equipment(Equipment, EntryData):
-    m_def = Section(a_eln=dict(hide=['users', 'origin', 'elemental_composition', 'components'], properties=dict(order=['name', 'lab_id', 'producer', 'location'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=['users', 'origin', 'elemental_composition', 'components'],
+            properties=dict(order=['name', 'lab_id', 'producer', 'location']),
+        )
+    )
 
 
 # class CE_NOME_Electrolyte(Electrolyte, EntryData):
@@ -104,13 +135,35 @@ class CE_NOME_Equipment(Equipment, EntryData):
 
 
 class CE_NOME_Environment(Environment, EntryData):
-    m_def = Section(a_eln=dict(hide=['users', 'origin', 'elemental_composition', 'components', 'substrate'], properties=dict(editable=dict(exclude=['chemical_composition_or_formulas']), order=['name', 'lab_id', 'chemical_composition_or_formulas', 'ph_value', 'solvent'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'users',
+                'origin',
+                'elemental_composition',
+                'components',
+                'substrate',
+            ],
+            properties=dict(
+                editable=dict(exclude=['chemical_composition_or_formulas']),
+                order=[
+                    'name',
+                    'lab_id',
+                    'chemical_composition_or_formulas',
+                    'ph_value',
+                    'solvent',
+                ],
+            ),
+        )
+    )
 
     environment_id = SubSection(section_def=SampleIDCENOME)
 
 
 class CE_NOME_Chemical(Substance, EntryData):
-    m_def = Section(a_eln=dict(hide=['users', 'origin', 'elemental_composition', 'components']))
+    m_def = Section(
+        a_eln=dict(hide=['users', 'origin', 'elemental_composition', 'components'])
+    )
 
 
 # class CE_NOME_ElectroChemicalCell(ElectroChemicalCell, EntryData):
@@ -134,14 +187,38 @@ class CE_NOME_Chemical(Substance, EntryData):
 
 class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'origin', 'elemental_composition', 'components', 'substrate'], properties=dict(order=['name', 'lab_id', 'chemical_composition_or_formulas', 'setup', 'reference_electrode', 'counter_electrode', 'equipment'])),
+        a_eln=dict(
+            hide=[
+                'users',
+                'origin',
+                'elemental_composition',
+                'components',
+                'substrate',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'lab_id',
+                    'chemical_composition_or_formulas',
+                    'setup',
+                    'reference_electrode',
+                    'counter_electrode',
+                    'equipment',
+                ]
+            ),
+        ),
     )
 
     setup_id = SubSection(section_def=SampleIDCENOME)
 
 
 class CE_NOME_Annealing(Process, EntryData):
-    m_def = Section(a_eln=dict(hide=['users', 'origin', 'lab_id', 'instruments', 'steps', 'end_time'], properties=dict(order=['name'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=['users', 'origin', 'lab_id', 'instruments', 'steps', 'end_time'],
+            properties=dict(order=['name']),
+        )
+    )
 
     properties = SubSection(section_def=Annealing)
 
@@ -236,7 +313,12 @@ def get_next_free_project_number(archive, entity_id):
     query = {'results.eln.lab_ids': entity_id}
     pagination = MetadataPagination()
     pagination.page_size = 9999
-    search_result = search(owner='all', query=query, pagination=pagination, user_id=archive.metadata.main_author.user_id)
+    search_result = search(
+        owner='all',
+        query=query,
+        pagination=pagination,
+        user_id=archive.metadata.main_author.user_id,
+    )
     return get_next_project_sample_number(search_result.data, entity_id)
 
 
@@ -259,9 +341,18 @@ def set_setup(archive, row):
     return CE_NOME_ElectroChemicalSetup(
         name=get_parameter(row, 'name'),
         setup=get_parameter(row, 'setup'),
-        reference_electrode=find_sample_by_id(archive, get_parameter(row, 'reference_electrode')),
-        counter_electrode=find_sample_by_id(archive, get_parameter(row, 'counter_electrode')),
-        equipment=[find_sample_by_id(archive, row[f'equipment_{i}']) for i in range(5) if get_parameter(row, f'equipment_{i}') and find_sample_by_id(archive, row[f'equipment_{i}'])],
+        reference_electrode=find_sample_by_id(
+            archive, get_parameter(row, 'reference_electrode')
+        ),
+        counter_electrode=find_sample_by_id(
+            archive, get_parameter(row, 'counter_electrode')
+        ),
+        equipment=[
+            find_sample_by_id(archive, row[f'equipment_{i}'])
+            for i in range(5)
+            if get_parameter(row, f'equipment_{i}')
+            and find_sample_by_id(archive, row[f'equipment_{i}'])
+        ],
         description=get_parameter(row, 'description'),
     )
 
@@ -272,14 +363,33 @@ def set_environment(row):
         name=get_parameter(row, 'name'),
         ph_value=get_parameter(row, 'ph_value'),
         description=get_parameter(row, 'description'),
-        solvent=PubChemPureSubstanceSectionCustom(name=row['solvent_name'], load_data=False) if not pd.isna(row['solvent_name']) else None,
-        purging=Purging(time=get_parameter(row, 'purging_time'), temperature=get_parameter(row, 'purging_temperature'), gas=PubChemPureSubstanceSectionCustom(name=get_parameter(row, 'purging_gas_name'), load_data=False)) if not pd.isna(row['purging_gas_name']) else None,
+        solvent=PubChemPureSubstanceSectionCustom(
+            name=row['solvent_name'], load_data=False
+        )
+        if not pd.isna(row['solvent_name'])
+        else None,
+        purging=Purging(
+            time=get_parameter(row, 'purging_time'),
+            temperature=get_parameter(row, 'purging_temperature'),
+            gas=PubChemPureSubstanceSectionCustom(
+                name=get_parameter(row, 'purging_gas_name'), load_data=False
+            ),
+        )
+        if not pd.isna(row['purging_gas_name'])
+        else None,
         substances=[
             SubstanceWithConcentration(
-                concentration_mmol_per_l=float(get_parameter(row, f'concentration_M_{i}')) * 1000 if get_parameter(row, f'concentration_M_{i}') else None,
+                concentration_mmol_per_l=float(
+                    get_parameter(row, f'concentration_M_{i}')
+                )
+                * 1000
+                if get_parameter(row, f'concentration_M_{i}')
+                else None,
                 concentration_g_per_l=get_parameter(row, f'concentration_g_per_l_{i}'),
                 amount_relative=get_parameter(row, f'amount_relative_{i}'),
-                substance=PubChemPureSubstanceSectionCustom(name=get_parameter(row, f'substance_name_{i}'), load_data=False),
+                substance=PubChemPureSubstanceSectionCustom(
+                    name=get_parameter(row, f'substance_name_{i}'), load_data=False
+                ),
             )
             for i in range(number_of_substances_per_env)
             if not pd.isna(row[f'substance_name_{i}'])
@@ -288,28 +398,54 @@ def set_environment(row):
 
 
 def set_sample(row):
-    number_of_substances_per_synthesis = get_number_of_substances(row, 'substance_name_')
+    number_of_substances_per_synthesis = get_number_of_substances(
+        row, 'substance_name_'
+    )
     return CE_NOME_Sample(
         name=get_parameter(row, 'name'),
-        chemical_composition_or_formulas=get_parameter(row, 'chemical_composition_or_formula'),
+        chemical_composition_or_formulas=get_parameter(
+            row, 'chemical_composition_or_formula'
+        ),
         component_description=get_parameter(row, 'component_description'),
         origin=get_parameter(row, 'producer'),
         project_name_long=get_parameter(row, 'project_name_long'),
         description=get_parameter(row, 'description'),
-        substrate=SubstrateProperties(substrate_type=get_parameter(row, 'substrate_type'), substrate_dimension=get_parameter(row, 'substrate_dimension')),
+        substrate=SubstrateProperties(
+            substrate_type=get_parameter(row, 'substrate_type'),
+            substrate_dimension=get_parameter(row, 'substrate_dimension'),
+        ),
         active_area=get_parameter(row, 'active_area_cm**2'),
         mass_coverage=get_parameter(row, 'mass_coverage_ug_cm**2'),
-        expected_structure=ExpectedStructure(expected_structure_links=get_parameter(row, 'expected_structure_links').split(',') if get_parameter(row, 'expected_structure_links') else None, expected_structure_description=get_parameter(row, 'expected_structure_description')),
+        expected_structure=ExpectedStructure(
+            expected_structure_links=get_parameter(
+                row, 'expected_structure_links'
+            ).split(',')
+            if get_parameter(row, 'expected_structure_links')
+            else None,
+            expected_structure_description=get_parameter(
+                row, 'expected_structure_description'
+            ),
+        ),
         synthesis=[
             CatalystSynthesis(
                 method=get_parameter(row, 'synthesis_method'),
                 description=get_parameter(row, 'synthesis_description'),
                 substances=[
                     SubstanceWithConcentration(
-                        concentration_mmol_per_l=float(get_parameter(row, f'concentration_M_{i}')) * 1000 if get_parameter(row, f'concentration_M_{i}') else None,
-                        concentration_g_per_l=get_parameter(row, f'concentration_g_per_l_{i}'),
+                        concentration_mmol_per_l=float(
+                            get_parameter(row, f'concentration_M_{i}')
+                        )
+                        * 1000
+                        if get_parameter(row, f'concentration_M_{i}')
+                        else None,
+                        concentration_g_per_l=get_parameter(
+                            row, f'concentration_g_per_l_{i}'
+                        ),
                         amount_relative=get_parameter(row, f'amount_relative_{i}'),
-                        substance=PubChemPureSubstanceSectionCustom(name=get_parameter(row, f'substance_name_{i}'), load_data=False),
+                        substance=PubChemPureSubstanceSectionCustom(
+                            name=get_parameter(row, f'substance_name_{i}'),
+                            load_data=False,
+                        ),
                     )
                     for i in range(number_of_substances_per_synthesis)
                     if not pd.isna(row[f'substance_name_{i}'])
@@ -320,19 +456,40 @@ def set_sample(row):
 
 
 class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
-    m_def = Section(a_eln=dict(hide=['number_of_substances_per_env', 'number_of_substances_per_synthesis'], properties=dict(order=['name', 'lab_id', 'create_template', 'create_entries', 'data_file', 'number_of_substances_per_env', 'number_of_substances_per_synthesis'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=['number_of_substances_per_env', 'number_of_substances_per_synthesis'],
+            properties=dict(
+                order=[
+                    'name',
+                    'lab_id',
+                    'create_template',
+                    'create_entries',
+                    'data_file',
+                    'number_of_substances_per_env',
+                    'number_of_substances_per_synthesis',
+                ]
+            ),
+        )
+    )
 
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
         if self.identifier is None:
             author = archive.metadata.main_author
-            self.identifier = SampleIDCENOME(owner=f'{author.first_name} {author.last_name}')
+            self.identifier = SampleIDCENOME(
+                owner=f'{author.first_name} {author.last_name}'
+            )
             self.identifier.normalize(archive, logger)
             super().normalize(archive, logger)
 
         if self.create_entries and self.data_file:
             if not self.lab_id:
-                logger.error('no identifier information provided', normalizer=self.__class__.__name__, section='system')
+                logger.error(
+                    'no identifier information provided',
+                    normalizer=self.__class__.__name__,
+                    section='system',
+                )
                 return
             self.create_entries = False
             rewrite_json(['data', 'create_entries'], archive, False)
@@ -347,7 +504,9 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
             # prepare id
             id_base = '_'.join(self.lab_id.split('_')[:-1])
-            id_base_sample = '_'.join([id_base, self.datetime.strftime('%y%m%d')])  # today??
+            id_base_sample = '_'.join(
+                [id_base, self.datetime.strftime('%y%m%d')]
+            )  # today??
             next_free_id = get_next_free_project_number(archive, id_base)
             next_free_id_sample = get_next_free_project_number(archive, id_base_sample)
             counter = 0
@@ -358,7 +517,11 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 edit = True if row[0].startswith('CE-NOME') else False
                 try:
                     ce_nome_sample = set_sample(row)
-                    ce_nome_sample.lab_id = f'{id_base_sample}_{next_free_id_sample + counter_sample:04d}' if not edit else row[0]
+                    ce_nome_sample.lab_id = (
+                        f'{id_base_sample}_{next_free_id_sample + counter_sample:04d}'
+                        if not edit
+                        else row[0]
+                    )
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_sample_{idx}.archive.json"
                     create_archive(ce_nome_sample, archive, file_name, overwrite=edit)
                     samples.at[idx, 'id'] = ce_nome_sample.lab_id
@@ -366,14 +529,22 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     if not edit:
                         counter_sample += 1
                 except Exception as e:
-                    logger.error(f'could not create row {idx} for samples', normalizer=self.__class__.__name__, section='system')
+                    logger.error(
+                        f'could not create row {idx} for samples',
+                        normalizer=self.__class__.__name__,
+                        section='system',
+                    )
                     raise e
             # environments
             for idx, row in envs.iterrows():
                 edit = True if row[0].startswith('CE-NOME') else False
                 try:
                     ce_nome_envs = set_environment(row)
-                    ce_nome_envs.lab_id = f'{id_base}_{next_free_id + counter:04d}' if not edit else row[0]
+                    ce_nome_envs.lab_id = (
+                        f'{id_base}_{next_free_id + counter:04d}'
+                        if not edit
+                        else row[0]
+                    )
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_env_{idx}.archive.json"
                     create_archive(ce_nome_envs, archive, file_name, overwrite=edit)
                     envs.at[idx, 'id'] = ce_nome_envs.lab_id
@@ -381,7 +552,11 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     if not edit:
                         counter += 1
                 except Exception as e:
-                    logger.error(f'could not create row {idx} for environment', normalizer=self.__class__.__name__, section='system')
+                    logger.error(
+                        f'could not create row {idx} for environment',
+                        normalizer=self.__class__.__name__,
+                        section='system',
+                    )
                     raise e
 
             # setups
@@ -389,7 +564,11 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                 edit = True if row[0].startswith('CE-NOME') else False
                 try:
                     ce_nome_setup = set_setup(archive, row)
-                    ce_nome_setup.lab_id = f'{id_base}_{next_free_id + counter:04d}' if not edit else row[0]
+                    ce_nome_setup.lab_id = (
+                        f'{id_base}_{next_free_id + counter:04d}'
+                        if not edit
+                        else row[0]
+                    )
                     file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_setup_{idx}.archive.json"
                     create_archive(ce_nome_setup, archive, file_name, overwrite=edit)
                     setups.at[idx, 'id'] = ce_nome_setup.lab_id
@@ -397,7 +576,11 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                     if not edit:
                         counter += 1
                 except Exception as e:
-                    logger.error(f'could not create row {idx} for setups', normalizer=self.__class__.__name__, section='system')
+                    logger.error(
+                        f'could not create row {idx} for setups',
+                        normalizer=self.__class__.__name__,
+                        section='system',
+                    )
                     raise e
 
             with pd.ExcelWriter(os.path.join(path, self.data_file)) as writer:
@@ -410,7 +593,20 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
 
 class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'users', 'location', 'end_time', 'steps', 'instruments', 'results'], properties=dict(order=['name', 'data_file', 'samples'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(order=['name', 'data_file', 'samples']),
+        )
+    )
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -431,7 +627,21 @@ class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
 
 
 class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results'], properties=dict(order=['name', 'data_file', 'samples'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(order=['name', 'data_file', 'samples']),
+        )
+    )
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -450,16 +660,52 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NOME_ElectrochemicalImpedanceSpectroscopy(ElectrochemicalImpedanceSpectroscopy, EntryData):
+class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
+    ElectrochemicalImpedanceSpectroscopy, EntryData
+):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file'], properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'station'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'station',
+                ]
+            ),
+        ),
         a_plot=[
-            {'label': 'Nyquist Plot', 'x': 'z_real', 'y': 'z_imaginary', 'layout': {'yaxis': {'fixedrange': False, 'title': '-Im(Z) (Ω)'}, 'xaxis': {'fixedrange': False, 'title': 'Re(Z) (Ω)'}}},
+            {
+                'label': 'Nyquist Plot',
+                'x': 'z_real',
+                'y': 'z_imaginary',
+                'layout': {
+                    'yaxis': {'fixedrange': False, 'title': '-Im(Z) (Ω)'},
+                    'xaxis': {'fixedrange': False, 'title': 'Re(Z) (Ω)'},
+                },
+            },
             {
                 'label': 'Bode Plot',
                 'x': ['frequency', 'frequency'],
                 'y': ['./z_modulus', './z_angle'],
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False, 'type': 'log'}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False, 'type': 'log'},
+                },
             },
         ],
     )
@@ -508,21 +754,60 @@ class CE_NOME_VoilaNotebook(VoilaNotebook, EntryData):
 class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file', 'voltage', 'current', 'current_density', 'voltage_rhe_uncompensated', 'time', 'voltage_rhe_compensated', 'voltage_ref_compensated', 'charge_density', 'control', 'charge'],
-            properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'station', 'voltage_shift', 'resistance']),
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'voltage',
+                'current',
+                'current_density',
+                'voltage_rhe_uncompensated',
+                'time',
+                'voltage_rhe_compensated',
+                'voltage_ref_compensated',
+                'charge_density',
+                'control',
+                'charge',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'station',
+                    'voltage_shift',
+                    'resistance',
+                ]
+            ),
         ),
         a_plot=[
             {
                 'label': 'Current Density over Voltage RHE',
                 'x': 'cycles/:/voltage_rhe_compensated',
                 'y': 'cycles/:/current_density',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
             {
                 'label': 'Current over Voltage',
                 'x': 'cycles/:/voltage',
                 'y': 'cycles/:/current',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
         ],
     )
@@ -542,7 +827,9 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
 
                     metadata, data = get_header_and_data(f)
                     curve_key = get_curve_tag(metadata.get('METHOD'), self.function)
-                    get_voltammetry_archive(data, metadata, curve_key, self, multiple=True)
+                    get_voltammetry_archive(
+                        data, metadata, curve_key, self, multiple=True
+                    )
                     if not self.properties:
                         self.properties = get_cv_properties(metadata)
 
@@ -552,20 +839,54 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
 class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file', 'control', 'cycles', 'charge', 'charge_density'], properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'station', 'voltage_shift', 'resistance'])
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'control',
+                'cycles',
+                'charge',
+                'charge_density',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'station',
+                    'voltage_shift',
+                    'resistance',
+                ]
+            ),
         ),
         a_plot=[
             {
                 'label': 'Current Density over Voltage RHE',
                 'x': 'voltage_rhe_compensated',
                 'y': 'current_density',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
             {
                 'label': 'Current over Voltage',
                 'x': 'voltage',
                 'y': 'current',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
         ],
     )
@@ -595,20 +916,54 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
 class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file', 'control', 'cycles', 'charge', 'charge_density'], properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'station', 'voltage_shift', 'resistance'])
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'control',
+                'cycles',
+                'charge',
+                'charge_density',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'station',
+                    'voltage_shift',
+                    'resistance',
+                ]
+            ),
         ),
         a_plot=[
             {
                 'label': 'Current Density over Voltage RHE',
                 'x': 'voltage_rhe_compensated',
                 'y': 'current_density',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
             {
                 'label': 'Current over Voltage',
                 'x': 'voltage',
                 'y': 'current',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
         ],
     )
@@ -638,15 +993,44 @@ class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
 class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file', 'charge_density', 'control', 'cycles', 'charge', 'charge_density'],
-            properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'station', 'voltage_shift', 'resistance']),
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'charge_density',
+                'control',
+                'cycles',
+                'charge',
+                'charge_density',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'station',
+                    'voltage_shift',
+                    'resistance',
+                ]
+            ),
         ),
         a_plot=[
             {
                 'label': 'Current',
                 'x': 'time',
                 'y': 'current',
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
                 'config': {
                     'scrollZoom': True,
                     'staticPlot': False,
@@ -656,7 +1040,10 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                 'label': 'Current Density',
                 'x': 'time',
                 'y': 'current_density',
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
                 'config': {
                     'scrollZoom': True,
                     'staticPlot': False,
@@ -688,13 +1075,43 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
 
 class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file', 'charge_density', 'control', 'cycles'], properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'station', 'voltage_shift', 'resistance'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'charge_density',
+                'control',
+                'cycles',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'station',
+                    'voltage_shift',
+                    'resistance',
+                ]
+            ),
+        ),
         a_plot=[
             {
                 'label': 'Voltage',
                 'x': 'time',
                 'y': 'voltage',
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
                 'config': {
                     'scrollZoom': True,
                     'staticPlot': False,
@@ -726,13 +1143,43 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
 
 class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file', 'control', 'cycles'], properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'station', 'voltage_shift', 'resistance'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'control',
+                'cycles',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'station',
+                    'voltage_shift',
+                    'resistance',
+                ]
+            ),
+        ),
         a_plot=[
             {
                 'label': 'Charge and current density',
                 'x': 'time',
                 'y': ['./current_density', './charge_density'],
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             }
         ],
     )
@@ -760,13 +1207,43 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
 
 class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file', 'charge_density', 'control', 'cycles'], properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'station', 'voltage_shift', 'resistance'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'charge_density',
+                'control',
+                'cycles',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'station',
+                    'voltage_shift',
+                    'resistance',
+                ]
+            ),
+        ),
         a_plot=[
             {
                 'label': 'Voltage',
                 'x': 'time',
                 'y': 'voltage',
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             }
         ],
     )
@@ -793,7 +1270,21 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
 
 
 class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results'], properties=dict(order=['name', 'data_file', 'samples'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(order=['name', 'data_file', 'samples']),
+        )
+    )
 
     measurements = SubSection(section_def=UVvisDataConcentration, repeats=True)
 
@@ -823,17 +1314,43 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
                     )
 
                     with archive.m_context.raw_file(data_file, 'rt') as f:
-                        data = pd.read_csv(f, delimiter=delimiter, header=None, skiprows=2)
-                    measurements.append(get_uvvis_concentration_archive(data, datetime_object, data_file))
+                        data = pd.read_csv(
+                            f, delimiter=delimiter, header=None, skiprows=2
+                        )
+                    measurements.append(
+                        get_uvvis_concentration_archive(
+                            data, datetime_object, data_file
+                        )
+                    )
             self.measurements = measurements
 
             fig = go.Figure()
             for measurement in self.measurements:
                 measurement.normalize(archive, logger)
-                fig.add_traces(go.Scatter(name=measurement.name, x=measurement.wavelength, y=measurement.intensity, mode='lines'))
-                fig.add_traces(go.Scatter(name='peaks', x=[measurement.peak_wavelength], y=[measurement.peak_value], mode='markers', line_color='black', showlegend=False))
+                fig.add_traces(
+                    go.Scatter(
+                        name=measurement.name,
+                        x=measurement.wavelength,
+                        y=measurement.intensity,
+                        mode='lines',
+                    )
+                )
+                fig.add_traces(
+                    go.Scatter(
+                        name='peaks',
+                        x=[measurement.peak_wavelength],
+                        y=[measurement.peak_value],
+                        mode='markers',
+                        line_color='black',
+                        showlegend=False,
+                    )
+                )
             fig.update_layout(showlegend=True, xaxis={'fixedrange': False})
-            fig.update_layout(xaxis_title=f'Wavelength [{self.measurements[0].wavelength.units}]', yaxis_title='Intensity', title_text='UVvis')
+            fig.update_layout(
+                xaxis_title=f'Wavelength [{self.measurements[0].wavelength.units}]',
+                yaxis_title='Intensity',
+                title_text='UVvis',
+            )
             self.figures = [PlotlyFigure(label='figure 1', figure=fig.to_plotly_json())]
 
         super().normalize(archive, logger)
@@ -841,13 +1358,37 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
 
 class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results'], properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'electro_chemistry_measurement'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'electro_chemistry_measurement',
+                ]
+            ),
+        ),
         a_plot=[
             {
                 'label': 'Oxygen',
                 'x': 'time',
                 'y': 'oxygen',
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             }
         ],
     )
@@ -888,13 +1429,37 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
 
 class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results'], properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples', 'electro_chemistry_measurement'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'environment',
+                    'setup',
+                    'samples',
+                    'electro_chemistry_measurement',
+                ]
+            ),
+        ),
         a_plot=[
             {
                 'label': 'Flow Rate Measured',
                 'x': 'time',
                 'y': ['flow_rate_measured', 'flow_rate_set'],
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             }
         ],
     )
@@ -923,7 +1488,16 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
 class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'users', 'location', 'is_standard_process', 'end_time', 'steps', 'instruments', 'results'],
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'is_standard_process',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
             properties=dict(
                 order=[
                     'name',
@@ -933,9 +1507,17 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
             ),
         )
     )
-    image = Quantity(type=str, a_eln=dict(component='FileEditQuantity'), a_browser=dict(adaptor='RawFileAdaptor'))
+    image = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
 
-    image_preview = Quantity(type=str, a_eln=dict(component='FileEditQuantity'), a_browser=dict(adaptor='RawFileAdaptor'))
+    image_preview = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
 
     def normalize(self, archive, logger):
         import tempfile
@@ -948,7 +1530,9 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
                 image_file_name = f.name
                 file_content = f.read()
 
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.tif') as temp_file:
+                with tempfile.NamedTemporaryFile(
+                    delete=False, suffix='.tif'
+                ) as temp_file:
                     temp_file.write(file_content)
                     temp_file_path = temp_file.name
                 tif_file = hs.load(temp_file_path)
@@ -961,7 +1545,20 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
 
 
 class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'users', 'location', 'end_time', 'steps', 'instruments', 'results'], properties=dict(order=['name', 'data_file'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(order=['name', 'data_file']),
+        )
+    )
 
     def normalize(self, archive, logger):
         # from datetime import datetime
@@ -989,7 +1586,13 @@ class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
 
             fig = go.Figure()
             for d in self.data:
-                fig.add_trace(go.Scatter(x=[r.strftime('%H:%M:%S') if r else None for r in self.time], y=d.spectrum_data, name=d.chemical_name))
+                fig.add_trace(
+                    go.Scatter(
+                        x=[r.strftime('%H:%M:%S') if r else None for r in self.time],
+                        y=d.spectrum_data,
+                        name=d.chemical_name,
+                    )
+                )
 
             layout_settings = {
                 'title': 'Mass spectra over time',
@@ -1006,7 +1609,11 @@ class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
                 'margin': {'b': 100, 'r': 90},
             }
             fig.update_layout(layout_settings)
-            result_figures.append(PlotlyFigure(label='Mass spectra over time', index=0, figure=fig.to_plotly_json()))
+            result_figures.append(
+                PlotlyFigure(
+                    label='Mass spectra over time', index=0, figure=fig.to_plotly_json()
+                )
+            )
             self.figures = result_figures
 
         super().normalize(archive, logger)
@@ -1016,9 +1623,28 @@ class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
 
 
 class CE_NOME_Process(BaseProcess, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'users', 'location', 'is_standard_process', 'end_time', 'steps', 'instruments', 'results'], properties=dict(order=['name', 'data_file', 'batch', 'station'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'is_standard_process',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(order=['name', 'data_file', 'batch', 'station']),
+        )
+    )
 
-    data_file = Quantity(type=str, shape=['*'], a_eln=dict(component='FileEditQuantity'), a_browser=dict(adaptor='RawFileAdaptor'))
+    data_file = Quantity(
+        type=str,
+        shape=['*'],
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
 
 
 # class CE_NOME_Deposition(WetChemicalDeposition, EntryData):
@@ -1046,20 +1672,59 @@ class CE_NOME_Process(BaseProcess, EntryData):
 
 
 class CE_NOME_Measurement(BaseMeasurement, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'users', 'location', 'end_time', 'steps', 'instruments', 'results'], properties=dict(order=['name', 'data_file', 'samples'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(order=['name', 'data_file', 'samples']),
+        )
+    )
 
-    data_file = Quantity(type=str, shape=['*'], a_eln=dict(component='FileEditQuantity'), a_browser=dict(adaptor='RawFileAdaptor'))
+    data_file = Quantity(
+        type=str,
+        shape=['*'],
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
 
 
 class CE_NOME_UVvisConcentrationDetection(UVvisConcentrationDetection, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'location', 'end_time', 'method', 'steps', 'outputs'], properties=dict(order=['name', 'uvvis_measurement', 'material_name', 'minimum_peak_value', 'maximum_peak_value', 'slope', 'intercept', 'blank_substraction'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'location', 'end_time', 'method', 'steps', 'outputs'],
+            properties=dict(
+                order=[
+                    'name',
+                    'uvvis_measurement',
+                    'material_name',
+                    'minimum_peak_value',
+                    'maximum_peak_value',
+                    'slope',
+                    'intercept',
+                    'blank_substraction',
+                ]
+            ),
+        )
+    )
 
 
 # %%####################################### Analysis
 
 
 class CE_NOME_CPAnalysis(CPAnalysis, EntryData):
-    m_def = Section(a_eln=dict(hide=['location', 'lab_id', 'description', 'method', 'steps'], properties=dict(order=['name'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=['location', 'lab_id', 'description', 'method', 'steps'],
+            properties=dict(order=['name']),
+        )
+    )
 
 
 m_package.__init_metainfo__()

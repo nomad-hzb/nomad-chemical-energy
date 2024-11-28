@@ -46,7 +46,9 @@ def find_sample_by_id(archive, sample_id):
 
     query = {'results.eln.lab_ids': sample_id, 'upload_id': archive.metadata.upload_id}
 
-    search_result = search(owner='all', query=query, user_id=archive.metadata.main_author.user_id)
+    search_result = search(
+        owner='all', query=query, user_id=archive.metadata.main_author.user_id
+    )
     if len(search_result.data) > 0:
         entry_id = search_result.data[0]['entry_id']
         upload_id = search_result.data[0]['upload_id']
@@ -69,7 +71,9 @@ def search_samples_in_upload(archive):
     from nomad.search import search
 
     query = {'entry_type': 'CatLab_Sample', 'upload_id': archive.metadata.upload_id}
-    search_result = search(owner='all', query=query, user_id=archive.metadata.main_author.user_id)
+    search_result = search(
+        owner='all', query=query, user_id=archive.metadata.main_author.user_id
+    )
     return search_result
 
 
@@ -90,9 +94,19 @@ class CatlabParser(MatchingParser):
 
         file_name = f'{sample_id}.archive.json'
         if not exist:
-            entry = CatLab_Sample(lab_id=sample_id, name=sample_id, parent=CompositeSystemReference(name=parent, reference=find_sample_by_id(archive, parent), lab_id=parent))
+            entry = CatLab_Sample(
+                lab_id=sample_id,
+                name=sample_id,
+                parent=CompositeSystemReference(
+                    name=parent,
+                    reference=find_sample_by_id(archive, parent),
+                    lab_id=parent,
+                ),
+            )
             create_archive(entry, archive, file_name)
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
-        archive.data = ParsedCatlabFile(lab_id=sample_id, sample=get_reference(archive.metadata.upload_id, entry_id))
+        archive.data = ParsedCatlabFile(
+            lab_id=sample_id, sample=get_reference(archive.metadata.upload_id, entry_id)
+        )
         archive.metadata.entry_name = file.split('.')[0].replace('#', ' ')

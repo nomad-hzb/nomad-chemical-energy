@@ -71,7 +71,7 @@ exclude = [
 ]
 
 # Same as Black.
-line-length = 300
+line-length = 88
 indent-width = 4
 
 
@@ -129,7 +129,7 @@ hzb_characterization_package = "nomad_chemical_energy.schema_packages:hzb_charac
 hzb_catlab_package = "nomad_chemical_energy.schema_packages:hzb_catlab_package"
 dlr_ec_package = "nomad_chemical_energy.schema_packages:dlr_ec_package"
 hzb_general_process_package = "nomad_chemical_energy.schema_packages:hzb_general_process_package"
-tfc_package = "nomad_chemical_energy.schema_packages:tfc_package"
+tfc_package = "nomad_chemical_energy.schema_packages:tfc_schema_package"
 
 hzb_catlab_parser = "nomad_chemical_energy.parsers:hzb_catlab_parser"
 ce_necc_xlsx_parser = "nomad_chemical_energy.parsers:ce_necc_xlsx_parser"

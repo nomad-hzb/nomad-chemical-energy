@@ -68,15 +68,54 @@ m_package = SchemaPackage()
 
 
 class Wannsee_EM_M001_SEM_Merlin(SEM_Microscope_Merlin, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'detector_data_folder', 'external_sample_url'], properties=dict(order=['name', 'detector_data', 'samples', 'solution'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'detector_data_folder',
+                'external_sample_url',
+            ],
+            properties=dict(order=['name', 'detector_data', 'samples', 'solution']),
+        )
+    )
 
 
 # %%
 class Wannsee_D8_XRD_Bruker(XRD, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'steps', 'instruments', 'results', 'metadata_file', 'shifted_data', 'identifier'], properties=dict(order=['name', 'data_file', 'samples', 'solution'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'shifted_data',
+                'identifier',
+            ],
+            properties=dict(order=['name', 'data_file', 'samples', 'solution']),
+        ),
         a_plot=[
-            {'x': ['measurements/:/angle', 'shifted_data/:/angle'], 'y': ['measurements/:/intensity', 'shifted_data/:/intensity'], 'layout': {'yaxis': {'fixedrange': False, 'title': 'Counts'}, 'xaxis': {'fixedrange': False}}},
+            {
+                'x': ['measurements/:/angle', 'shifted_data/:/angle'],
+                'y': ['measurements/:/intensity', 'shifted_data/:/intensity'],
+                'layout': {
+                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
+                    'xaxis': {'fixedrange': False},
+                },
+            },
         ],
     )
 
@@ -87,9 +126,33 @@ class Wannsee_D8_XRD_Bruker(XRD, EntryData):
 
 class Wannsee_XRD_XY(XRD, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'steps', 'instruments', 'results', 'metadata_file', 'shifted_data', 'identifier'], properties=dict(order=['name', 'data_file', 'samples', 'solution'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'shifted_data',
+                'identifier',
+            ],
+            properties=dict(order=['name', 'data_file', 'samples', 'solution']),
+        ),
         a_plot=[
-            {'x': ['data/angle'], 'y': ['data/intensity'], 'layout': {'yaxis': {'fixedrange': False, 'title': 'Counts'}, 'xaxis': {'fixedrange': False}}},
+            {
+                'x': ['data/angle'],
+                'y': ['data/intensity'],
+                'layout': {
+                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
+                    'xaxis': {'fixedrange': False},
+                },
+            },
         ],
     )
 
@@ -101,10 +164,14 @@ class Wannsee_XRD_XY(XRD, EntryData):
 
                     if 'Id' in f.readline():
                         skiprows = 1
-                        data = pd.read_csv(f, sep=' |\t', header=None, skiprows=skiprows)
+                        data = pd.read_csv(
+                            f, sep=' |\t', header=None, skiprows=skiprows
+                        )
                     else:
                         skiprows = 0
-                        data = pd.read_csv(f, sep=' |\t', header=None, skiprows=skiprows)
+                        data = pd.read_csv(
+                            f, sep=' |\t', header=None, skiprows=skiprows
+                        )
                     print(data)
                     self.data = XRDData(angle=data[0], intensity=data[1])
         super().normalize(archive, logger)
@@ -135,19 +202,29 @@ class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
                 'voltage_ref_compensated',
                 'voltage_rhe_compensated',
             ],
-            properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples']),
+            properties=dict(
+                order=['name', 'data_file', 'environment', 'setup', 'samples']
+            ),
         ),
         a_plot=[
             {
                 'x': 'cycles/:/voltage',
                 'y': 'cycles/:/current',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
             {
                 'label': 'Current Density over Voltage RHE',
                 'x': 'cycles/:/voltage_rhe_compensated',
                 'y': 'cycles/:/current_density',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
         ],
     )
@@ -194,19 +271,29 @@ class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
                 'voltage_ref_compensated',
                 'voltage_rhe_compensated',
             ],
-            properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples']),
+            properties=dict(
+                order=['name', 'data_file', 'environment', 'setup', 'samples']
+            ),
         ),
         a_plot=[
             {
                 'x': 'cycles/:/voltage',
                 'y': 'cycles/:/current_density',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
             {
                 'label': 'Current Density over Voltage RHE',
                 'x': 'cycles/:/voltage_rhe_compensated',
                 'y': 'cycles/:/current_density',
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             },
         ],
     )
@@ -229,16 +316,46 @@ class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
     #           self).normalize(archive, logger)
 
 
-class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(ElectrochemicalImpedanceSpectroscopy, EntryData):
+class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
+    ElectrochemicalImpedanceSpectroscopy, EntryData
+):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file', 'station'], properties=dict(order=['name', 'data_file', 'environment', 'setup', 'samples'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'station',
+            ],
+            properties=dict(
+                order=['name', 'data_file', 'environment', 'setup', 'samples']
+            ),
+        ),
         a_plot=[
-            {'label': 'Nyquist Plot', 'x': 'z_real', 'y': 'z_imaginary', 'layout': {'yaxis': {'fixedrange': False, 'title': '-Im(Z) (Ω)'}, 'xaxis': {'fixedrange': False, 'title': 'Re(Z) (Ω)'}}},
+            {
+                'label': 'Nyquist Plot',
+                'x': 'z_real',
+                'y': 'z_imaginary',
+                'layout': {
+                    'yaxis': {'fixedrange': False, 'title': '-Im(Z) (Ω)'},
+                    'xaxis': {'fixedrange': False, 'title': 'Re(Z) (Ω)'},
+                },
+            },
             {
                 'label': 'Bode Plot',
                 'x': ['frequency', 'frequency'],
                 'y': ['./z_modulus', './z_angle'],
-                'layout': {'showlegend': True, 'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False, 'type': 'log'}},
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False, 'type': 'log'},
+                },
             },
         ],
     )
@@ -268,7 +385,18 @@ class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(ElectrochemicalImp
 class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'metadata_file', 'station'],
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'station',
+            ],
             properties=dict(
                 order=[
                     'name',
@@ -284,7 +412,10 @@ class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
                 'label': 'Voltage',
                 'x': 'time',
                 'y': 'voltage',
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             }
         ],
     )

@@ -115,7 +115,13 @@ class CENSLIIdentifier(ArchiveSection):
             else:
                 self.datetime = datetime.datetime.now()
 
-        if self.mxene_formula and self.owner and self.datetime and self.mxene_formula and self.method:
+        if (
+            self.mxene_formula
+            and self.owner
+            and self.datetime
+            and self.mxene_formula
+            and self.method
+        ):
             creation_date = self.datetime.strftime('%y%m%d')
             owner = self.owner.replace(' ', '-')
             lab_id_list = [creation_date, owner, self.mxene_formula, self.method]

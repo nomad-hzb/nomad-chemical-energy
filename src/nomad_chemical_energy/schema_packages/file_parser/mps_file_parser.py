@@ -113,7 +113,14 @@ def read_mpt_file(filename, encoding='iso-8859-1'):
             metadata.update({key: value})
 
     header_line, decimal = headeranddelimiter(filename)
-    data = pd.read_csv(filename, sep='\t', header=header_line, encoding=encoding, skip_blank_lines=False, decimal=decimal)
+    data = pd.read_csv(
+        filename,
+        sep='\t',
+        header=header_line,
+        encoding=encoding,
+        skip_blank_lines=False,
+        decimal=decimal,
+    )
 
     if 'Cyclic' in technique and 'nc cycles' in metadata:
         curve = 0

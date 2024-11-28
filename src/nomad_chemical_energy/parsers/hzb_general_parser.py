@@ -90,15 +90,23 @@ def update_general_process_entries(entry, entry_id, archive, logger, entry_class
     query = {
         'entry_id': entry_id,
     }
-    search_result = search(owner='all', query=query, user_id=archive.metadata.main_author.user_id)
-    entry_type = search_result.data[0].get('entry_type') if len(search_result.data) == 1 else None
+    search_result = search(
+        owner='all', query=query, user_id=archive.metadata.main_author.user_id
+    )
+    entry_type = (
+        search_result.data[0].get('entry_type')
+        if len(search_result.data) == 1
+        else None
+    )
     if entry_type != 'HZB_GeneralProcess':
         return None
     new_entry_dict = entry.m_to_dict()
     res = search_result.data[0]
     try:
         # Open Archives
-        with files.UploadFiles.get(upload_id=res['upload_id']).read_archive(entry_id=res['entry_id']) as archive:
+        with files.UploadFiles.get(upload_id=res['upload_id']).read_archive(
+            entry_id=res['entry_id']
+        ) as archive:
             entry_id = res['entry_id']
             entry_data = archive[entry_id]['data']
             entry_data.pop('m_def', None)

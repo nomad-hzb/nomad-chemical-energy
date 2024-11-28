@@ -68,14 +68,21 @@ def find_id(archive, lab_id, method):
     while True:
         next_lab_id = f'{lab_id}_{method}{i}'
         query = {'results.eln.lab_ids': next_lab_id}
-        search_result = search(owner='all', query=query, user_id=archive.metadata.main_author.user_id)
+        search_result = search(
+            owner='all', query=query, user_id=archive.metadata.main_author.user_id
+        )
         if len(search_result.data) == 0:
             return next_lab_id
         i += 1
 
 
 def assign_id(obj, archive, method):
-    if not obj.lab_id and obj.solution and obj.solution[0].solution and obj.solution[0].solution.lab_id:
+    if (
+        not obj.lab_id
+        and obj.solution
+        and obj.solution[0].solution
+        and obj.solution[0].solution.lab_id
+    ):
         obj.lab_id = find_id(archive, obj.solution[0].solution.lab_id, method)
 
 
@@ -90,10 +97,17 @@ def get_processes(archive, entry_id, lab_id):
     }
     pagination = MetadataPagination()
     pagination.page_size = 100
-    search_result = search(owner='all', query=query, pagination=pagination, user_id=archive.metadata.main_author.user_id)
+    search_result = search(
+        owner='all',
+        query=query,
+        pagination=pagination,
+        user_id=archive.metadata.main_author.user_id,
+    )
     processes = []
     for res in search_result.data:
-        with files.UploadFiles.get(upload_id=res['upload_id']).read_archive(entry_id=res['entry_id']) as archive_entry:
+        with files.UploadFiles.get(upload_id=res['upload_id']).read_archive(
+            entry_id=res['entry_id']
+        ) as archive_entry:
             entry_id = res['entry_id']
             entry_data = archive_entry[entry_id]['data']
             if 'lab_id' in entry_data and entry_data.get('lab_id').startswith(lab_id):
@@ -113,14 +127,30 @@ class CE_NSLI_MXene_Solution(MXeneSolution, EntryData):
                 'elemental_composition',
             ],
             properties=dict(
-                order=['name', 'create_overview', 'overview', 'MAX_phase', 'etching', 'delamination', 'washing', 'concentration', 'properties'],
+                order=[
+                    'name',
+                    'create_overview',
+                    'overview',
+                    'MAX_phase',
+                    'etching',
+                    'delamination',
+                    'washing',
+                    'concentration',
+                    'properties',
+                ],
             ),
         )
     )
 
-    create_overview = Quantity(type=bool, default=False, a_eln=dict(component='BoolEditQuantity'))
+    create_overview = Quantity(
+        type=bool, default=False, a_eln=dict(component='BoolEditQuantity')
+    )
 
-    overview = Quantity(type=str, a_eln=dict(component='FileEditQuantity'), a_browser=dict(adaptor='RawFileAdaptor'))
+    overview = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
 
     sample_id = SubSection(section_def=CENSLIIdentifier)
 
@@ -130,7 +160,10 @@ class CE_NSLI_MXene_Solution(MXeneSolution, EntryData):
         if self.create_overview and self.lab_id:
             self.create_overview = False
 
-            data = [[p[0], p[1]] for p in get_processes(archive, archive.entry_id, self.lab_id)]
+            data = [
+                [p[0], p[1]]
+                for p in get_processes(archive, archive.entry_id, self.lab_id)
+            ]
             import pandas as pd
 
             df = pd.DataFrame(data, columns=['process_id', 'process_name'])
@@ -181,7 +214,33 @@ class CE_NSLI_DiamondSample(DiamondSample, EntryData):
 
 class CE_NSLI_DropCasting(DropCasting, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'end_time', 'steps', 'instruments', 'results', 'samples', 'positon_in_experimental_plan', 'present', 'batch', 'layer'], properties=dict(order=['name', 'location', 'datetime', 'solution', 'substrate', 'properties', 'quenching', 'annealing', 'sintering']))
+        a_eln=dict(
+            hide=[
+                'users',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'samples',
+                'positon_in_experimental_plan',
+                'present',
+                'batch',
+                'layer',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'location',
+                    'datetime',
+                    'solution',
+                    'substrate',
+                    'properties',
+                    'quenching',
+                    'annealing',
+                    'sintering',
+                ]
+            ),
+        )
     )
 
     substrate = SubSection(section_def=SubstrateProperties)
@@ -193,7 +252,34 @@ class CE_NSLI_DropCasting(DropCasting, EntryData):
 
 class CE_NSLI_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['users', 'end_time', 'steps', 'instruments', 'results', 'recipe', 'samples', 'positon_in_experimental_plan', 'present', 'batch', 'layer'], properties=dict(order=['name', 'location', 'datetime', 'solution', 'substrate', 'recipe_steps', 'quenching', 'annealing', 'sintering']))
+        a_eln=dict(
+            hide=[
+                'users',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'recipe',
+                'samples',
+                'positon_in_experimental_plan',
+                'present',
+                'batch',
+                'layer',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'location',
+                    'datetime',
+                    'solution',
+                    'substrate',
+                    'recipe_steps',
+                    'quenching',
+                    'annealing',
+                    'sintering',
+                ]
+            ),
+        )
     )
 
     substrate = SubSection(section_def=SubstrateProperties)
@@ -204,20 +290,83 @@ class CE_NSLI_SpinCoating(SpinCoating, EntryData):
 
 
 class CE_NSLI_SEM(SEM_Microscope_Merlin, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'detector_data_folder', 'external_sample_url'], properties=dict(order=['name', 'detector_data', 'datetime', 'description', 'sample_preparation', 'samples'])))
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'detector_data_folder',
+                'external_sample_url',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'detector_data',
+                    'datetime',
+                    'description',
+                    'sample_preparation',
+                    'samples',
+                ]
+            ),
+        )
+    )
 
-    sample_preparation = Quantity(type=Reference(WetChemicalDeposition.m_def), a_eln=dict(component='ReferenceEditQuantity'))
+    sample_preparation = Quantity(
+        type=Reference(WetChemicalDeposition.m_def),
+        a_eln=dict(component='ReferenceEditQuantity'),
+    )
 
 
 class CE_NSLI_XRD_XY(XRD, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'users', 'location', 'end_time', 'steps', 'instruments', 'results', 'steps', 'instruments', 'results', 'metadata_file', 'shifted_data', 'identifier'], properties=dict(order=['name', 'data_file', 'datetime', 'description', 'sample_preparation', 'samples'])),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+                'steps',
+                'instruments',
+                'results',
+                'metadata_file',
+                'shifted_data',
+                'identifier',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'datetime',
+                    'description',
+                    'sample_preparation',
+                    'samples',
+                ]
+            ),
+        ),
         a_plot=[
-            {'x': ['data/angle'], 'y': ['data/intensity'], 'layout': {'yaxis': {'fixedrange': False, 'title': 'Counts'}, 'xaxis': {'fixedrange': False}}},
+            {
+                'x': ['data/angle'],
+                'y': ['data/intensity'],
+                'layout': {
+                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
+                    'xaxis': {'fixedrange': False},
+                },
+            },
         ],
     )
 
-    sample_preparation = Quantity(type=Reference(WetChemicalDeposition.m_def), a_eln=dict(component='ReferenceEditQuantity'))
+    sample_preparation = Quantity(
+        type=Reference(WetChemicalDeposition.m_def),
+        a_eln=dict(component='ReferenceEditQuantity'),
+    )
 
     # def normalize(self, archive, logger):
 
@@ -254,13 +403,28 @@ class CE_NSLI_XRD_XY(XRD, EntryData):
 
 class CE_NSLI_CyclicVoltammetry(CyclicVoltammetry, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'working_electrode', 'counter_electrode', 'reference_electrode', 'electrolyte']),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'working_electrode',
+                'counter_electrode',
+                'reference_electrode',
+                'electrolyte',
+            ]
+        ),
         a_plot=[
             {
                 'label': 'Current',
                 'x': 'voltage',
                 'y': 'current',
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             }
         ],
     )
@@ -268,13 +432,28 @@ class CE_NSLI_CyclicVoltammetry(CyclicVoltammetry, EntryData):
 
 class CE_NSLI_Chronoamperometry(Chronoamperometry, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'working_electrode', 'counter_electrode', 'reference_electrode', 'electrolyte']),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'working_electrode',
+                'counter_electrode',
+                'reference_electrode',
+                'electrolyte',
+            ]
+        ),
         a_plot=[
             {
                 'label': 'Current',
                 'x': 'time',
                 'y': 'current',
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
                 'config': {
                     'scrollZoom': True,
                     'staticPlot': False,
@@ -286,26 +465,54 @@ class CE_NSLI_Chronoamperometry(Chronoamperometry, EntryData):
 
 class CE_NSLI_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
     m_def = Section(
-        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time', 'working_electrode', 'counter_electrode', 'reference_electrode', 'electrolyte']),
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'solution',
+                'users',
+                'location',
+                'end_time',
+                'working_electrode',
+                'counter_electrode',
+                'reference_electrode',
+                'electrolyte',
+            ]
+        ),
         a_plot=[
             {
                 'label': 'Voltage',
                 'x': 'time',
                 'y': 'voltage',
-                'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}},
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
             }
         ],
     )
 
 
 class CE_NSLI_ConstantPotential(ConstantPotential, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']))
+    m_def = Section(
+        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time'])
+    )
 
 
 class CE_NSLI_RamanSpectroscopy(Raman, EntryData):
     m_def = Section(
         a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']),
-        a_plot=[{'label': 'Intensity', 'x': ['raman_shift', 'peaks_raman'], 'y': ['intensity', 'peaks_intensity'], 'layout': {'yaxis': {'type': 'lin'}}, 'lines': [{'mode': 'lines', 'marker': {'color': 'rgb(40, 80, 130)'}}, {'mode': 'markers', 'line': {'color': 'rgb(100, 0, 0)'}}]}],
+        a_plot=[
+            {
+                'label': 'Intensity',
+                'x': ['raman_shift', 'peaks_raman'],
+                'y': ['intensity', 'peaks_intensity'],
+                'layout': {'yaxis': {'type': 'lin'}},
+                'lines': [
+                    {'mode': 'lines', 'marker': {'color': 'rgb(40, 80, 130)'}},
+                    {'mode': 'markers', 'line': {'color': 'rgb(100, 0, 0)'}},
+                ],
+            }
+        ],
     )
 
 
@@ -324,27 +531,51 @@ class CE_NSLI_InfraredSpectroscopy(InfraredSpectroscopy, EntryData):
 
 
 class CE_NSLI_XAS(XAS, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']))
+    m_def = Section(
+        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time'])
+    )
 
 
 class CE_NSLI_OpticalMicroscopy(OpticalMicorscopy, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']))
+    m_def = Section(
+        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time'])
+    )
 
 
 class CE_NSLI_TEM(TEM, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']))
+    m_def = Section(
+        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time'])
+    )
 
 
 class CE_NSLI_SXM(SXM, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']))
+    m_def = Section(
+        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time'])
+    )
 
 
 class CE_NSLI_XPEEM(XPEEM, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']))
+    m_def = Section(
+        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time'])
+    )
 
 
 class CE_NSLI_Photocurrent(PhotoCurrent, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']), a_plot=[{'label': 'Energy', 'x': 'energy', 'y': 'voltage', 'layout': {'yaxis': {'fixedrange': False}, 'xaxis': {'fixedrange': False}}, 'config': {'scrollZoom': True}}])
+    m_def = Section(
+        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']),
+        a_plot=[
+            {
+                'label': 'Energy',
+                'x': 'energy',
+                'y': 'voltage',
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
+                'config': {'scrollZoom': True},
+            }
+        ],
+    )
 
     # def normalize(self, archive, logger):
     #     super(CE_NSLI_Photocurrent, self).normalize(archive, logger)
@@ -396,7 +627,18 @@ class CE_NSLI_Photocurrent(PhotoCurrent, EntryData):
 
 
 class CE_NSLI_SPV(SPV, EntryData):
-    m_def = Section(a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']), a_plot=[{'label': 'Voltage', 'x': 'wavelength', 'y': 'volt', 'layout': {'yaxis': {'type': 'lin'}}, 'config': {'editable': True, 'scrollZoom': True}}])
+    m_def = Section(
+        a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']),
+        a_plot=[
+            {
+                'label': 'Voltage',
+                'x': 'wavelength',
+                'y': 'volt',
+                'layout': {'yaxis': {'type': 'lin'}},
+                'config': {'editable': True, 'scrollZoom': True},
+            }
+        ],
+    )
 
 
 # %%####################################### Generic Entries

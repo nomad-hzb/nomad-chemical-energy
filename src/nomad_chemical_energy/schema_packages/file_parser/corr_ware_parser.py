@@ -62,7 +62,17 @@ def get_header_data_corrware(filename):
                 pass
             _working.update({line[0].strip(): value})
 
-    _data = pd.read_csv(filename, skiprows=[0], header=count - 1, delimiter='\t', skip_blank_lines=False).iloc[1:].astype('float64')
+    _data = (
+        pd.read_csv(
+            filename,
+            skiprows=[0],
+            header=count - 1,
+            delimiter='\t',
+            skip_blank_lines=False,
+        )
+        .iloc[1:]
+        .astype('float64')
+    )
 
     _data = _data.rename(columns=lambda x: x.strip())
 
@@ -77,10 +87,26 @@ def get_header_data_corrware(filename):
             v_value_old = v_value_new
             v_value_new = row['E(Volts)']
             if (
-                (v_value_new < v_value_start and v_value_old > v_value_start and v_max > v_min)
-                or (v_value_new > v_value_start and v_value_old < v_value_start and v_max < v_min)
-                or (v_value_new == v_max and v_value_start == v_max and v_value_new != v_value_old)
-                or (v_value_new == v_min and v_value_start == v_min and v_value_new != v_value_old)
+                (
+                    v_value_new < v_value_start
+                    and v_value_old > v_value_start
+                    and v_max > v_min
+                )
+                or (
+                    v_value_new > v_value_start
+                    and v_value_old < v_value_start
+                    and v_max < v_min
+                )
+                or (
+                    v_value_new == v_max
+                    and v_value_start == v_max
+                    and v_value_new != v_value_old
+                )
+                or (
+                    v_value_new == v_min
+                    and v_value_start == v_min
+                    and v_value_new != v_value_old
+                )
             ):
                 curve += 1
             _data.at[index, 'curve'] = curve

@@ -162,7 +162,9 @@ class GamryParser(MatchingParser):
                 measurements.append((eid, file_name, CE_NOME_OpenCircuitVoltage()))
 
             if 'EISPOT' in method or 'PEIS' in method:
-                measurements.append((eid, file_name, CE_NOME_ElectrochemicalImpedanceSpectroscopy()))
+                measurements.append(
+                    (eid, file_name, CE_NOME_ElectrochemicalImpedanceSpectroscopy())
+                )
 
         archive.metadata.entry_name = os.path.basename(mainfile)
         nickname = metadata.get('NICK')
@@ -200,7 +202,9 @@ class GamryParser(MatchingParser):
         for idx, (eid, name, measurement) in enumerate(measurements):
             measurement.name = nickname
             measurement.data_file = measurement_name
-            measurement.connected_experiments = [c for c in connected_experiments if eid not in c]
+            measurement.connected_experiments = [
+                c for c in connected_experiments if eid not in c
+            ]
             measurement.function = 'Generator'
             if idx > 0:
                 measurement.function = 'Detector'
@@ -244,7 +248,9 @@ class CENOMEcsvParser(MatchingParser):
         sample = search_class(archive, 'CE_NOME_Sample')
         if sample is not None:
             upload_id, entry_id = sample['upload_id'], sample['entry_id']
-            entry.samples = [CompositeSystemReference(reference=get_reference(upload_id, entry_id))]
+            entry.samples = [
+                CompositeSystemReference(reference=get_reference(upload_id, entry_id))
+            ]
 
         environment = search_class(archive, 'CE_NOME_Environment')
         if environment is not None:
@@ -267,7 +273,12 @@ class CENOMEcsvParser(MatchingParser):
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         create_archive(entry, archive, file_name)
 
-        archive.data = ParsedTxtFile(activity=get_reference(archive.metadata.upload_id, get_entry_id_from_file_name(file_name, archive)))
+        archive.data = ParsedTxtFile(
+            activity=get_reference(
+                archive.metadata.upload_id,
+                get_entry_id_from_file_name(file_name, archive),
+            )
+        )
 
 
 class UVvisParser(MatchingParser):
@@ -296,7 +307,12 @@ class UVvisParser(MatchingParser):
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         create_archive(uvvis, archive, file_name)
 
-        archive.data = ParsedTxtFile(activity=get_reference(archive.metadata.upload_id, get_entry_id_from_file_name(file_name, archive)))
+        archive.data = ParsedTxtFile(
+            activity=get_reference(
+                archive.metadata.upload_id,
+                get_entry_id_from_file_name(file_name, archive),
+            )
+        )
 
 
 class MassspectrometryParser(MatchingParser):
@@ -319,7 +335,12 @@ class MassspectrometryParser(MatchingParser):
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         create_archive(mass, archive, file_name)
 
-        archive.data = ParsedTxtFile(activity=get_reference(archive.metadata.upload_id, get_entry_id_from_file_name(file_name, archive)))
+        archive.data = ParsedTxtFile(
+            activity=get_reference(
+                archive.metadata.upload_id,
+                get_entry_id_from_file_name(file_name, archive),
+            )
+        )
         archive.metadata.entry_name = mainfile_split[0]
 
 
@@ -348,13 +369,22 @@ class XASParser(MatchingParser):
             sample = search_class(archive, 'CE_NOME_Sample')
             if sample is not None:
                 upload_id, entry_id = sample['upload_id'], sample['entry_id']
-                xas_measurement.samples = [CompositeSystemReference(reference=get_reference(upload_id, entry_id))]
+                xas_measurement.samples = [
+                    CompositeSystemReference(
+                        reference=get_reference(upload_id, entry_id)
+                    )
+                ]
 
         # archive.data = cam_measurements
         if xas_measurement is not None:
             file_name = f'{measurement_name}.archive.json'
             create_archive(xas_measurement, archive, file_name)
-            archive.data = ParsedKMC2File(activity=get_reference(archive.metadata.upload_id, get_entry_id_from_file_name(file_name, archive)))
+            archive.data = ParsedKMC2File(
+                activity=get_reference(
+                    archive.metadata.upload_id,
+                    get_entry_id_from_file_name(file_name, archive),
+                )
+            )
             archive.metadata.entry_name = measurement_name
 
 
@@ -380,13 +410,22 @@ class CENOMETIFParser(MatchingParser):
             sample = search_class(archive, 'CE_NOME_Sample')
             if sample is not None:
                 upload_id, entry_id = sample['upload_id'], sample['entry_id']
-                tif_image.samples = [CompositeSystemReference(reference=get_reference(upload_id, entry_id))]
+                tif_image.samples = [
+                    CompositeSystemReference(
+                        reference=get_reference(upload_id, entry_id)
+                    )
+                ]
 
         # archive.data = cam_measurements
         if tif_image is not None:
             file_name = f'{measurement_name}.archive.json'
             create_archive(tif_image, archive, file_name)
-            archive.data = ParsedTifFile(activity=get_reference(archive.metadata.upload_id, get_entry_id_from_file_name(file_name, archive)))
+            archive.data = ParsedTifFile(
+                activity=get_reference(
+                    archive.metadata.upload_id,
+                    get_entry_id_from_file_name(file_name, archive),
+                )
+            )
             archive.metadata.entry_name = measurement_name
 
 

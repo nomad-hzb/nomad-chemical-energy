@@ -26,7 +26,13 @@ necc_find_app = AppEntryPoint(
         # quantities in a schema package, you need to load the schema package
         # explicitly here. Note that you can use a glob syntax to load the
         # entire package, or just a single schema from a package.
-        filters=Filters(include=['*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC', '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode', '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe']),
+        filters=Filters(
+            include=[
+                '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode',
+                '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe',
+            ]
+        ),
         # Controls which columns are shown in the results table
         columns=Columns(
             selected=[
@@ -45,9 +51,15 @@ necc_find_app = AppEntryPoint(
                 'entry_create_time': Column(label='Entry time', align='left'),
                 'authors': Column(label='Authors', align='left'),
                 'upload_name': Column(label='Upload name', align='left'),
-                'data.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC': Column(label='Experiment ID', align='left'),
-                'data.properties.cathode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode': Column(label='Cathode ID', align='left'),
-                'data.properties.anode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe': Column(label='Anode ID', align='left'),
+                'data.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC': Column(
+                    label='Experiment ID', align='left'
+                ),
+                'data.properties.cathode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode': Column(
+                    label='Cathode ID', align='left'
+                ),
+                'data.properties.anode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe': Column(
+                    label='Anode ID', align='left'
+                ),
             },
         ),
         # Dictionary of search filters that are always enabled for queries made
@@ -55,15 +67,21 @@ necc_find_app = AppEntryPoint(
         # results to the wanted subset. Any available search filter can be
         # targeted here. This example makes sure that only entries that use
         # MySchema are included.
-        filters_locked={'section_defs.definition_qualified_name': 'nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'},
+        filters_locked={
+            'section_defs.definition_qualified_name': 'nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'
+        },
         # Controls the filter menus shown on the left
         filter_menus=FilterMenus(
             options={
                 'material': FilterMenu(label='Material', level=0),
                 'elements': FilterMenu(label='Elements / Formula', level=1, size='xl'),
                 'eln': FilterMenu(label='Electronic Lab Notebook', level=0),
-                'custom_quantities': FilterMenu(label='User Defined Quantities', level=0, size='l'),
-                'author': FilterMenu(label='Author / Origin / Dataset', level=0, size='m'),
+                'custom_quantities': FilterMenu(
+                    label='User Defined Quantities', level=0, size='l'
+                ),
+                'author': FilterMenu(
+                    label='Author / Origin / Dataset', level=0, size='m'
+                ),
                 'metadata': FilterMenu(label='Visibility / IDs / Schema', level=0),
                 'optimade': FilterMenu(label='Optimade', level=0, size='m'),
             }
@@ -135,7 +153,13 @@ necc_compare_app = AppEntryPoint(
         # quantities in a schema package, you need to load the schema package
         # explicitly here. Note that you can use a glob syntax to load the
         # entire package, or just a single schema from a package.
-        filters=Filters(include=['*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC', '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode', '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe']),
+        filters=Filters(
+            include=[
+                '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode',
+                '*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe',
+            ]
+        ),
         # Controls which columns are shown in the results table
         columns=Columns(
             selected=[
@@ -154,9 +178,15 @@ necc_compare_app = AppEntryPoint(
                 'entry_create_time': Column(label='Entry time', align='left'),
                 'authors': Column(label='Authors', align='left'),
                 'upload_name': Column(label='Upload name', align='left'),
-                'data.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC': Column(label='Experiment ID', align='left'),
-                'data.properties.cathode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode': Column(label='Cathode ID', align='left'),
-                'data.properties.anode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe': Column(label='Anode ID', align='left'),
+                'data.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC': Column(
+                    label='Experiment ID', align='left'
+                ),
+                'data.properties.cathode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode': Column(
+                    label='Cathode ID', align='left'
+                ),
+                'data.properties.anode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe': Column(
+                    label='Anode ID', align='left'
+                ),
             },
         ),
         # Dictionary of search filters that are always enabled for queries made
@@ -164,15 +194,21 @@ necc_compare_app = AppEntryPoint(
         # results to the wanted subset. Any available search filter can be
         # targeted here. This example makes sure that only entries that use
         # MySchema are included.
-        filters_locked={'section_defs.definition_qualified_name': 'nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'},
+        filters_locked={
+            'section_defs.definition_qualified_name': 'nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'
+        },
         # Controls the filter menus shown on the left
         filter_menus=FilterMenus(
             options={
                 'material': FilterMenu(label='Material', level=0),
                 'elements': FilterMenu(label='Elements / Formula', level=1, size='xl'),
                 'eln': FilterMenu(label='Electronic Lab Notebook', level=0),
-                'custom_quantities': FilterMenu(label='User Defined Quantities', level=0, size='l'),
-                'author': FilterMenu(label='Author / Origin / Dataset', level=0, size='m'),
+                'custom_quantities': FilterMenu(
+                    label='User Defined Quantities', level=0, size='l'
+                ),
+                'author': FilterMenu(
+                    label='Author / Origin / Dataset', level=0, size='m'
+                ),
                 'metadata': FilterMenu(label='Visibility / IDs / Schema', level=0),
                 'optimade': FilterMenu(label='Optimade', level=0, size='m'),
             }
@@ -231,7 +267,10 @@ necc_compare_app = AppEntryPoint(
                             'quantity': 'data.properties.anolyte_type#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
                         }
                     },
-                    'y': {'title': 'CO FE (in%)', 'quantity': 'data.fe_results.gas_results[0].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'},
+                    'y': {
+                        'title': 'CO FE (in%)',
+                        'quantity': 'data.fe_results.gas_results[0].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                    },
                     'x': {
                         'quantity': 'data.properties.anolyte_concentration#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
                         'scale': 'linear',
@@ -307,7 +346,10 @@ necc_compare_app = AppEntryPoint(
                             'quantity': 'data.properties.anolyte_type#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
                         }
                     },
-                    'y': {'title': 'CH4 FE (in%)', 'quantity': 'data.fe_results.gas_results[1].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'},
+                    'y': {
+                        'title': 'CH4 FE (in%)',
+                        'quantity': 'data.fe_results.gas_results[1].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                    },
                     'x': {
                         'quantity': 'data.properties.anolyte_concentration#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
                         'scale': 'linear',
@@ -331,7 +373,10 @@ necc_compare_app = AppEntryPoint(
                             'quantity': 'data.properties.anolyte_type#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
                         }
                     },
-                    'y': {'title': 'C2H4 FE (in%)', 'quantity': 'data.fe_results.gas_results[2].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'},
+                    'y': {
+                        'title': 'C2H4 FE (in%)',
+                        'quantity': 'data.fe_results.gas_results[2].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                    },
                     'x': {
                         'quantity': 'data.properties.anolyte_concentration#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
                         'scale': 'linear',
@@ -355,7 +400,10 @@ necc_compare_app = AppEntryPoint(
                             'quantity': 'data.properties.anolyte_type#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
                         }
                     },
-                    'y': {'title': 'H2 FE (in%)', 'quantity': 'data.fe_results.gas_results[3].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC'},
+                    'y': {
+                        'title': 'H2 FE (in%)',
+                        'quantity': 'data.fe_results.gas_results[3].minimum_fe#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
+                    },
                     'x': {
                         'quantity': 'data.properties.anolyte_concentration#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC',
                         'scale': 'linear',
@@ -411,7 +459,9 @@ nome_oer_cp_app = AppEntryPoint(
             options={
                 'entry_name': Column(label='Name', align='left'),
                 'upload_name': Column(label='Upload name', align='left'),
-                'results.eln.lab_ids#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis': Column(label='Sample ID', align='left'),
+                'results.eln.lab_ids#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis': Column(
+                    label='Sample ID', align='left'
+                ),
                 'entry_type': Column(label='Entry type', align='left'),
                 'entry_create_time': Column(label='Entry time', align='left'),
                 'authors': Column(label='Authors', align='left'),
@@ -422,15 +472,21 @@ nome_oer_cp_app = AppEntryPoint(
         # results to the wanted subset. Any available search filter can be
         # targeted here. This example makes sure that only entries that use
         # MySchema are included.
-        filters_locked={'section_defs.definition_qualified_name': 'nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis'},
+        filters_locked={
+            'section_defs.definition_qualified_name': 'nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis'
+        },
         # Controls the filter menus shown on the left
         filter_menus=FilterMenus(
             options={
                 'material': FilterMenu(label='Material', level=0),
                 'elements': FilterMenu(label='Elements / Formula', level=1, size='xl'),
                 'eln': FilterMenu(label='Electronic Lab Notebook', level=0),
-                'custom_quantities': FilterMenu(label='User Defined Quantities', level=0, size='l'),
-                'author': FilterMenu(label='Author / Origin / Dataset', level=0, size='m'),
+                'custom_quantities': FilterMenu(
+                    label='User Defined Quantities', level=0, size='l'
+                ),
+                'author': FilterMenu(
+                    label='Author / Origin / Dataset', level=0, size='m'
+                ),
                 'metadata': FilterMenu(label='Visibility / IDs / Schema', level=0),
                 'optimade': FilterMenu(label='Optimade', level=0, size='m'),
             }
@@ -513,8 +569,14 @@ nome_oer_cp_app = AppEntryPoint(
                     'type': 'scatterplot',
                     'autorange': True,
                     'size': 1000,
-                    'x': {'quantity': 'data.outputs[0].voltage_avg_first5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis', 'unit': 'volt'},
-                    'y': {'quantity': 'data.outputs[0].voltage_avg_last5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis', 'unit': 'volt'},
+                    'x': {
+                        'quantity': 'data.outputs[0].voltage_avg_first5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                        'unit': 'volt',
+                    },
+                    'y': {
+                        'quantity': 'data.outputs[0].voltage_avg_last5#nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_CPAnalysis',
+                        'unit': 'volt',
+                    },
                     'layout': {
                         'xxl': {'minH': 3, 'minW': 3, 'h': 6, 'w': 9, 'y': 9, 'x': 0},
                         'xl': {'minH': 3, 'minW': 3, 'h': 6, 'w': 9, 'y': 9, 'x': 0},

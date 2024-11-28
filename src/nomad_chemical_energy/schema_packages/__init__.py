@@ -113,7 +113,7 @@ hzb_general_process_package = HZBGeneralPackageEntryPoint(
     description='Package for general HZB Schema',
 )
 
-tfc_package = TFCPackageEntryPoint(
+tfc_schema_package = TFCPackageEntryPoint(
     name='TFC',
     description='Package for Thin Film Catalysts Group',
 )

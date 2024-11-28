@@ -36,7 +36,9 @@ from nomad.metainfo import (
 )
 from nomad.parsing import MatchingParser
 
-from nomad_chemical_energy.parsers.hzb_general_parser import update_general_process_entries
+from nomad_chemical_energy.parsers.hzb_general_parser import (
+    update_general_process_entries,
+)
 from nomad_chemical_energy.schema_packages.tfc_package import (
     TFC_Sputtering,
 )
@@ -74,7 +76,9 @@ class TFCSputteringParser(MatchingParser):
         eid = get_entry_id_from_file_name(file_name_archive, archive)
         ref = get_reference(archive.metadata.upload_id, eid)
         if not new_entry_created:
-            new_entry = update_general_process_entries(entry, eid, archive, logger, TFC_Sputtering())
+            new_entry = update_general_process_entries(
+                entry, eid, archive, logger, TFC_Sputtering()
+            )
             if new_entry is not None:
                 create_archive(new_entry, archive, file_name_archive, overwrite=True)
         archive.data = ParsedSputteringFile(activity=ref)

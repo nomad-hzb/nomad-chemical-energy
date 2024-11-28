@@ -58,7 +58,9 @@ def _read_curve_data(fid, curve_length) -> tuple:
     try:
         curve = pd.read_csv(StringIO(curve), delimiter='\t', header=0, index_col=0)
     except:
-        curve = pd.read_csv(StringIO(curve), delimiter='\t', header=0, index_col=0, decimal=',')
+        curve = pd.read_csv(
+            StringIO(curve), delimiter='\t', header=0, index_col=0, decimal=','
+        )
 
     keys = curve.columns.values.tolist()
     units = units[1:]
@@ -101,7 +103,16 @@ def get_curve(f, _header, _curve_units, curve_length=None):
 
 
 def check_is_number(key, input_string):
-    if key in ['NICK', 'PSTATSERIALNO', 'PSTATSECTION', 'SAMPLEID', 'ENVIRONMENTID', 'ECSETUPID', 'DCCALDATE', 'ACCALDATE']:
+    if key in [
+        'NICK',
+        'PSTATSERIALNO',
+        'PSTATSECTION',
+        'SAMPLEID',
+        'ENVIRONMENTID',
+        'ECSETUPID',
+        'DCCALDATE',
+        'ACCALDATE',
+    ]:
         return input_string
     try:
         return float(input_string)
@@ -127,7 +138,9 @@ def get_header_and_data(f):
         if len(cur_line) > 1:
             if 'CURVE' in cur_line[0] and len(cur_line) > 2:
                 table_length = get_number(cur_line[2])
-                _curves[cur_line[0]] = [get_curve(f, _header, _curve_units, table_length)]
+                _curves[cur_line[0]] = [
+                    get_curve(f, _header, _curve_units, table_length)
+                ]
             elif 'CURVE' in cur_line[0]:
                 curves = []
                 while True:
@@ -140,7 +153,11 @@ def get_header_and_data(f):
             if cur_line[0].strip() in ['METHOD']:
                 _header[cur_line[0]] = cur_line[1]
             if cur_line[1].strip() in ['LABEL', 'PSTAT']:
-                _header[cur_line[0]] = check_is_number(cur_line[0], cur_line[2]) if len(cur_line) > 2 else ''
+                _header[cur_line[0]] = (
+                    check_is_number(cur_line[0], cur_line[2])
+                    if len(cur_line) > 2
+                    else ''
+                )
                 if cur_line[0] in ['TITLE'] and len(cur_line) > 3:
                     _header['SAMPLE_ID'] = cur_line[3]
             elif cur_line[1] in ['POTEN'] and len(cur_line) == 5:

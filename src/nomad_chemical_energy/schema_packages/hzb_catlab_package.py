@@ -53,7 +53,9 @@ def get_next_project_sample_number(data, entry_id):
         lab_ids = entry['results']['eln']['lab_ids']
         if entry['entry_id'] == entry_id and correct_lab_id(lab_ids[0]):
             return int(lab_ids[0][4:])
-        project_sample_numbers.extend([int(lab_id[4:]) for lab_id in lab_ids if correct_lab_id(lab_id)])
+        project_sample_numbers.extend(
+            [int(lab_id[4:]) for lab_id in lab_ids if correct_lab_id(lab_id)]
+        )
     return max(project_sample_numbers) + 1 if project_sample_numbers else 1
 
 
@@ -64,8 +66,15 @@ def create_id(archive, lab_id_base):
     query = {'entry_type': 'CatLab_Sample', 'results.eln.lab_ids': lab_id_base}
     pagination = MetadataPagination()
     pagination.page_size = 9999
-    search_result = search(owner='all', query=query, pagination=pagination, user_id=archive.metadata.main_author.user_id)
-    project_sample_number = get_next_project_sample_number(search_result.data, archive.metadata.entry_id)
+    search_result = search(
+        owner='all',
+        query=query,
+        pagination=pagination,
+        user_id=archive.metadata.main_author.user_id,
+    )
+    project_sample_number = get_next_project_sample_number(
+        search_result.data, archive.metadata.entry_id
+    )
 
     return f'{lab_id_base}{project_sample_number:04d}'
 
@@ -120,7 +129,17 @@ class CatLab_Library(CatalysisLibrary, EntryData):
 class CatLab_Sputtering(MultiTargetSputtering, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['users', 'elemental_composition', 'components', 'present', 'instruments', 'steps', 'end_time', 'batch', 'lab_id'],
+            hide=[
+                'users',
+                'elemental_composition',
+                'components',
+                'present',
+                'instruments',
+                'steps',
+                'end_time',
+                'batch',
+                'lab_id',
+            ],
             properties=dict(
                 order=[
                     'name',
@@ -136,9 +155,17 @@ class Catlab_SimpleCatalyticReaction(BaseMeasurement, EntryData):
     Example section for a simple catalytic reaction.
     """
 
-    m_def = Section(label='Simple Catalytic Measurement for Catlab', a_eln=dict(hide=['steps', 'instruments', 'results', 'lab_id']))
+    m_def = Section(
+        label='Simple Catalytic Measurement for Catlab',
+        a_eln=dict(hide=['steps', 'instruments', 'results', 'lab_id']),
+    )
 
-    data_file = Quantity(type=str, shape=['*'], a_eln=dict(component='FileEditQuantity'), a_browser=dict(adaptor='RawFileAdaptor'))
+    data_file = Quantity(
+        type=str,
+        shape=['*'],
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
 
     # reaction = SubSection(section_def=ReactionConditions, a_eln=ELNAnnotation(label='Reaction Data'))
 
@@ -146,7 +173,17 @@ class Catlab_SimpleCatalyticReaction(BaseMeasurement, EntryData):
 class CatLab_PECVD(PECVDeposition, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['users', 'elemental_composition', 'components', 'present', 'lab_id', 'end_time', 'batch', 'instruments', 'steps'],
+            hide=[
+                'users',
+                'elemental_composition',
+                'components',
+                'present',
+                'lab_id',
+                'end_time',
+                'batch',
+                'instruments',
+                'steps',
+            ],
             properties=dict(
                 order=[
                     'name',

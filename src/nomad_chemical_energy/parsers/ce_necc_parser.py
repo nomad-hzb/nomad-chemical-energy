@@ -62,11 +62,18 @@ class NECCXlsxParser(MatchingParser):
         decoded_buffer: str,
         compression: str = None,
     ):
-        is_mainfile_super = super().is_mainfile(filename, mime, buffer, decoded_buffer, compression)
+        is_mainfile_super = super().is_mainfile(
+            filename, mime, buffer, decoded_buffer, compression
+        )
         if not is_mainfile_super:
             return False
         excel_sheets = pd.ExcelFile(filename).sheet_names
-        required_sheets = ['Catalyst details', 'Experimental details', 'Raw Data', 'Results']
+        required_sheets = [
+            'Catalyst details',
+            'Experimental details',
+            'Raw Data',
+            'Results',
+        ]
         return all(sheet in excel_sheets for sheet in required_sheets)
 
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
@@ -88,5 +95,7 @@ class NECCXlsxParser(MatchingParser):
         create_archive(entry, archive, file_name)
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
-        archive.data = ParsedExcelFile(activity=[get_reference(archive.metadata.upload_id, entry_id)])
+        archive.data = ParsedExcelFile(
+            activity=[get_reference(archive.metadata.upload_id, entry_id)]
+        )
         archive.metadata.entry_name = file

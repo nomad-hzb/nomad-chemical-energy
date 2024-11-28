@@ -78,7 +78,9 @@ def create_ec_entry(archive, mainfile, entry):
 
     file_name = f'{os.path.basename(mainfile)}.archive.json'
     eid = get_entry_id_from_file_name(file_name, archive)
-    archive.data = ParsedDLRECFile(activity=get_reference(archive.metadata.upload_id, eid))
+    archive.data = ParsedDLRECFile(
+        activity=get_reference(archive.metadata.upload_id, eid)
+    )
     create_archive(entry, archive, file_name)
 
 
