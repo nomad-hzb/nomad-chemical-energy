@@ -106,13 +106,14 @@ def update_general_process_entries(entry, entry_id, archive, logger, entry_class
         # Open Archives
         with files.UploadFiles.get(upload_id=res['upload_id']).read_archive(
             entry_id=res['entry_id']
-        ) as archive:
+        ) as ar:
             entry_id = res['entry_id']
-            entry_data = archive[entry_id]['data']
+            entry_data = ar[entry_id]['data']
             entry_data.pop('m_def', None)
             new_entry_dict.update(entry_data)
-    except Exception as e:
-        logger.error('Error in processing data: ', e)
+    except Exception:
+        pass
+        # logger.error('Error in processing data: ', e)
 
     new_entry = entry_class.m_from_dict(new_entry_dict)
     return new_entry

@@ -5,7 +5,7 @@ import pandas as pd
 def to_float(value):
     try:
         return float(value)
-    except:
+    except Exception:
         return value
 
 

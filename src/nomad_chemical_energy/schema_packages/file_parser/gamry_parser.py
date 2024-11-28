@@ -57,7 +57,7 @@ def _read_curve_data(fid, curve_length) -> tuple:
             break
     try:
         curve = pd.read_csv(StringIO(curve), delimiter='\t', header=0, index_col=0)
-    except:
+    except Exception:
         curve = pd.read_csv(
             StringIO(curve), delimiter='\t', header=0, index_col=0, decimal=','
         )
@@ -73,7 +73,7 @@ def get_number(value_str):
         return get_number(value_str.replace(',', '.'))
     try:
         return locale.atof(value_str)
-    except:
+    except Exception:
         return value_str
 
 
@@ -95,7 +95,7 @@ def get_curve(f, _header, _curve_units, curve_length=None):
         elif not is_numeric_dtype(curve[key]):
             try:
                 curve[key] = curve[key].map(locale.atof)
-            except:
+            except Exception:
                 curve[key] = curve[key].apply(lambda x: x.replace(',', '.'))
                 curve[key] = curve[key].map(locale.atof)
 
@@ -116,7 +116,7 @@ def check_is_number(key, input_string):
         return input_string
     try:
         return float(input_string)
-    except:
+    except Exception:
         return input_string
 
 

@@ -139,7 +139,8 @@ class GamryParser(MatchingParser):
         for method in methods:
             file_name = f'{measurement_name}_{method}.archive.json'
             eid = get_entry_id_from_file_name(file_name, archive)
-            connected_experiments.append(get_reference(archive.metadata.upload_id, eid))
+            connected_experiments.append(
+                get_reference(archive.metadata.upload_id, eid))
             if 'CV' in method:
                 measurements.append((eid, file_name, CE_NOME_CyclicVoltammetry()))
 
@@ -266,7 +267,7 @@ class CENOMEcsvParser(MatchingParser):
         entry.description = f'Notes from file name: {notes}'
         try:
             entry.data_file = os.path.basename(mainfile)
-        except:
+        except Exception:
             entry.data_file = [os.path.basename(mainfile)]
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 

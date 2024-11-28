@@ -97,7 +97,7 @@ def test_normalize_all(parsed_archive, monkeypatch):
 def get_archive(file_base, monkeypatch):
     set_monkey_patch(monkeypatch)
     file_name = os.path.join('tests', 'data', file_base)
-    file_archive = parse(file_name)[0]
+    parse(file_name)[0]
     for file in os.listdir(os.path.join('tests/data')):
         if 'archive.json' not in file or file_base.replace('#', 'run') not in file:
             continue

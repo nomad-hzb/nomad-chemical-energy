@@ -129,7 +129,7 @@ class MPTParser(MatchingParser):
                 try:
                     key, value = param.split('=')
                     setattr(setup_parameters, key.strip(), value.strip())
-                except:
+                except Exception:
                     pass
 
         cam_measurements.setup_parameters = setup_parameters

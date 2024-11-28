@@ -106,7 +106,7 @@ class CatLab_Sample(CatalysisSample, EntryData):
             try:
                 first_short = unidecode(author.first_name)[:2]
                 last_short = unidecode(author.last_name)[:2]
-            except:
+            except Exception:
                 pass
             self.lab_id = create_id(archive, str(first_short) + str(last_short))
         export_lab_id(archive, self.lab_id)

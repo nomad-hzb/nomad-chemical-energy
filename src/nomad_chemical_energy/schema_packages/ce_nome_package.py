@@ -326,7 +326,7 @@ def get_parameter(obj, key):
     value = None
     try:
         value = obj[key]
-    except:
+    except Exception:
         pass
     if pd.isna(value):
         return None
