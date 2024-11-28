@@ -43,21 +43,18 @@ from nomad_chemical_energy.schema_packages.hzb_general_process_package import (
 
 
 class ParsedGeneralProcessFile(EntryData):
-
     activity = Quantity(
         type=Activity,
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
-        )
+        ),
     )
 
 
 class GeneralProcessParser(MatchingParser):
-
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-
         file_name = mainfile.split('/')[-1]
-        sample_id = file_name.split(".")[0].split("-")[0]
+        sample_id = file_name.split('.')[0].split('-')[0]
 
         entry = HZB_GeneralProcess()
         entry.name = file_name
@@ -71,7 +68,7 @@ class GeneralProcessParser(MatchingParser):
         eid = get_entry_id_from_file_name(file_name_archive, archive)
         ref = get_reference(archive.metadata.upload_id, eid)
         archive.data = ParsedGeneralProcessFile(activity=ref)
-        archive.metadata.entry_name = file_name.split(".")[0].replace("-", " ")
+        archive.metadata.entry_name = file_name.split('.')[0].replace('-', ' ')
 
         # TODO for new measurement parsers that should replace GeneralProcess entries you can use this code inside the parser
         # file_name_archive = f'{file_name}.archive.json'
@@ -89,28 +86,34 @@ class GeneralProcessParser(MatchingParser):
 def update_general_process_entries(entry, entry_id, archive, logger, entry_class):
     from nomad import files
     from nomad.search import search
+
     query = {
         'entry_id': entry_id,
     }
     search_result = search(
-        owner='all',
-        query=query,
-        user_id=archive.metadata.main_author.user_id)
-    entry_type = search_result.data[0].get('entry_type') if len(search_result.data) == 1 else None
+        owner='all', query=query, user_id=archive.metadata.main_author.user_id
+    )
+    entry_type = (
+        search_result.data[0].get('entry_type')
+        if len(search_result.data) == 1
+        else None
+    )
     if entry_type != 'HZB_GeneralProcess':
         return None
     new_entry_dict = entry.m_to_dict()
     res = search_result.data[0]
     try:
         # Open Archives
-        with files.UploadFiles.get(upload_id=res["upload_id"]).read_archive(
-                entry_id=res["entry_id"]) as archive:
-            entry_id = res["entry_id"]
-            entry_data = archive[entry_id]["data"]
+        with files.UploadFiles.get(upload_id=res['upload_id']).read_archive(
+            entry_id=res['entry_id']
+        ) as ar:
+            entry_id = res['entry_id']
+            entry_data = ar[entry_id]['data']
             entry_data.pop('m_def', None)
             new_entry_dict.update(entry_data)
-    except Exception as e:
-        logger.error("Error in processing data: ", e)
+    except Exception:
+        pass
+        # logger.error('Error in processing data: ', e)
 
     new_entry = entry_class.m_from_dict(new_entry_dict)
     return new_entry

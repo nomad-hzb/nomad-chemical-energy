@@ -25,37 +25,34 @@ import pandas as pd
 
 
 def get_header_data_corrware(filename):
-
     _header = dict()
     _working = _header
-    with open(file=filename, encoding="utf8", errors="ignore") as f:
+    with open(file=filename, encoding='utf8', errors='ignore') as f:
         line = f.readline()
         count = -1
         _technique = ''
-        while "End Comments" not in line:
+        while 'End Comments' not in line:
             count += 1
             line = f.readline()
-            if ":" not in line:
+            if ':' not in line:
                 if count == 1:
                     _technique = line.strip()
                 continue
 
             if 'Date:' in line and 'Time:' in line:
-                date, time = line.replace(
-                    'Date:', '').replace(
-                    'Time:', '').split()
-                _working.update({"Datetime": f"{date} {time}"})
+                date, time = line.replace('Date:', '').replace('Time:', '').split()
+                _working.update({'Datetime': f'{date} {time}'})
                 continue
 
-            line = line.split(":")
+            line = line.split(':')
 
-            if "Begin" in line[0]:
-                key = line[0].replace("Begin", "").strip()
+            if 'Begin' in line[0]:
+                key = line[0].replace('Begin', '').strip()
                 _working.update({key: {}})
                 _working = _working[key]
                 continue
 
-            if "End" in line[0]:
+            if 'End' in line[0]:
                 _working = _header
                 continue
             value = line[1].strip()
@@ -65,32 +62,54 @@ def get_header_data_corrware(filename):
                 pass
             _working.update({line[0].strip(): value})
 
-    _data = pd.read_csv(filename,
-                        skiprows=[0],
-                        header=count - 1,
-                        delimiter="\t",
-                        skip_blank_lines=False).iloc[1:].astype("float64")
+    _data = (
+        pd.read_csv(
+            filename,
+            skiprows=[0],
+            header=count - 1,
+            delimiter='\t',
+            skip_blank_lines=False,
+        )
+        .iloc[1:]
+        .astype('float64')
+    )
 
     _data = _data.rename(columns=lambda x: x.strip())
 
-    if "Cyclic" in _technique:
+    if 'Cyclic' in _technique:
         curve = 0
-        v_min = _header["Experiment"]["Potential #2"]
-        v_max = _header["Experiment"]["Potential #3"]
-        _data["curve"] = 0
-        v_value_new = _data.iloc[0]["E(Volts)"]
-        v_value_start = _data.iloc[0]["E(Volts)"]
+        v_min = _header['Experiment']['Potential #2']
+        v_max = _header['Experiment']['Potential #3']
+        _data['curve'] = 0
+        v_value_new = _data.iloc[0]['E(Volts)']
+        v_value_start = _data.iloc[0]['E(Volts)']
         for index, row in _data[1:].iterrows():
             v_value_old = v_value_new
-            v_value_new = row["E(Volts)"]
-            if (v_value_new < v_value_start and v_value_old > v_value_start
-                    and v_max > v_min) or \
-                    (v_value_new > v_value_start
-                     and v_value_old < v_value_start and v_max < v_min) or \
-                    (v_value_new == v_max and v_value_start == v_max and v_value_new != v_value_old) or \
-                    (v_value_new == v_min and v_value_start == v_min and v_value_new != v_value_old):
+            v_value_new = row['E(Volts)']
+            if (
+                (
+                    v_value_new < v_value_start
+                    and v_value_old > v_value_start
+                    and v_max > v_min
+                )
+                or (
+                    v_value_new > v_value_start
+                    and v_value_old < v_value_start
+                    and v_max < v_min
+                )
+                or (
+                    v_value_new == v_max
+                    and v_value_start == v_max
+                    and v_value_new != v_value_old
+                )
+                or (
+                    v_value_new == v_min
+                    and v_value_start == v_min
+                    and v_value_new != v_value_old
+                )
+            ):
                 curve += 1
-            _data.at[index, "curve"] = curve
-        _data = _data.set_index("curve")
+            _data.at[index, 'curve'] = curve
+        _data = _data.set_index('curve')
 
     return _header, _data, _technique

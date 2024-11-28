@@ -44,9 +44,9 @@ from nomad.parsing import MatchingParser
 
 from nomad_chemical_energy.schema_packages.ce_wannsee_package import Wannsee_XRD_XY
 
-'''
+"""
 This is a hello world style example for an example parser/converter.
-'''
+"""
 
 
 class ParsedMPTFile(EntryData):
@@ -54,7 +54,7 @@ class ParsedMPTFile(EntryData):
         type=Activity,
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
-        )
+        ),
     )
 
 
@@ -63,7 +63,7 @@ class ParsedXYFile(EntryData):
         type=Activity,
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
-        )
+        ),
     )
 
 
@@ -72,14 +72,12 @@ class ParsedCORFile(EntryData):
         type=Activity,
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
-        )
+        ),
     )
 
 
 class MPTParser(MatchingParser):
-
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-
         mainfile_split = os.path.basename(mainfile).split('.')
         notes = mainfile_split[0]
         if len(mainfile_split) > 2:
@@ -89,44 +87,49 @@ class MPTParser(MatchingParser):
         from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import (
             read_mpt_file,
         )
+
         metadata, _, technique = read_mpt_file(mainfile)
 
-        if "Cyclic Voltammetry" in technique:
+        if 'Cyclic Voltammetry' in technique:
             from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
                 Wannsee_B307_CyclicVoltammetry_ECLab,
             )
+
             cam_measurements = Wannsee_B307_CyclicVoltammetry_ECLab()
 
-        if "Open Circuit Voltage" in technique:
+        if 'Open Circuit Voltage' in technique:
             from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
                 Wannsee_B307_OpenCircuitVoltage_ECLab,
             )
+
             cam_measurements = Wannsee_B307_OpenCircuitVoltage_ECLab()
 
-        if "Potentio Electrochemical Impedance Spectroscopy" in technique:
+        if 'Potentio Electrochemical Impedance Spectroscopy' in technique:
             from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
                 Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab,
             )
+
             cam_measurements = Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab()
 
         archive.metadata.entry_name = os.path.basename(mainfile)
 
-        sample_id = metadata.get("Electrode material")
-        setup_id = metadata.get("Initial state")
-        environment_id = metadata.get("Electrolyte")
+        sample_id = metadata.get('Electrode material')
+        setup_id = metadata.get('Initial state')
+        environment_id = metadata.get('Electrolyte')
 
         from baseclasses.chemical_energy import PotentiostatSetup
+
         setup_parameters = PotentiostatSetup()
-        setup_params = metadata.get("Comments")
+        setup_params = metadata.get('Comments')
         if setup_params is not None:
-            setup_params = setup_params.split(",")
+            setup_params = setup_params.split(',')
             for param in setup_params:
-                if "=" not in param:
+                if '=' not in param:
                     continue
                 try:
-                    key, value = param.split("=")
+                    key, value = param.split('=')
                     setattr(setup_parameters, key.strip(), value.strip())
-                except:
+                except Exception:
                     pass
 
         cam_measurements.setup_parameters = setup_parameters
@@ -140,8 +143,8 @@ class MPTParser(MatchingParser):
         if setup_ref is not None:
             cam_measurements.setup = setup_ref
 
-        cam_measurements.name = f"{mainfile_split[0]} {notes}"
-        cam_measurements.description = f"Notes from file name: {notes}"
+        cam_measurements.name = f'{mainfile_split[0]} {notes}'
+        cam_measurements.description = f'Notes from file name: {notes}'
         cam_measurements.data_file = os.path.basename(mainfile)
 
         if cam_measurements is not None:
@@ -151,13 +154,11 @@ class MPTParser(MatchingParser):
             eid = get_entry_id_from_file_name(file_name, archive)
             ref = get_reference(archive.metadata.upload_id, eid)
             archive.data = ParsedMPTFile(activity=ref)
-            archive.metadata.entry_name = f"{mainfile_split[0]} {notes}"
+            archive.metadata.entry_name = f'{mainfile_split[0]} {notes}'
 
 
 class CORParser(MatchingParser):
-
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-
         mainfile_split = os.path.basename(mainfile).split('.')
         notes = mainfile_split[0]
         if len(mainfile_split) > 2:
@@ -166,6 +167,7 @@ class CORParser(MatchingParser):
         from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
             Wannsee_B307_CyclicVoltammetry_CorrWare,
         )
+
         cam_measurements = Wannsee_B307_CyclicVoltammetry_CorrWare()
 
         archive.metadata.entry_name = os.path.basename(mainfile)
@@ -173,8 +175,8 @@ class CORParser(MatchingParser):
         search_id = mainfile_split[0]
         set_sample_reference(archive, cam_measurements, search_id)
 
-        cam_measurements.name = f"{search_id} {notes}"
-        cam_measurements.description = f"Notes from file name: {notes}"
+        cam_measurements.name = f'{search_id} {notes}'
+        cam_measurements.description = f'Notes from file name: {notes}'
         cam_measurements.data_file = os.path.basename(mainfile)
 
         file_name = f'{os.path.basename(mainfile)}.archive.json'
@@ -183,11 +185,10 @@ class CORParser(MatchingParser):
         eid = get_entry_id_from_file_name(file_name, archive)
         ref = get_reference(archive.metadata.upload_id, eid)
         archive.data = ParsedCORFile(activity=ref)
-        archive.metadata.entry_name = f"{mainfile_split[0]} {notes}"
+        archive.metadata.entry_name = f'{mainfile_split[0]} {notes}'
 
 
 class XRDParser(MatchingParser):
-
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
 
@@ -201,11 +202,11 @@ class XRDParser(MatchingParser):
         search_id = mainfile_split[0]
         set_sample_reference(archive, entry, search_id)
 
-        entry.name = f"{search_id} {notes}"
-        entry.description = f"Notes from file name: {notes}"
-        if not mainfile_split[-2] == "eqe":
+        entry.name = f'{search_id} {notes}'
+        entry.description = f'Notes from file name: {notes}'
+        if not mainfile_split[-2] == 'eqe':
             entry.data_file = os.path.basename(mainfile)
-        entry.datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+        entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
         file_name = f'{os.path.basename(mainfile)}.archive.json'
         create_archive(entry, archive, file_name)
@@ -213,4 +214,4 @@ class XRDParser(MatchingParser):
         eid = get_entry_id_from_file_name(file_name, archive)
         ref = get_reference(archive.metadata.upload_id, eid)
         archive.data = ParsedXYFile(activity=ref)
-        archive.metadata.entry_name = f"{mainfile_split[0]} {notes}"
+        archive.metadata.entry_name = f'{mainfile_split[0]} {notes}'

@@ -46,9 +46,9 @@ from nomad_chemical_energy.schema_packages.dlr_electro_chemistry_package import 
     DLR_ElectrochemicalImpedanceSpectroscopy,
 )
 
-'''
+"""
 This is a hello world style example for an example parser/converter.
-'''
+"""
 
 
 class ParsedDLRECFile(EntryData):
@@ -56,7 +56,7 @@ class ParsedDLRECFile(EntryData):
         type=Activity,
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
-        )
+        ),
     )
 
 
@@ -70,20 +70,21 @@ def create_ec_entry(archive, mainfile, entry):
     search_id = mainfile_split[0]
     set_sample_reference(archive, entry, search_id)
 
-    entry.name = f"{search_id} {notes}"
-    entry.description = f"Notes from file name: {notes}"
+    entry.name = f'{search_id} {notes}'
+    entry.description = f'Notes from file name: {notes}'
 
     entry.data_file = os.path.basename(mainfile)
-    entry.datetime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+    entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
 
     file_name = f'{os.path.basename(mainfile)}.archive.json'
     eid = get_entry_id_from_file_name(file_name, archive)
-    archive.data = ParsedDLRECFile(activity=get_reference(archive.metadata.upload_id, eid))
+    archive.data = ParsedDLRECFile(
+        activity=get_reference(archive.metadata.upload_id, eid)
+    )
     create_archive(entry, archive, file_name)
 
 
 class DLRECCVParser(MatchingParser):
-
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
         entry = DLR_CyclicVoltammetry()
@@ -91,7 +92,6 @@ class DLRECCVParser(MatchingParser):
 
 
 class DLRECEISParser(MatchingParser):
-
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
 
@@ -100,7 +100,6 @@ class DLRECEISParser(MatchingParser):
 
 
 class DLRECCPParser(MatchingParser):
-
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         # Log a hello world, just to get us started. TODO remove from an actual parser.
         entry = DLR_Chronopotentiometry()

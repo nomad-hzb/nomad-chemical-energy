@@ -4,33 +4,32 @@ Created on Mon Dec 19 11:18:04 2022
 
 @author: a2853
 """
+
 import pandas as pd
 
-encoding = "iso-8859-1"
+encoding = 'iso-8859-1'
 
 
 def headeranddelimiter(file):
     header = 0
     header_found = False
-    decimal = "."
-    with open(file, "br") as f:
+    decimal = '.'
+    with open(file, 'br') as f:
         for i, line in enumerate(f):
             line_decode = line.decode(encoding)
-            if line_decode.startswith("mode") or\
-                line_decode.startswith("freq/Hz"):
+            if line_decode.startswith('mode') or line_decode.startswith('freq/Hz'):
                 header = i
                 header_found = True
             if header_found:
-                if "," in line_decode and "." not in line_decode:
-                    decimal = ","
-                if "." in line_decode and decimal == ",":
-                    raise Exception("decimal delimiter . and , found")
+                if ',' in line_decode and '.' not in line_decode:
+                    decimal = ','
+                if '.' in line_decode and decimal == ',':
+                    raise Exception('decimal delimiter . and , found')
 
     return header, decimal
 
 
 def parse_line(line, separator, encoding):
-
     stripped_line = line.strip()
 
     if not stripped_line:
@@ -46,11 +45,11 @@ def parse_line(line, separator, encoding):
     return None, None
 
 
-def read_mps_file(datafile, encoding="iso-8859-1"):
+def read_mps_file(datafile, encoding='iso-8859-1'):
     """Reads an MPS file, splits by : and if technique splits by spaces"""
     res = {}
     tmp = res
-    separator = ":"
+    separator = ':'
 
     with open(datafile, 'rb') as file:
         for line in file.readlines():
@@ -60,14 +59,14 @@ def read_mps_file(datafile, encoding="iso-8859-1"):
                 continue
 
             if key == '' and value == '':
-                separator = ":"
+                separator = ':'
                 tmp = res
                 continue
 
-            if "Technique" in key:
-                separator = "  "
-                res.update({f"{key} {value}": {}})
-                tmp = res[f"{key} {value}"]
+            if 'Technique' in key:
+                separator = '  '
+                res.update({f'{key} {value}': {}})
+                tmp = res[f'{key} {value}']
                 continue
 
             tmp.update({key: value})
@@ -75,10 +74,10 @@ def read_mps_file(datafile, encoding="iso-8859-1"):
     return res
 
 
-def read_mpt_file(filename, encoding="iso-8859-1"):
+def read_mpt_file(filename, encoding='iso-8859-1'):
     """Reads an MPS file, splits by : and if technique splits by spaces"""
     metadata = {}
-    separator = ":"
+    separator = ':'
     technique = ''
     count = 0
     key = ''
@@ -88,17 +87,17 @@ def read_mpt_file(filename, encoding="iso-8859-1"):
             if count == 3:
                 technique = line_decode.strip()
             count += 1
-            if line_decode.startswith("mode"):
+            if line_decode.startswith('mode'):
                 break
-            if line_decode.startswith("vs."):
+            if line_decode.startswith('vs.'):
                 key_old = key
             if line_decode.strip() == '':
                 continue
 
-            if ":" in line_decode:
-                separator = ":"
+            if ':' in line_decode:
+                separator = ':'
             else:
-                separator = "  "
+                separator = '  '
 
             key, value = parse_line(line_decode, separator, encoding)
             try:
@@ -108,33 +107,34 @@ def read_mpt_file(filename, encoding="iso-8859-1"):
             if key is None and value is None:
                 continue
 
-            if line_decode.startswith("vs."):
-                metadata.update({f"{key_old} {key}": value})
+            if line_decode.startswith('vs.'):
+                metadata.update({f'{key_old} {key}': value})
                 continue
             metadata.update({key: value})
 
     header_line, decimal = headeranddelimiter(filename)
     data = pd.read_csv(
         filename,
-        sep="\t",
+        sep='\t',
         header=header_line,
         encoding=encoding,
         skip_blank_lines=False,
-        decimal=decimal)
+        decimal=decimal,
+    )
 
-    if "Cyclic" in technique and 'nc cycles' in metadata:
+    if 'Cyclic' in technique and 'nc cycles' in metadata:
         curve = 0
-        data["curve"] = 0
-        v_value_new = data.iloc[0]["Ewe/V"]
-        v_value_start = data.iloc[0]["Ewe/V"]
+        data['curve'] = 0
+        v_value_new = data.iloc[0]['Ewe/V']
+        v_value_start = data.iloc[0]['Ewe/V']
         for index, row in data[1:].iterrows():
             v_value_old = v_value_new
-            v_value_new = row["Ewe/V"]
+            v_value_new = row['Ewe/V']
             if v_value_new < v_value_start and v_value_old > v_value_start:
                 curve += 1
 
-            data.at[index, "curve"] = curve
-        data = data.set_index("curve")
+            data.at[index, 'curve'] = curve
+        data = data.set_index('curve')
 
     return metadata, data, technique
 
