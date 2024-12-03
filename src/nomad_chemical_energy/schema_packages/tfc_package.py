@@ -303,7 +303,6 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
             self.energy = energy
             with archive.m_context.raw_file(file_path, 'rt') as f:
                 composition_data = load_XRF_txt(f)
-            print(composition_data)
 
             material_name = ''
             for i, file in enumerate(files):
@@ -317,7 +316,6 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
                 ]
                 layer_data = {}
                 for v in measurement_row.items():
-                    print(v)
                     if v[0][0] not in layer_data:
                         layer_data.update({v[0][0]: {}})
                     if 'Thick' in v[0][1] or 'Dicke' in v[0][1]:
