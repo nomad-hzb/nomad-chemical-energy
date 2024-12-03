@@ -1,10 +1,7 @@
-from typing import List, Dict, Any, Tuple
-from xarray import Dataset
 import base64
-import xml.etree.ElementTree as ElTree
 import struct
-from datetime import datetime
 import tempfile
+import xml.etree.ElementTree as ElTree
 
 # from kExceptions import KameleontImportError
 # from kXarrayMethods import make_dimension_array, make_data_array, make_dataset
@@ -13,7 +10,6 @@ import tempfile
 # from kInfoJsonCommands import LibraryLayer, LibraryLayerProperty, create_update_json
 import numpy as np
 import pandas as pd
-
 
 periodic_table_list = [
     'H',
@@ -141,7 +137,7 @@ periodic_table_dict = {
 }
 
 
-def get_spectrum_hardware_params(data_root: ElTree.Element) -> Dict:
+def get_spectrum_hardware_params(data_root: ElTree.Element) -> dict:
     """
     Method that walks the XML tree from the given root and finds the information for the hardware parameters
     that were stored in the spx file. Returns the found values as a dict.
@@ -240,7 +236,7 @@ def get_position(data_root: ElTree.Element) -> np.array:
         return positions
 
 
-def create_grid(in_array: np.array) -> Tuple[List, bool]:
+def create_grid(in_array: np.array) -> tuple[list, bool]:
     """
     Method that generate a grid with x-positions and y-positions from a 2D-array of all positions, at which
     measurements were taken. (Input contains a list of all "pairs" of absolute x- and y-positions; number of
@@ -297,7 +293,7 @@ def create_grid(in_array: np.array) -> Tuple[List, bool]:
             if np.std(np.diff(p_diff_array[restart_line_posis_ori])) < epsilon:
                 spots_per_line = int(np.mean(np.diff(restart_line_posis_ori)))
             else:
-                raise
+                raise Exception
         else:
             spots_per_line = len(p_diff_array) + 1
         return np.linspace(0, step_aver * (spots_per_line - 1), spots_per_line)
@@ -356,7 +352,7 @@ def create_grid(in_array: np.array) -> Tuple[List, bool]:
     return [x_array, y_array], x_first
 
 
-def get_system_settings(data_root: ElTree.Element) -> Dict:
+def get_system_settings(data_root: ElTree.Element) -> dict:
     """
     Method that walks the XML tree from the given root and finds the information for the system settings
     that were stored in the spx file. Returns the found values as a dict.
@@ -420,7 +416,7 @@ def get_system_settings(data_root: ElTree.Element) -> Dict:
     return system_settings_dict
 
 
-def get_spectrum_header(data_root: ElTree.Element) -> Dict:
+def get_spectrum_header(data_root: ElTree.Element) -> dict:
     """
     Method that walks the XML tree from the given root and finds the information for the spectrum header
     that were stored in the spx file. Returns the found values as a dict.
@@ -523,7 +519,7 @@ def get_fit_bkg(data_root: ElTree.Element) -> np.array:
 
 def get_fit_layer_composition(
     data_root: ElTree.Element,
-) -> Tuple[List[Dict], List[Dict]]:
+) -> tuple[list[dict], list[dict]]:
     """
     Method that walks the XML tree from the given root and finds the
 
@@ -570,7 +566,7 @@ def get_fit_layer_composition(
     return layer_results, layer_props
 
 
-def get_roi_results(data_root: ElTree.Element) -> List[Dict]:
+def get_roi_results(data_root: ElTree.Element) -> list[dict]:
     """
     Method that walks the XML tree from the given root and finds the
 
@@ -597,7 +593,7 @@ def get_roi_results(data_root: ElTree.Element) -> List[Dict]:
     return roi_results
 
 
-def get_deconvolution_results(data_root: ElTree.Element) -> Tuple[str, List[Dict]]:
+def get_deconvolution_results(data_root: ElTree.Element) -> tuple[str, list[dict]]:
     """
     Method that walks the XML tree from the given root and finds the
 
@@ -660,12 +656,6 @@ def read(
     positions = []  # list of np.arrays with the positions of each spectrum
     spectra = []  # list of np.arrays with the spectra
 
-    deconvolution_rows = []  # list of dicts containing deconvolution results
-    deconvolution_methods = []  # list of strings with the name of the deconvolution method (hopefully all the same)
-    roi_rows = []  # list of dicts containing the roi results
-    layer_rows = []  # list of dicts containing the layer results (atom_percent, weight_percent of element)
-    layer_prop_rows = []  # list of dicts containing layer properties (density, thickness, ...)
-    fit_bkg = []  # list of np.arrays with the fitted background
     for idx, spx_file_obj in enumerate(file_obj_paths):
         with tempfile.NamedTemporaryFile(delete=False, suffix='.spx') as temp_file:
             temp_file.write(spx_file_obj.read())
