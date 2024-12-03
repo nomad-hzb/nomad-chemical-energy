@@ -280,7 +280,7 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
 
             measurements = []
 
-            from hzb_combinatorial_libraries.schema_packages.file_parser.xrf_spx_parser import (
+            from nomad_chemical_energy.schema_packages.file_parser.xrf_spx_parser import (
                 read as xrf_read,
             )
 
