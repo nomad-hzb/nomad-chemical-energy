@@ -16,8 +16,16 @@
 # limitations under the License.
 #
 
+import os
+
 import pandas as pd
 import plotly.graph_objs as go
+from baseclasses.characterizations import (
+    XRFComposition,
+    XRFLayer,
+    XRFLibrary,
+    XRFSingleLibraryMeasurement,
+)
 from baseclasses.chemical_energy import Equipment
 from baseclasses.helper.utilities import set_sample_reference
 from baseclasses.vapour_based_deposition import MultiTargetSputtering
@@ -199,6 +207,158 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
 
 
 # %%######################## Measurements
+
+
+def load_XRF_txt(input_file):
+    head = [next(input_file) for _ in range(3)]
+    pos = [0]
+    ns = False
+    for i, c in enumerate(head[2]):
+        if c != ' ':
+            ns = True
+        if c == ' ' and ns and head[0][i] == ' ':
+            pos.append(i)
+            ns = False
+    pos.append(-1)
+    col = []
+    c_old = ''
+    for i in range(len(pos) - 1):
+        c1 = (
+            head[0][pos[i] : pos[i + 1]].strip()
+            if head[0][pos[i] : pos[i + 1]].strip()
+            else c_old
+        )
+        c2 = head[1][pos[i] : pos[i + 1]].strip()
+        col.append((c1, c2))
+        c_old = c1
+    input_file.seek(0)
+    try:
+        composition_data = pd.read_csv(
+            input_file,
+            names=col,
+            header=None,
+            skiprows=2,
+            sep='\s{2,}',
+            decimal=',',
+            index_col=0,
+        )
+    except Exception:
+        composition_data = pd.read_csv(
+            input_file,
+            names=col,
+            header=None,
+            skiprows=2,
+            sep='\s{2,}',
+            decimal='.',
+            index_col=0,
+        )
+
+    return composition_data
+
+
+class TFC_XRFLibrary(XRFLibrary, EntryData):
+    m_def = Section(
+        label='XRF Measurement Library',
+        a_eln=dict(
+            hide=['instruments', 'steps', 'results', 'lab_id'],
+            properties=dict(
+                order=[
+                    'name',
+                ]
+            ),
+        ),
+    )
+
+    def normalize(self, archive, logger):
+        with archive.m_context.raw_file(archive.metadata.mainfile, 'rt') as f:
+            os.path.basename(f.name)
+            if not self.samples:
+                set_sample_reference(archive, self, self.data_folder.split('_')[0])
+
+        if self.composition_file and self.data_folder:
+            file_path = os.path.join(self.data_folder, self.composition_file)
+
+            measurements = []
+
+            from hzb_combinatorial_libraries.schema_packages.file_parser.xrf_spx_parser import (
+                read as xrf_read,
+            )
+
+            files = [
+                os.path.basename(file.path)
+                for file in archive.m_context.upload_files.raw_directory_list(
+                    self.data_folder
+                )
+                if file.path.endswith('.spx')
+            ]
+            files.sort()
+
+            with archive.m_context.raw_file(
+                os.path.join(self.data_folder, files[0]), 'rb'
+            ) as f:
+                _, energy, measurement_rows, positions_array, _, _ = xrf_read([f])
+
+            # self.datetime = convert_datetime(
+            #     measurement_rows[0]["DateTime"], datetime_format="%Y-%m-%dT%H:%M:%S.%f", utc=False)
+            self.energy = energy
+            with archive.m_context.raw_file(file_path, 'rt') as f:
+                composition_data = load_XRF_txt(f)
+            print(composition_data)
+
+            material_name = ''
+            for i, file in enumerate(files):
+                with archive.m_context.raw_file(
+                    os.path.join(self.data_folder, file), 'rb'
+                ) as f:
+                    _, _, _, ar, _, _ = xrf_read([f])
+
+                measurement_row = composition_data.loc[
+                    os.path.splitext(os.path.basename(file))[0]
+                ]
+                layer_data = {}
+                for v in measurement_row.items():
+                    print(v)
+                    if v[0][0] not in layer_data:
+                        layer_data.update({v[0][0]: {}})
+                    if 'Thick' in v[0][1] or 'Dicke' in v[0][1]:
+                        layer_data.update({v[0][0]: {'thickness': v[1]}})
+                        continue
+                    if '%' not in v[0][1]:
+                        continue
+                    if 'composition' not in layer_data[v[0][0]]:
+                        layer_data[v[0][0]].update({'composition': []})
+                    if v[0][1] not in material_name:
+                        material_name += f'{v[0][0]}:{v[0][1]},'
+                    layer_data[v[0][0]]['composition'].append(
+                        XRFComposition(amount=float(v[1]))
+                    )
+
+                layers = []
+                for key, layer in layer_data.items():
+                    layers.append(
+                        XRFLayer(
+                            layer=key,
+                            composition=layer.get('composition', None),
+                            thickness=layer.get('thickness', None),
+                        )
+                    )
+
+                measurements.append(
+                    XRFSingleLibraryMeasurement(
+                        data_file=[
+                            os.path.basename(os.path.join(self.data_folder, file))
+                        ],
+                        position_x=ar[0][0],  # positions_array[0, i],
+                        position_y=ar[1][0],  # positions_array[1, i],
+                        layer=layers,
+                        name=f'{round(ar[0][0], 5)},{round(ar[1][0], 5)}',
+                    )
+                )
+            self.measurements = measurements
+            self.material_names = material_name
+        super().normalize(archive, logger)
+
+
 # %%######################## Generic Entries
 # %%######################## Analysis
 

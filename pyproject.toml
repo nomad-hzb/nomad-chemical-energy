@@ -148,6 +148,7 @@ dlr_ec_cp_parser = "nomad_chemical_energy.parsers:dlr_ec_cp_parser"
 dlr_ec_eis_parser = "nomad_chemical_energy.parsers:dlr_ec_eis_parser"
 hzb_general_process_parser = "nomad_chemical_energy.parsers:hzb_general_process_parser"
 tfc_sputtering_parser = "nomad_chemical_energy.parsers:tfc_sputtering_parser"
+tfc_xrf_parser = "nomad_chemical_energy.parsers:tfc_xrf_parser"
 
 necc_find_app = "nomad_chemical_energy.apps:necc_find_app"
 necc_compare_app = "nomad_chemical_energy.apps:necc_compare_app"

@@ -128,6 +128,13 @@ class TFCSputteringParserEntryPoint(ParserEntryPoint):
         return TFCSputteringParser(**self.dict())
 
 
+class TFCXRFLibraryParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.tfc_parser import TFCXRFParser
+
+        return TFCXRFParser(**self.dict())
+
+
 ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     name='CENECCxlsxParser',
     description='Parser for CENECC xls files',
@@ -242,4 +249,11 @@ tfc_sputtering_parser = TFCSputteringParserEntryPoint(
         'Observables': {'__has_all_keys': ['Sputtering', 'Values']},
         # '__comment_symbol': '#',
     },
+)
+
+tfc_xrf_parser = TFCXRFLibraryParserEntryPoint(
+    name='TFCXRFParser',
+    description='Parse txt files with xrf. Files are defined for the Thin Film Catalysis Group.',
+    mainfile_name_re=r'.*report.txt',
+    mainfile_contents=r'.*Basis.*Grid_',
 )

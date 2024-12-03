@@ -15,11 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import datetime
 
 from baseclasses.helper.utilities import (
     create_archive,
     get_entry_id_from_file_name,
     get_reference,
+    set_sample_reference,
 )
 from nomad.datamodel import EntryArchive
 from nomad.datamodel.data import (
@@ -41,6 +43,7 @@ from nomad_chemical_energy.parsers.hzb_general_parser import (
 )
 from nomad_chemical_energy.schema_packages.tfc_package import (
     TFC_Sputtering,
+    TFC_XRFLibrary,
 )
 
 
@@ -83,3 +86,29 @@ class TFCSputteringParser(MatchingParser):
                 create_archive(new_entry, archive, file_name_archive, overwrite=True)
         archive.data = ParsedSputteringFile(activity=ref)
         archive.metadata.entry_name = file_name.split('.')[0].replace('-', ' ')
+
+
+class ParsedXRFFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        ),
+    )
+
+
+class TFCXRFParser(MatchingParser):
+    def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
+        file = mainfile.split('/')[-1]
+
+        entry = TFC_XRFLibrary(composition_file=file)
+        entry.data_folder = mainfile.split('/')[-2]
+
+        set_sample_reference(archive, entry, entry.data_folder.split('_')[0])
+
+        entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        entry.name = f'XRF {entry.data_folder}'
+
+        file_name = f'{"_".join(mainfile.split("/")[-2:])}.archive.json'
+        archive.data = ParsedXRFFile(activity=create_archive(entry, archive, file_name))
+        archive.metadata.entry_name = file
