@@ -110,5 +110,6 @@ class TFCXRFParser(MatchingParser):
         entry.name = f'XRF {entry.data_folder}'
 
         file_name = f'{"_".join(mainfile.split("/")[-2:])}.archive.json'
-        archive.data = ParsedXRFFile(activity=create_archive(entry, archive, file_name))
-        archive.metadata.entry_name = file
+        archive.data = ParsedXRFFile(
+            activity=create_archive(entry, archive, file_name))
+        archive.metadata.entry_name = f'XRF Raw {entry.data_folder}'
