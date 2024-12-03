@@ -254,6 +254,6 @@ tfc_sputtering_parser = TFCSputteringParserEntryPoint(
 tfc_xrf_parser = TFCXRFLibraryParserEntryPoint(
     name='TFCXRFParser',
     description='Parse txt files with xrf. Files are defined for the Thin Film Catalysis Group.',
-    mainfile_name_re=r'.*report.txt',
+    mainfile_name_re=r'.*(R|r)eport.txt',
     mainfile_contents=r'.*Basis.*Grid_',
 )
