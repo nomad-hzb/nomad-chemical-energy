@@ -342,8 +342,11 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(ElectrolyserPerformanceEvaluatio
                     from baseclasses.helper.archive_builder.labview_archive import get_electrolyser_properties, get_tdms_archive
                     metadata, data = get_info_and_data(f)
                     get_tdms_archive(data, self)
-
-                    get_electrolyser_properties(metadata)
+                    self.name = metadata.get('name')
+                    self.description = metadata.get('Comments')
+                    # TODO add user name and maybe rename description to comment (or use label?)
+                    if not self.properties:
+                        self.properties = get_electrolyser_properties(metadata)
         super(CE_NESD_ElectrolyserPerformanceEvaluation, self).normalize(archive, logger)
 
 
