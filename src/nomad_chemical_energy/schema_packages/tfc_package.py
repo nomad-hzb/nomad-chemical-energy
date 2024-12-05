@@ -337,7 +337,7 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
                     if v[0][1] not in material_name:
                         material_name += f'{v[0][0]}:{v[0][1]},'
                     layer_data[v[0][0]]['composition'].append(
-                        XRFComposition(amount=float(v[1]))
+                        XRFComposition(amount=float(v[1]), name=v[0][1])
                     )
 
                 layers = []
