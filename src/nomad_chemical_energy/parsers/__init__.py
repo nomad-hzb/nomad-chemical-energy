@@ -135,6 +135,13 @@ class TFCXRFLibraryParserEntryPoint(ParserEntryPoint):
         return TFCXRFParser(**self.dict())
 
 
+class TFCXRDLibraryParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.tfc_parser import TFCXRDParser
+
+        return TFCXRDParser(**self.dict())
+
+
 ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     name='CENECCxlsxParser',
     description='Parser for CENECC xls files',
@@ -256,4 +263,11 @@ tfc_xrf_parser = TFCXRFLibraryParserEntryPoint(
     description='Parse txt files with xrf. Files are defined for the Thin Film Catalysis Group.',
     mainfile_name_re=r'.*(R|r)eport.txt',
     mainfile_contents=r'.*Basis.*Grid_',
+)
+
+tfc_xrd_parser = TFCXRDLibraryParserEntryPoint(
+    name='TFCXRDParser',
+    description='Parse txt files with xrd. Files are defined for the Thin Film Catalysis Group.',
+    mainfile_name_re=r'.*log_all.txt',
+    mainfile_contents=r'########## start Header ##########.*# xlab 0.6.4 log all file',
 )

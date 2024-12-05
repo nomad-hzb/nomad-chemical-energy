@@ -43,6 +43,7 @@ from nomad_chemical_energy.parsers.hzb_general_parser import (
 )
 from nomad_chemical_energy.schema_packages.tfc_package import (
     TFC_Sputtering,
+    TFC_XRDMetalJetLibrary,
     TFC_XRFLibrary,
 )
 
@@ -112,3 +113,29 @@ class TFCXRFParser(MatchingParser):
         file_name = f'{"_".join(mainfile.split("/")[-2:])}.archive.json'
         archive.data = ParsedXRFFile(activity=create_archive(entry, archive, file_name))
         archive.metadata.entry_name = f'XRF Raw {entry.data_folder}'
+
+
+class ParsedXRDFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        ),
+    )
+
+
+class TFCXRDParser(MatchingParser):
+    def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
+        file = mainfile.split('/')[-1]
+
+        entry = TFC_XRDMetalJetLibrary(data_file=file)
+        entry.data_folder = mainfile.split('/')[-2]
+
+        set_sample_reference(archive, entry, entry.data_folder.split('_')[0])
+
+        entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        entry.name = f'XRD {entry.data_folder}'
+
+        file_name = f'{"_".join(mainfile.split("/")[-2:])}.archive.json'
+        archive.data = ParsedXRDFile(activity=create_archive(entry, archive, file_name))
+        archive.metadata.entry_name = f'XRD Raw {entry.data_folder}'

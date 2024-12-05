@@ -18,20 +18,23 @@
 
 import os
 
+import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
+from baseclasses import SingleLibraryMeasurement
 from baseclasses.characterizations import (
+    XRDLibrary,
     XRFComposition,
     XRFLayer,
     XRFLibrary,
     XRFSingleLibraryMeasurement,
 )
 from baseclasses.chemical_energy import Equipment
-from baseclasses.helper.utilities import set_sample_reference
+from baseclasses.helper.utilities import convert_datetime, set_sample_reference
 from baseclasses.vapour_based_deposition import MultiTargetSputtering
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
-from nomad.metainfo import SchemaPackage, Section
+from nomad.metainfo import Datetime, Quantity, SchemaPackage, Section, SubSection
 
 m_package = SchemaPackage()
 
@@ -298,6 +301,12 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
             ) as f:
                 _, energy, measurement_rows, positions_array, _, _ = xrf_read([f])
 
+            self.datetime = convert_datetime(
+                measurement_rows[0]['DateTime'],
+                datetime_format='%Y-%m-%dT%H:%M:%S.%f',
+                utc=False,
+            )
+
             # self.datetime = convert_datetime(
             #     measurement_rows[0]["DateTime"], datetime_format="%Y-%m-%dT%H:%M:%S.%f", utc=False)
             self.energy = energy
@@ -357,8 +366,260 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
         super().normalize(archive, logger)
 
 
+def get_value(val):
+    try:
+        return float(val)
+    except Exception:
+        return None
+
+
+def set_single_xrd_measurement_metadata(row):
+    entry = XRDMetalJetSingleLibraryMeasurement()
+    entry.datetime = convert_datetime(
+        f'{row["Date"]} {row["Time"]}', datetime_format='%Y/%m/%d %H:%M:%S', utc=False
+    )
+    entry.position_x = get_value(row['motors x'])
+    entry.position_y = get_value(row['motors y'])
+    entry.motors_det_v = get_value(row['motors det_v'])
+    entry.motors_det_h = get_value(row['motors det_h'])
+    entry.motors_det_rot = get_value(row['motors det_rot'])
+    entry.motors_x = get_value(row['motors x'])
+    entry.motors_y = get_value(row['motors y'])
+    entry.motors_z = get_value(row['motors z'])
+    entry.motors_phi = get_value(row['motors phi'])
+    entry.motors_chi = get_value(row['motors chi'])
+    entry.motors_chi_cor = get_value(row['motors chi_cor'])
+    entry.motors_omega = get_value(row['motors omega'])
+    entry.motors_zhuber = get_value(row['motors zhuber'])
+    entry.motors_xhuber = get_value(row['motors xhuber'])
+    entry.motors_sb = get_value(row['motors sb'])
+    entry.motors_st = get_value(row['motors st'])
+    entry.motors_sl = get_value(row['motors sl'])
+    entry.motors_sr = get_value(row['motors sr'])
+    entry.motors_sv_delta = get_value(row['motors sv_delta'])
+    entry.motors_sv_pos = get_value(row['motors sv_pos'])
+    entry.motors_sh_delta = get_value(row['motors sh_delta'])
+    entry.motors_sh_pos = get_value(row['motors sh_pos'])
+    entry.hexapod_x = get_value(row['hexapod x'])
+    entry.hexapod_y = get_value(row['hexapod y'])
+    entry.hexapod_z = get_value(row['hexapod z'])
+    entry.hexapod_u = get_value(row['hexapod u'])
+    entry.hexapod_v = get_value(row['hexapod v'])
+    entry.hexapod_w = get_value(row['hexapod w'])
+    entry.hexapod_pivot_x = get_value(row['hexapod pivot_x'])
+    entry.hexapod_pivot_y = get_value(row['hexapod pivot_y'])
+    entry.hexapod_pivot_z = get_value(row['hexapod pivot_z'])
+    entry.metaljet_generator_emission_power = get_value(
+        row['metaljet generator_emission_power,m']
+    )
+    entry.metaljet_generator_high_voltage = get_value(
+        row['metaljet generator_high_voltage,m']
+    )
+    entry.metaljet_spotsize_x_um = get_value(row['metaljet spotsize_x_um,m'])
+    entry.metaljet_spotsize_y_um = get_value(row['metaljet spotsize_y_um,m'])
+    entry.metaljet_spot_position_x_um = get_value(row['metaljet spot_position_x_um,m'])
+    entry.metaljet_spot_position_y_um = get_value(row['metaljet spot_position_y_um,m'])
+    entry.metaljet_jet_pressure = get_value(row['metaljet jet_pressure,m'])
+    entry.metaljet_vacuum_pressure_mbar = get_value(
+        row['metaljet vacuum_pressure_mbar,m']
+    )
+    entry.detector_position_pos = get_value(row['detector_position pos'])
+    entry.detector_position_rel_pos = get_value(row['detector_position rel_pos'])
+    entry.detector_position_valid = get_value(row['detector_position valid'])
+    entry.filter_open = get_value(row['filter_ open'])
+
+    return entry
+
+
+class XRDMetalJetSingleLibraryMeasurement(SingleLibraryMeasurement):
+    m_def = Section(
+        label_quantity='name',
+        a_plot=[
+            {
+                'x': 'q_nm_inv',
+                'y': 'intensity',
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
+                'config': {
+                    'scrollZoom': True,
+                    'staticPlot': False,
+                },
+            }
+        ],
+    )
+
+    datetime = Quantity(type=Datetime)
+
+    motors_det_v = Quantity(type=np.dtype(np.float64))
+    motors_det_h = Quantity(type=np.dtype(np.float64))
+    motors_det_rot = Quantity(type=np.dtype(np.float64))
+    motors_x = Quantity(type=np.dtype(np.float64))
+    motors_y = Quantity(type=np.dtype(np.float64))
+    motors_z = Quantity(type=np.dtype(np.float64))
+    motors_phi = Quantity(type=np.dtype(np.float64))
+    motors_chi = Quantity(type=np.dtype(np.float64))
+    motors_chi_cor = Quantity(type=np.dtype(np.float64))
+    motors_omega = Quantity(type=np.dtype(np.float64))
+    motors_zhuber = Quantity(type=np.dtype(np.float64))
+    motors_xhuber = Quantity(type=np.dtype(np.float64))
+    motors_sb = Quantity(type=np.dtype(np.float64))
+    motors_st = Quantity(type=np.dtype(np.float64))
+    motors_sl = Quantity(type=np.dtype(np.float64))
+    motors_sr = Quantity(type=np.dtype(np.float64))
+    motors_sv_delta = Quantity(type=np.dtype(np.float64))
+    motors_sv_pos = Quantity(type=np.dtype(np.float64))
+    motors_sh_delta = Quantity(type=np.dtype(np.float64))
+    motors_sh_pos = Quantity(type=np.dtype(np.float64))
+    hexapod_x = Quantity(type=np.dtype(np.float64))
+    hexapod_y = Quantity(type=np.dtype(np.float64))
+    hexapod_z = Quantity(type=np.dtype(np.float64))
+    hexapod_u = Quantity(type=np.dtype(np.float64))
+    hexapod_v = Quantity(type=np.dtype(np.float64))
+    hexapod_w = Quantity(type=np.dtype(np.float64))
+    hexapod_pivot_x = Quantity(type=np.dtype(np.float64))
+    hexapod_pivot_y = Quantity(type=np.dtype(np.float64))
+    hexapod_pivot_z = Quantity(type=np.dtype(np.float64))
+    metaljet_generator_emission_power = Quantity(type=np.dtype(np.float64))
+    metaljet_generator_high_voltage = Quantity(type=np.dtype(np.float64))
+    metaljet_spotsize_x_um = Quantity(type=np.dtype(np.float64))
+    metaljet_spotsize_y_um = Quantity(type=np.dtype(np.float64))
+    metaljet_spot_position_x_um = Quantity(type=np.dtype(np.float64))
+    metaljet_spot_position_y_um = Quantity(type=np.dtype(np.float64))
+    metaljet_jet_pressure = Quantity(type=np.dtype(np.float64))
+    metaljet_vacuum_pressure_mbar = Quantity(type=np.dtype(np.float64))
+    detector_position_pos = Quantity(type=np.dtype(np.float64))
+    detector_position_rel_pos = Quantity(type=np.dtype(np.float64))
+    detector_position_valid = Quantity(type=np.dtype(np.float64))
+    filter_open = Quantity(type=np.dtype(np.float64))
+
+    q_nm_inv = Quantity(type=np.dtype(np.float64), shape=['*'])
+    intensity = Quantity(type=np.dtype(np.float64), shape=['*'])
+
+
+def load_XRD_txt(file_object):
+    for _ in range(2):
+        next(file_object)
+    date = next(file_object).split(' ')[-1]
+    time = next(file_object).split(' ')[-1]
+
+    for _ in range(4):
+        next(file_object)
+    try:
+        df = pd.read_csv(
+            file_object,
+            header=0,
+            sep='\t',
+            decimal='.',
+        )
+    except Exception:
+        df = pd.read_csv(
+            file_object,
+            header=0,
+            sep='\t',
+            decimal=',',
+        )
+    for c in df.columns:
+        df.rename(columns={c: c.strip()}, inplace=True)
+    return df, f'{date.strip()} {time.strip()}'
+
+
+def xrd_read(file_object):
+    for _ in range(23):
+        next(file_object)
+    try:
+        df = pd.read_csv(file_object, sep='    ', decimal='.', header=None, dtype=float)
+    except Exception:
+        df = pd.read_csv(file_object, sep='    ', decimal=',', header=None, dtype=float)
+    return df
+
+
+class TFC_XRDMetalJetLibrary(XRDLibrary, EntryData):
+    m_def = Section(
+        label='XRD Measurement Library',
+        a_eln=dict(
+            hide=['instruments', 'steps', 'results', 'lab_id'],
+            properties=dict(
+                order=[
+                    'name',
+                ]
+            ),
+        ),
+        a_plot=[
+            {
+                'x': 'measurements/:/q_nm_inv',
+                'y': 'measurements/:/intensity',
+                'layout': {
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
+                'config': {
+                    'scrollZoom': True,
+                    'staticPlot': False,
+                },
+            }
+        ],
+    )
+
+    data_folder = Quantity(type=str, a_eln=dict(component='StringEditQuantity'))
+
+    data_file = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
+
+    measurements = SubSection(
+        section_def=XRDMetalJetSingleLibraryMeasurement, repeats=True
+    )
+
+    def normalize(self, archive, logger):
+        with archive.m_context.raw_file(archive.metadata.mainfile, 'rt') as f:
+            os.path.basename(f.name)
+            if not self.samples:
+                set_sample_reference(archive, self, self.data_folder.split('_')[0])
+        if self.data_file and self.data_folder:
+            file_path = os.path.join(self.data_folder, self.data_file)
+            measurements = []
+            files = [
+                os.path.basename(file.path)
+                for file in archive.m_context.upload_files.raw_directory_list(
+                    self.data_folder
+                )
+                if file.path.endswith('integrated.dat')
+            ]
+            files.sort()
+
+            with archive.m_context.raw_file(file_path, 'rt') as f:
+                df_md, datetime_file = load_XRD_txt(f)
+
+            self.datetime = convert_datetime(
+                datetime_file, datetime_format='%Y/%m/%d %H:%M:%S', utc=False
+            )
+
+            material_name = ''
+            for i, file in enumerate(files):
+                with archive.m_context.raw_file(
+                    os.path.join(self.data_folder, file), 'rb'
+                ) as f:
+                    df_data = xrd_read(f)
+
+                measurement_entry = set_single_xrd_measurement_metadata(
+                    df_md.iloc[int(file.split('_')[1]) - 1]
+                )
+                measurement_entry.q_nm_inv = df_data[0]
+                measurement_entry.intensity = df_data[1]
+                measurement_entry.data_file = [f'{self.data_folder}/{file}']
+                measurement_entry.normalize(archive, logger)
+                measurements.append(measurement_entry)
+
+            self.measurements = measurements
+            self.material_names = material_name
+
+        super().normalize(archive, logger)
+
+
 # %%######################## Generic Entries
 # %%######################## Analysis
-
-
 m_package.__init_metainfo__()
