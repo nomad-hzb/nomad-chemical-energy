@@ -259,7 +259,7 @@ def load_XRF_txt(input_file):
     return composition_data
 
 
-class TFC_XRFLibrary(XRFLibrary, EntryData):
+class TFC_XRFLibrary(XRFLibrary, EntryData, PlotSection):
     m_def = Section(
         label='XRF Measurement Library',
         a_eln=dict(
@@ -271,6 +271,42 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
             ),
         ),
     )
+
+    def get_xrf_overview(self, logger):
+        overview_df = pd.DataFrame()
+        try:
+            for single_library in self.measurements:
+                x = single_library.get('position_x')
+                y = single_library.get('position_y')
+                thickness = single_library.get('layer')[1].get('thickness')
+                composition = single_library.get('layer')[1].get('composition')
+                composition_names = [element.name for element in composition]
+                composition_amounts = [element.amount for element in composition]
+                if overview_df.empty:
+                    overview_df = overview_df.reindex(columns=['x', 'y', 'thickness']+composition_names)
+                overview_df.loc[len(overview_df)] = [x, y, thickness] + composition_amounts
+        except:
+            logger.debug('The XRF Library does not have the expected structure.')
+        return overview_df
+
+    def make_library_overview_table(self, overview_df):
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    header=dict(
+                        values=list(overview_df.columns),
+                        fill_color='grey',
+                        line_color='darkslategray',
+                        font=dict(color='white'),
+                    ),
+                    cells=dict(
+                        values=[overview_df[col] for col in overview_df.columns],
+                        line_color='darkslategray',
+                    ),
+                )
+            ]
+        )
+        return fig
 
     def normalize(self, archive, logger):
         with archive.m_context.raw_file(archive.metadata.mainfile, 'rt') as f:
@@ -363,6 +399,10 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
                 )
             self.measurements = measurements
             self.material_names = material_name
+            overview_df = self.get_xrf_overview(logger)
+            fig1 = self.make_library_overview_table(overview_df)
+            self.figures = [PlotlyFigure(label='XRF Overview',figure=fig1.to_plotly_json()),]
+
         super().normalize(archive, logger)
 
 
