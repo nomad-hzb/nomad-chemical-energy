@@ -283,7 +283,7 @@ class TFC_XRFLibrary(XRFLibrary, EntryData, PlotSection):
                 composition_names = [element.name for element in composition]
                 composition_amounts = [element.amount for element in composition]
                 if overview_df.empty:
-                    overview_df = overview_df.reindex(columns=['x', 'y', 'thickness']+composition_names)
+                    overview_df = overview_df.reindex(columns=['x', 'y', 'Thickness [nm]']+composition_names)
                 overview_df.loc[len(overview_df)] = [x, y, thickness] + composition_amounts
         except:
             logger.debug('The XRF Library does not have the expected structure.')
@@ -305,6 +305,36 @@ class TFC_XRFLibrary(XRFLibrary, EntryData, PlotSection):
                     ),
                 )
             ]
+        )
+        return fig
+
+    def make_library_plot(self, overview_df, characteristic):
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=overview_df["x"],
+                y=overview_df["y"],
+                mode="markers",
+                marker=dict(
+                    size=30,
+                    color=overview_df[characteristic],
+                    colorscale="Viridis",
+                    colorbar=dict(title=characteristic),
+                    showscale=True,
+                ),
+                text=overview_df[characteristic],
+                hovertemplate=f"x: %{{x}}<br>y: %{{y}}<br>{characteristic}: %{{text}}<extra></extra>",
+            )
+        )
+        fig.update_layout(
+            title=f"Library Overview {characteristic}",
+            xaxis_title="X-Position (mm)",
+            yaxis_title="Y-Position (mm)",
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=False, fixedrange=True),
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            hovermode="closest",
         )
         return fig
 
@@ -401,7 +431,13 @@ class TFC_XRFLibrary(XRFLibrary, EntryData, PlotSection):
             self.material_names = material_name
             overview_df = self.get_xrf_overview(logger)
             fig1 = self.make_library_overview_table(overview_df)
-            self.figures = [PlotlyFigure(label='XRF Overview',figure=fig1.to_plotly_json()),]
+            library_figures = [PlotlyFigure(label='XRF Overview', figure=fig1.to_plotly_json())]
+            for characteristic in overview_df.columns:
+                if characteristic == 'x' or characteristic == 'y': continue
+                fig = self.make_library_plot(overview_df, characteristic)
+                json_fig = PlotlyFigure(label=f'Library Overview {characteristic}', figure=fig.to_plotly_json())
+                library_figures.append(json_fig)
+            self.figures = library_figures
 
         super().normalize(archive, logger)
 
