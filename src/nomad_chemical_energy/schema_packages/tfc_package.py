@@ -205,8 +205,8 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
                     figure=fig1.to_plotly_json(),
                 ),
             ]
-
         super().normalize(archive, logger)
+        archive.results.properties.optoelectronic = None
 
 
 # %%######################## Measurements
