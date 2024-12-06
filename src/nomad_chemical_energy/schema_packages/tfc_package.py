@@ -259,7 +259,7 @@ def load_XRF_txt(input_file):
     return composition_data
 
 
-class TFC_XRFLibrary(XRFLibrary, EntryData):
+class TFC_XRFLibrary(XRFLibrary, EntryData, PlotSection):
     m_def = Section(
         label='XRF Measurement Library',
         a_eln=dict(
@@ -271,6 +271,78 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
             ),
         ),
     )
+
+    def get_xrf_overview(self, logger):
+        overview_df = pd.DataFrame()
+        try:
+            for single_library in self.measurements:
+                x = single_library.get('position_x')
+                y = single_library.get('position_y')
+                thickness = single_library.get('layer')[1].get('thickness')
+                composition = single_library.get('layer')[1].get('composition')
+                composition_names = [element.name for element in composition]
+                composition_amounts = [element.amount for element in composition]
+                if overview_df.empty:
+                    overview_df = overview_df.reindex(
+                        columns=['x', 'y', 'Thickness [nm]'] + composition_names
+                    )
+                overview_df.loc[len(overview_df)] = [
+                    x,
+                    y,
+                    thickness,
+                ] + composition_amounts
+        except (IndexError, KeyError) as e:
+            logger.debug(f'The XRF Library does not have the expected structure. {e}')
+        return overview_df
+
+    def make_library_overview_table(self, overview_df):
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    header=dict(
+                        values=list(overview_df.columns),
+                        fill_color='grey',
+                        line_color='darkslategray',
+                        font=dict(color='white'),
+                    ),
+                    cells=dict(
+                        values=[overview_df[col] for col in overview_df.columns],
+                        line_color='darkslategray',
+                    ),
+                )
+            ]
+        )
+        return fig
+
+    def make_library_plot(self, overview_df, characteristic):
+        fig = go.Figure()
+        fig.add_trace(
+            go.Scatter(
+                x=overview_df['x'],
+                y=overview_df['y'],
+                mode='markers',
+                marker=dict(
+                    size=30,
+                    color=overview_df[characteristic],
+                    colorscale='Viridis',
+                    colorbar=dict(title=characteristic),
+                    showscale=True,
+                ),
+                text=overview_df[characteristic],
+                hovertemplate=f'x: %{{x}}<br>y: %{{y}}<br>{characteristic}: %{{text}}<extra></extra>',
+            )
+        )
+        fig.update_layout(
+            title=f'Library Overview {characteristic}',
+            xaxis_title='X-Position (mm)',
+            yaxis_title='Y-Position (mm)',
+            xaxis=dict(showgrid=False),
+            yaxis=dict(showgrid=False, fixedrange=True),
+            plot_bgcolor='white',
+            paper_bgcolor='white',
+            hovermode='closest',
+        )
+        return fig
 
     def normalize(self, archive, logger):
         with archive.m_context.raw_file(archive.metadata.mainfile, 'rt') as f:
@@ -363,6 +435,22 @@ class TFC_XRFLibrary(XRFLibrary, EntryData):
                 )
             self.measurements = measurements
             self.material_names = material_name
+            overview_df = self.get_xrf_overview(logger)
+            fig1 = self.make_library_overview_table(overview_df)
+            library_figures = [
+                PlotlyFigure(label='XRF Overview', figure=fig1.to_plotly_json())
+            ]
+            for characteristic in overview_df.columns:
+                if characteristic in ('x', 'y'):
+                    continue
+                fig = self.make_library_plot(overview_df, characteristic)
+                json_fig = PlotlyFigure(
+                    label=f'Library Overview {characteristic}',
+                    figure=fig.to_plotly_json(),
+                )
+                library_figures.append(json_fig)
+            self.figures = library_figures
+
         super().normalize(archive, logger)
 
 
