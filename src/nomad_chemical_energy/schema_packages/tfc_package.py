@@ -95,14 +95,15 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
         value_list[start_idx_bias_i] = 'Bias I (A)'
         color_list = ['white'] * (len(target_names) * 3 + 2)
         color_list[1] = 'lightgrey'
-        color_list[start_idx_bias_u : start_idx_bias_i] = ['lightgrey'] * len(
+        color_list[start_idx_bias_u:start_idx_bias_i] = ['lightgrey'] * len(
             target_names
         )
         flow_rates = [
             [process.flow_rate.magnitude] for process in self.process_properties
         ]
         substrate_temperatures = [
-            [process.substrate_temperature.magnitude] for process in self.process_properties
+            [process.substrate_temperature.magnitude]
+            for process in self.process_properties
         ]
         target_power = [
             process.power.magnitude.tolist() for process in self.process_properties
@@ -115,7 +116,13 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
         ]
         cells = [
             flow + substr_temp + power + bias_u + bias_i
-            for flow, substr_temp, power, bias_u, bias_i in zip(flow_rates, substrate_temperatures, target_power, target_bias_u, target_bias_i)
+            for flow, substr_temp, power, bias_u, bias_i in zip(
+                flow_rates,
+                substrate_temperatures,
+                target_power,
+                target_bias_u,
+                target_bias_i,
+            )
         ]
         header_values = ['', 'Targets'] + [
             f'Step {i + 1}' for i in range(len(target_power))
@@ -344,16 +351,19 @@ class TFC_XRFLibrary(XRFLibrary, EntryData, PlotSection):
             )
         )
         fig.update_layout(
-            title=dict(
-                text=f'Library Overview {characteristic}',
-                y=1.0,
-                yanchor='top'
-            ),
+            title=dict(text=f'Library Overview {characteristic}', y=1.0, yanchor='top'),
             xaxis_title='X-Position (0.1mm)',
             yaxis_title='Y-Position (0.1mm)',
-            xaxis=dict(showgrid=False, scaleanchor='y', side='top',),
-            yaxis=dict(showgrid=False, fixedrange=True,
-                       range=[max(overview_df['y']), min(overview_df['y'])],),
+            xaxis=dict(
+                showgrid=False,
+                scaleanchor='y',
+                side='top',
+            ),
+            yaxis=dict(
+                showgrid=False,
+                fixedrange=True,
+                range=[max(overview_df['y']), min(overview_df['y'])],
+            ),
             plot_bgcolor='white',
             paper_bgcolor='white',
             margin=dict(l=10, r=10, t=80, b=10),
