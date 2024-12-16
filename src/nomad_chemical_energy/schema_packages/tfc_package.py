@@ -85,14 +85,25 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
         target_names = [target.name for target in self.targets]
         if len(target_names) == 0:
             return None
-        value_list = [''] * len(target_names) * 3
-        value_list[0] = 'Power (W)'
-        value_list[len(target_names)] = 'Bias U (V)'
-        value_list[len(target_names) * 2] = 'Bias I (A)'
-        color_list = ['white'] * len(target_names) * 3
-        color_list[len(target_names) : len(target_names) * 2] = ['lightgrey'] * len(
+        value_list = [''] * (len(target_names) * 3 + 2)
+        value_list[0] = 'Flow Rate (ml/min)'
+        value_list[1] = 'Substrate Temperature (°C)'
+        value_list[2] = 'Power (W)'
+        start_idx_bias_u = len(target_names) + 2
+        start_idx_bias_i = len(target_names) * 2 + 2
+        value_list[start_idx_bias_u] = 'Bias U (V)'
+        value_list[start_idx_bias_i] = 'Bias I (A)'
+        color_list = ['white'] * (len(target_names) * 3 + 2)
+        color_list[1] = 'lightgrey'
+        color_list[start_idx_bias_u : start_idx_bias_i] = ['lightgrey'] * len(
             target_names
         )
+        flow_rates = [
+            [process.flow_rate.magnitude] for process in self.process_properties
+        ]
+        substrate_temperatures = [
+            [process.substrate_temperature.magnitude] for process in self.process_properties
+        ]
         target_power = [
             process.power.magnitude.tolist() for process in self.process_properties
         ]
@@ -103,8 +114,8 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
             process.bias_current.magnitude.tolist() for process in self.observables
         ]
         cells = [
-            power + bias_u + bias_i
-            for power, bias_u, bias_i in zip(target_power, target_bias_u, target_bias_i)
+            flow + substr_temp + power + bias_u + bias_i
+            for flow, substr_temp, power, bias_u, bias_i in zip(flow_rates, substrate_temperatures, target_power, target_bias_u, target_bias_i)
         ]
         header_values = ['', 'Targets'] + [
             f'Step {i + 1}' for i in range(len(target_power))
@@ -119,7 +130,7 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
                         font=dict(color='white'),
                     ),
                     cells=dict(
-                        values=[value_list, target_names * 3, *cells],
+                        values=[value_list, ['', ''] + target_names * 3, *cells],
                         fill_color=[color_list * len(header_values)],
                         line_color='darkslategray',
                     ),
@@ -333,13 +344,19 @@ class TFC_XRFLibrary(XRFLibrary, EntryData, PlotSection):
             )
         )
         fig.update_layout(
-            title=f'Library Overview {characteristic}',
-            xaxis_title='X-Position (mm)',
-            yaxis_title='Y-Position (mm)',
-            xaxis=dict(showgrid=False),
-            yaxis=dict(showgrid=False, fixedrange=True),
+            title=dict(
+                text=f'Library Overview {characteristic}',
+                y=1.0,
+                yanchor='top'
+            ),
+            xaxis_title='X-Position (0.1mm)',
+            yaxis_title='Y-Position (0.1mm)',
+            xaxis=dict(showgrid=False, scaleanchor='y', side='top',),
+            yaxis=dict(showgrid=False, fixedrange=True,
+                       range=[max(overview_df['y']), min(overview_df['y'])],),
             plot_bgcolor='white',
             paper_bgcolor='white',
+            margin=dict(l=10, r=10, t=80, b=10),
             hovermode='closest',
         )
         return fig
