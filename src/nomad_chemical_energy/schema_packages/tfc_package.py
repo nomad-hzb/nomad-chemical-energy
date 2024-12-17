@@ -165,6 +165,10 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
                         archive, self, sample_id, archive.metadata.upload_id
                     )
 
+                if self.samples:
+                    for s in self.samples:
+                        s.normalize(archive, logger)
+
                 if not self.targets:
                     target_df = pd.read_excel(
                         xls_file, sheet_name='Source_Configuration', header=0
