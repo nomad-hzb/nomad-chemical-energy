@@ -18,7 +18,7 @@
 
 
 from baseclasses import BaseMeasurement
-from baseclasses.catalysis import CatalysisLibrary, CatalysisSample
+from baseclasses.catalysis import CatalysisLibrary, CatalysisSample, CatalysisXYSample
 from baseclasses.vapour_based_deposition import MultiTargetSputtering, PECVDeposition
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.results import ELN, Results
@@ -79,6 +79,31 @@ def create_id(archive, lab_id_base):
     return f'{lab_id_base}{project_sample_number:04d}'
 
 
+class CatLab_XYSample(CatalysisXYSample, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['users', 'components'],
+            properties=dict(
+                order=[
+                    'name',
+                    'lab_id',
+                ]
+            ),
+        ),
+        a_plot=[
+            {
+                'x': 'xray_diffraction/scattering_vector',
+                'y': 'xray_diffraction/intensity',
+                'layout': {
+                    'showlegend': True,
+                    'yaxis': {'fixedrange': False},
+                    'xaxis': {'fixedrange': False},
+                },
+            }
+        ],
+    )
+
+
 class CatLab_Sample(CatalysisSample, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -89,7 +114,7 @@ class CatLab_Sample(CatalysisSample, EntryData):
                     'lab_id',
                 ]
             ),
-        )
+        ),
     )
 
     lab_id = Quantity(
