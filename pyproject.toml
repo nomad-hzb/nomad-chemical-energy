@@ -2,6 +2,10 @@
 requires = ["setuptools>=61.0.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
+# TODO this doesn't work install differently
+[tool.dependencies]
+yadg = { url = "git+https://github.com/carla-terboven/yadg.git"}
+
 [project]
 classifiers = [
     "Intended Audience :: Developers",
