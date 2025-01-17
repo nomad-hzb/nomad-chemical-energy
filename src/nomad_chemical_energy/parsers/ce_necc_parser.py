@@ -68,13 +68,25 @@ class NECCXlsxParser(MatchingParser):
         if not is_mainfile_super:
             return False
         excel_sheets = pd.ExcelFile(filename).sheet_names
-        required_sheets = [
+        required_sheets_v1 = [
             'Catalyst details',
             'Experimental details',
             'Raw Data',
             'Results',
         ]
-        return all(sheet in excel_sheets for sheet in required_sheets)
+        required_sheets_v2 = [
+            'Experimental Details',
+            'Time_Calc',
+            'FID Data',
+            'TCD Data',
+            'Pot Data',
+            'Thermo Data',
+            'GC Calc',
+            'Results',
+        ]
+        is_v1_excel = all(sheet in excel_sheets for sheet in required_sheets_v1)
+        is_v2_excel = all(sheet in excel_sheets for sheet in required_sheets_v2)
+        return is_v1_excel or is_v2_excel
 
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
         file = mainfile.split('/')[-1]
@@ -83,7 +95,7 @@ class NECCXlsxParser(MatchingParser):
 
         xls_file = pd.ExcelFile(mainfile)
         num_sheets = len(xls_file.sheet_names)
-        if num_sheets != 4:
+        if num_sheets != 4 and num_sheets != 8:
             return
         entry = CE_NECC_EC_GC(data_file=file)
 
