@@ -144,7 +144,9 @@ def read_results_data(data):
 
 
 def read_properties(file):
-    table_name = 'Experimental details' if len(file.sheet_names) == 4 else 'Experimental Details'
+    table_name = (
+        'Experimental details' if len(file.sheet_names) == 4 else 'Experimental Details'
+    )
     data = pd.read_excel(file, sheet_name=table_name, index_col=0, header=None)
 
     if len(data.columns) == 0:

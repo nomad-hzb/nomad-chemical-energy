@@ -218,7 +218,11 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
     def get_cleaned_df(self, data, column_list):
         string_col_names = [col for col in data.columns if isinstance(col, str)]
-        existing_columns = [col for col in string_col_names if any(col.startswith(prefix) for prefix in column_list)]
+        existing_columns = [
+            col
+            for col in string_col_names
+            if any(col.startswith(prefix) for prefix in column_list)
+        ]
         cleaned_df = data.loc[:, existing_columns]
         cleaned_df.dropna(axis=0, how='all', inplace=True)
         return cleaned_df
@@ -243,29 +247,51 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                     or not self.gaschromatographies
                     or not self.potentiometry
                 ):
-                    gc_columns = ['Experiment name', 'Date', 'Time ', 'Gas type', 'RT', 'area', 'ppm value']
+                    gc_columns = [
+                        'Experiment name',
+                        'Date',
+                        'Time ',
+                        'Gas type',
+                        'RT',
+                        'area',
+                        'ppm value',
+                    ]
                     pot_columns = ['time/s', 'I/mA', 'Ewe/V', 'Ece/V', 'Ewe-Ece/V']
-                    thermo_columns = ['Date', 'Time Stamp Local', 'bar(g)', 'øC  cathode', 'øC  anode']
+                    thermo_columns = [
+                        'Date',
+                        'Time Stamp Local',
+                        'bar(g)',
+                        'øC  cathode',
+                        'øC  anode',
+                    ]
                     if len(xls_file.sheet_names) == 4:
                         data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
-                        results_data = pd.read_excel(xls_file, sheet_name='Results', header=0)
+                        results_data = pd.read_excel(
+                            xls_file, sheet_name='Results', header=0
+                        )
 
                         gc_data = self.get_cleaned_df(data, gc_columns)
                         pot_data = self.get_cleaned_df(data, pot_columns)
-                        data.columns = data.iloc[1]     # thermo column names are in second row
+                        data.columns = data.iloc[
+                            1
+                        ]  # thermo column names are in second row
                         thermo_data = self.get_cleaned_df(data[2:], thermo_columns)
                     else:
                         pot_data = pd.read_excel(xls_file, sheet_name='Pot Data')
                         thermo_data = pd.read_excel(xls_file, sheet_name='Thermo Data')
                         fid_data = pd.read_excel(xls_file, sheet_name='FID Data')
                         tcd_data = pd.read_excel(xls_file, sheet_name='TCD Data')
-                        results_data = pd.read_excel(xls_file, sheet_name='GC Calc', header=0)
+                        results_data = pd.read_excel(
+                            xls_file, sheet_name='GC Calc', header=0
+                        )
 
                         pot_data = self.get_cleaned_df(pot_data, pot_columns)
                         thermo_data = self.get_cleaned_df(thermo_data, thermo_columns)
                         fid_data = self.get_cleaned_df(fid_data, gc_columns)
                         tcd_data = self.get_cleaned_df(tcd_data, gc_columns)
-                        gc_data = pd.merge(fid_data, tcd_data, on=['Date', 'Time '], how='inner')
+                        gc_data = pd.merge(
+                            fid_data, tcd_data, on=['Date', 'Time '], how='inner'
+                        )
 
                     results_data.dropna(axis=0, how='any', inplace=True)
 
@@ -327,6 +353,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                     from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
                         read_thermocouple_data,
                     )
+
                     try:
                         datetimes, pressure, temperature_cathode, temperature_anode = (
                             read_thermocouple_data(thermo_data, start_time, end_time)

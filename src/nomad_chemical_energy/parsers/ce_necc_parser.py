@@ -95,7 +95,7 @@ class NECCXlsxParser(MatchingParser):
 
         xls_file = pd.ExcelFile(mainfile)
         num_sheets = len(xls_file.sheet_names)
-        if num_sheets != 4 and num_sheets != 8:
+        if num_sheets not in (4, 8):
             return
         entry = CE_NECC_EC_GC(data_file=file)
 
