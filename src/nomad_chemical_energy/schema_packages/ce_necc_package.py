@@ -216,6 +216,17 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         )
         return fig
 
+    def get_cleaned_df(self, data, column_list):
+        string_col_names = [col for col in data.columns if isinstance(col, str)]
+        existing_columns = [
+            col
+            for col in string_col_names
+            if any(col.startswith(prefix) for prefix in column_list)
+        ]
+        cleaned_df = data.loc[:, existing_columns]
+        cleaned_df.dropna(axis=0, how='all', inplace=True)
+        return cleaned_df
+
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
@@ -229,7 +240,6 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                     experimental_properties_dict = read_properties(xls_file)
                     self.properties = NECCExperimentalProperties()
                     for attribute_name, value in experimental_properties_dict.items():
-                        # TODO setattr should be avoided but I don't know better way when having that many attributes
                         setattr(self.properties, attribute_name, value)
 
                 if (
@@ -237,7 +247,53 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                     or not self.gaschromatographies
                     or not self.potentiometry
                 ):
-                    data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
+                    gc_columns = [
+                        'Experiment name',
+                        'Date',
+                        'Time ',
+                        'Gas type',
+                        'RT',
+                        'area',
+                        'ppm value',
+                    ]
+                    pot_columns = ['time/s', 'I/mA', 'Ewe/V', 'Ece/V', 'Ewe-Ece/V']
+                    thermo_columns = [
+                        'Date',
+                        'Time Stamp Local',
+                        'bar(g)',
+                        'øC  cathode',
+                        'øC  anode',
+                    ]
+                    if len(xls_file.sheet_names) == 4:
+                        data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
+                        results_data = pd.read_excel(
+                            xls_file, sheet_name='Results', header=0
+                        )
+
+                        gc_data = self.get_cleaned_df(data, gc_columns)
+                        pot_data = self.get_cleaned_df(data, pot_columns)
+                        data.columns = data.iloc[
+                            1
+                        ]  # thermo column names are in second row
+                        thermo_data = self.get_cleaned_df(data[2:], thermo_columns)
+                    else:
+                        pot_data = pd.read_excel(xls_file, sheet_name='Pot Data')
+                        thermo_data = pd.read_excel(xls_file, sheet_name='Thermo Data')
+                        fid_data = pd.read_excel(xls_file, sheet_name='FID Data')
+                        tcd_data = pd.read_excel(xls_file, sheet_name='TCD Data')
+                        results_data = pd.read_excel(
+                            xls_file, sheet_name='GC Calc', header=0
+                        )
+
+                        pot_data = self.get_cleaned_df(pot_data, pot_columns)
+                        thermo_data = self.get_cleaned_df(thermo_data, thermo_columns)
+                        fid_data = self.get_cleaned_df(fid_data, gc_columns)
+                        tcd_data = self.get_cleaned_df(tcd_data, gc_columns)
+                        gc_data = pd.merge(
+                            fid_data, tcd_data, on=['Date', 'Time '], how='inner'
+                        )
+
+                    results_data.dropna(axis=0, how='any', inplace=True)
 
                     from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
                         read_gaschromatography_data,
@@ -251,7 +307,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         retention_times,
                         areas,
                         ppms,
-                    ) = read_gaschromatography_data(data)
+                    ) = read_gaschromatography_data(gc_data)
                     if datetimes.size > 0:
                         start_time = datetimes.iat[0]
                         end_time = datetimes.iat[-1]
@@ -283,7 +339,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         working_electrode_potential,
                         counter_electrode_potential,
                         ewe_ece_difference,
-                    ) = read_potentiostat_data(data)
+                    ) = read_potentiostat_data(pot_data)
                     if start_time is None or end_time is None:
                         start_time = datetimes.iat[0]
                         end_time = datetimes.iat[-1]
@@ -298,10 +354,9 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         read_thermocouple_data,
                     )
 
-                    data.columns = data.iloc[1]
                     try:
                         datetimes, pressure, temperature_cathode, temperature_anode = (
-                            read_thermocouple_data(data.iloc[2:], start_time, end_time)
+                            read_thermocouple_data(thermo_data, start_time, end_time)
                         )
                         self.thermocouple = ThermocoupleMeasurement(
                             datetime=datetimes.to_list(),
@@ -325,7 +380,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         cell_current,
                         cell_voltage,
                         gas_measurements,
-                    ) = read_results_data(xls_file)
+                    ) = read_results_data(results_data)
                     self.fe_results = PotentiometryGasChromatographyResults(
                         datetime=datetimes.to_list(),
                         total_flow_rate=total_flow_rate,

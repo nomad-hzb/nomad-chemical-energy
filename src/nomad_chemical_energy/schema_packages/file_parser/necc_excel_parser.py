@@ -39,7 +39,8 @@ def _process_potentiostat_column(data, column_name):
 
 
 def read_potentiostat_data(data):
-    datetimes = pd.to_datetime(data['time/s'], errors='coerce').dropna()
+    data['time/s'] = pd.to_datetime(data['time/s'], errors='coerce')
+    data = data.dropna(subset=['time/s'])
 
     current = _process_potentiostat_column(data, 'I/mA')
     working_electrode_potential = _process_potentiostat_column(data, 'Ewe/V')
@@ -47,7 +48,7 @@ def read_potentiostat_data(data):
     ewe_ece_difference = _process_potentiostat_column(data, 'Ewe-Ece/V')
 
     return (
-        datetimes,
+        data['time/s'],
         current,
         working_electrode_potential,
         counter_electrode_potential,
@@ -103,9 +104,7 @@ def read_gaschromatography_data(data):
     return instrument_file_names, datetimes, gas_types, retention_times, areas, ppms
 
 
-def read_results_data(file):
-    data = pd.read_excel(file, sheet_name='Results', header=0)
-
+def read_results_data(data):
     data['DateTime'] = pd.to_datetime(data['Time'].astype(str))
     data['Date'] = pd.to_datetime(data['Date'].astype(str))
     data['DateTime'] = data['Date'] + pd.to_timedelta(
@@ -145,9 +144,10 @@ def read_results_data(file):
 
 
 def read_properties(file):
-    data = pd.read_excel(
-        file, sheet_name='Experimental details', index_col=0, header=None
+    table_name = (
+        'Experimental details' if len(file.sheet_names) == 4 else 'Experimental Details'
     )
+    data = pd.read_excel(file, sheet_name=table_name, index_col=0, header=None)
 
     if len(data.columns) == 0:
         return {}
