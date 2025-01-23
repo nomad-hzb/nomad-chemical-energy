@@ -8,6 +8,14 @@ from nomad.config.models.ui import (
     Filters,
 )
 
+from nomad_chemical_energy.apps.catlab_combinatorial_app import catlab_combinatorial_app
+
+catlab_combinatorial_library_app = AppEntryPoint(
+    name='Compinatorial Samples',
+    description='Provides filters to investigate combinatorial libraries.',
+    app=catlab_combinatorial_app,
+)
+
 necc_find_app = AppEntryPoint(
     name='FindNECCExperiments',
     description='Provides filters to quickly find NECC experiment entries.',
