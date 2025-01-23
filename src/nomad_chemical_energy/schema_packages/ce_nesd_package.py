@@ -17,6 +17,7 @@
 #
 
 import os
+import pandas as pd
 
 from nomad.datamodel.metainfo.plot import PlotSection, PlotlyFigure
 import plotly.graph_objs as go
