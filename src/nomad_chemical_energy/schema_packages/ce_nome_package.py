@@ -747,7 +747,19 @@ def get_curve_tag(methods, function):
 class CE_NOME_VoilaNotebook(VoilaNotebook, EntryData):
     m_def = Section()
 
+    file_uri = Quantity(
+        type=str,
+    )
+
+    def get_file_uri(self, upload_id):
+        if self.notebook_file is None:
+            return None
+        uri = f'https://nomad-hzb-ce.de/nomad-oasis/gui/user/uploads/upload/id/{upload_id}/files/{self.notebook_file}'
+        return uri
+
     def normalize(self, archive, logger):
+        upload_id = archive.metadata.upload_id
+        self.file_uri = self.get_file_uri(upload_id)
         super().normalize(archive, logger)
 
 
