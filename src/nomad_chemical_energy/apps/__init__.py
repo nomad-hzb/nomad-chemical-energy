@@ -10,6 +10,8 @@ from nomad.config.models.ui import (
     Format,
     ModeEnum,
     RowActions,
+    RowDetails,
+    RowSelection,
     RowActionURL,
     Rows,
 )
@@ -94,7 +96,9 @@ nome_documentation_app = AppEntryPoint(
                         icon='search',
                     ),
                 ]
-            )
+            ),
+            details=RowDetails(),
+            selection=RowSelection(),
         ),
     ),
 )
