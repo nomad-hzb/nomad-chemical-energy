@@ -10,10 +10,10 @@ from nomad.config.models.ui import (
     Format,
     ModeEnum,
     RowActions,
-    RowDetails,
-    RowSelection,
     RowActionURL,
+    RowDetails,
     Rows,
+    RowSelection,
 )
 
 schema_name = (
