@@ -143,7 +143,7 @@ def test_labview_nesd_parser(monkeypatch):
     archive = get_archive(file, monkeypatch)
     assert archive.data
     assert archive.data.electrolyser_properties
-    assert (isinstance(archive.data.electrolyser_properties.reference, MProxy))
+    assert isinstance(archive.data.electrolyser_properties.reference, MProxy)
     assert len(archive.data.time) == 344
 
 

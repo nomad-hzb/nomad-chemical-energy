@@ -29,9 +29,8 @@ def get_header_and_data(filename):
     try:
         data_tree = yadg.extractors.extract(filetype='eclab.mpr', path=filename)
     except Exception as e:
-        print(f"Error during extraction: {e}")
+        print(f'Error during extraction: {e}')
         return None, None
 
     metadata = json.loads(data_tree.attrs.get('original_metadata')).get('settings', {})
     return metadata, data_tree
-

@@ -9,23 +9,23 @@ class CENECCxlsxParserEntryPoint(ParserEntryPoint):
 
 
 class CENESDBioLogicParserEntryPoint(ParserEntryPoint):
-
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDBioLogicParser
+
         return CENESDBioLogicParser(**self.dict())
 
 
 class CENESDLabviewParserEntryPoint(ParserEntryPoint):
-
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDLabviewParser
+
         return CENESDLabviewParser(**self.dict())
 
 
 class CENESDPalmSensParserEntryPoint(ParserEntryPoint):
-
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDPalmSensParser
+
         return CENESDPalmSensParser(**self.dict())
 
 

@@ -16,9 +16,9 @@ class CENECCPackageEntryPoint(SchemaPackageEntryPoint):
 
 
 class CENESDPackageEntryPoint(SchemaPackageEntryPoint):
-
     def load(self):
         from nomad_chemical_energy.schema_packages.ce_nesd_package import m_package
+
         return m_package
 
 

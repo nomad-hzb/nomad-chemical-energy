@@ -26,6 +26,8 @@ from nptdms import TdmsFile
 def get_info_and_data(filename):
     tdms_file = TdmsFile.read(filename)
     measurement_data = tdms_file['Measurements'].as_dataframe()
-    measurement_data.columns = measurement_data.columns.str.replace('.Value', '', regex=False)
+    measurement_data.columns = measurement_data.columns.str.replace(
+        '.Value', '', regex=False
+    )
     metadata = tdms_file.properties
     return metadata, measurement_data
