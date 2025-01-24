@@ -195,6 +195,4 @@ def get_header_and_data(f):
 
     f.tell()
 
-        print(_header, _curves)
-
     return _header, _curves

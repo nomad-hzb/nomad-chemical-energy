@@ -17,34 +17,33 @@
 #
 
 import os
-import pandas as pd
 
-from nomad.datamodel.metainfo.plot import PlotSection, PlotlyFigure
 import plotly.graph_objs as go
-
-from nomad.datamodel.data import EntryData
-
-from nomad.metainfo import (
-    Package,
-    Quantity,
-    Section, SubSection, SchemaPackage)
-
 from baseclasses import BaseMeasurement
-from nomad.datamodel.metainfo.basesections import CompositeSystemReference
-from baseclasses.helper.utilities import create_archive, get_entry_id_from_file_name, get_reference
-
 from baseclasses.chemical_energy import (
-    CENOMESample, ElectroChemicalSetup, Environment, SampleIDCENOME,
-    NESDElectrode,
+    CENOMESample,
     Chronoamperometry,
     Chronopotentiometry,
     CyclicVoltammetry,
     ElectrochemicalImpedanceSpectroscopy,
+    ElectroChemicalSetup,
     ElectrolyserPerformanceEvaluation,
     ElectrolyserProperties,
+    Environment,
     LinearSweepVoltammetry,
+    NESDElectrode,
     OpenCircuitVoltage,
+    SampleIDCENOME,
 )
+from baseclasses.helper.utilities import (
+    create_archive,
+    get_entry_id_from_file_name,
+    get_reference,
+)
+from nomad.datamodel.data import EntryData
+from nomad.datamodel.metainfo.basesections import CompositeSystemReference
+from nomad.datamodel.metainfo.plot import PlotlyFigure
+from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 
 m_package = SchemaPackage()
 
@@ -125,7 +124,7 @@ class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
                 ])),
     )
     def normalize(self, archive, logger):
-        super(CE_NESD_Electrolyser, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 # %% ####################### Generic Entries
@@ -188,20 +187,25 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
-                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
-                        get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_voltammetry_archive,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
                     metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
-                        metadata_device_settings = json.loads(data.attrs.get('original_metadata')).get('params', {})
+                        # metadata_device_settings = json.loads(data.attrs.get('original_metadata')).get('params', {})
                         # TODO use CA Properties with metadata_device_settings attribute
                         self.properties = get_biologic_properties(metadata)
         fig1 = self.make_current_plot()
         fig2 = self.make_current_density_plot()
         self.figures = [PlotlyFigure(label='Current over Time', figure=fig1.to_plotly_json()),
                         PlotlyFigure(label='Current Density over Time', figure=fig2.to_plotly_json())]
-        super(CE_NESD_Chronoamperometry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData):
@@ -231,16 +235,21 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
-                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
-                        get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_voltammetry_archive,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
                     metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
         fig1 = self.make_voltage_plot()
         self.figures = [PlotlyFigure(label='Voltage over Time', figure=fig1.to_plotly_json()),]
-        super(CE_NESD_Chronopotentiometry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData):
@@ -263,14 +272,19 @@ class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
-                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
-                        get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_voltammetry_archive,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
                     metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
-        super(CE_NESD_ConstantCurrentMode, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 
@@ -294,14 +308,19 @@ class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
-                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
-                        get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_voltammetry_archive,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
                     metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
-        super(CE_NESD_ConstantVoltageMode, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData):
@@ -339,9 +358,14 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
-                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
-                        get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_voltammetry_archive,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
                     metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self, multiple=True)
                     if not self.properties:
@@ -350,7 +374,7 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData):
         fig2 = self.make_current_over_voltage_plot()
         self.figures = [PlotlyFigure(label='Current Density over Voltage RHE', figure=fig1.to_plotly_json()),
                         PlotlyFigure(label='Current over Voltage', figure=fig2.to_plotly_json())]
-        super(CE_NESD_CyclicVoltammetry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NESD_ElectrolyserPerformanceEvaluation(ElectrolyserPerformanceEvaluation, EntryData):
@@ -370,8 +394,14 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(ElectrolyserPerformanceEvaluatio
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 # TODO difference to tdms_index files
                 if os.path.splitext(self.data_file)[-1] == ".tdms":
-                    from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import get_info_and_data
-                    from baseclasses.helper.archive_builder.labview_archive import get_electrolyser_properties, get_tdms_archive
+                    from baseclasses.helper.archive_builder.labview_archive import (
+                        get_electrolyser_properties,
+                        get_tdms_archive,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import (
+                        get_info_and_data,
+                    )
                     metadata, data = get_info_and_data(f)
                     get_tdms_archive(data, self)
                     self.name = metadata.get('name')
@@ -387,7 +417,7 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(ElectrolyserPerformanceEvaluatio
                         self.electrolyser_properties = CompositeSystemReference(reference=get_reference(archive.metadata.upload_id, electrolyser_entry_id))
                         self.electrolyser_properties.normalize(archive, logger)
 
-        super(CE_NESD_ElectrolyserPerformanceEvaluation, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy(ElectrochemicalImpedanceSpectroscopy, EntryData):
@@ -426,9 +456,15 @@ class CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy(Electrochemical
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
-                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
-                        get_eis_data, get_meta_data
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_eis_data,
+                        get_meta_data,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
                     metadata, data = get_header_and_data(f)
                     get_eis_data(data, self)
                     get_meta_data(metadata, self)
@@ -438,7 +474,7 @@ class CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy(Electrochemical
         fig2 = self.make_bode_plot()
         self.figures = [PlotlyFigure(label='Nyquist Plot', figure=fig1.to_plotly_json()),
                         PlotlyFigure(label='Bode Plot', figure=fig2.to_plotly_json())]
-        super(CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
@@ -477,9 +513,14 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
-                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
-                        get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_voltammetry_archive,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
                     metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
@@ -488,7 +529,7 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
         fig2 = self.make_current_over_voltage_plot()
         self.figures = [PlotlyFigure(label='Current Density over Voltage RHE', figure=fig1.to_plotly_json()),
                         PlotlyFigure(label='Current over Voltage', figure=fig2.to_plotly_json())]
-        super(CE_NESD_LinearSweepVoltammetry, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
@@ -518,16 +559,21 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
-                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
-                        get_voltammetry_archive
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_voltammetry_archive,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
                     metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
         fig1 = self.make_voltage_plot()
         self.figures = [PlotlyFigure(label='Voltage over Time', figure=fig1.to_plotly_json()),]
-        super(CE_NESD_OpenCircuitVoltage, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy(ElectrochemicalImpedanceSpectroscopy, EntryData):
@@ -565,9 +611,15 @@ class CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy(Electrochemica
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, "rt") as f:
                 if os.path.splitext(self.data_file)[-1] == ".mpr":
-                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
-                    from baseclasses.helper.archive_builder.biologic_archive import get_biologic_properties, \
-                        get_eis_data, get_meta_data
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_eis_data,
+                        get_meta_data,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
                     metadata, data = get_header_and_data(f)
                     get_eis_data(data, self)
                     get_meta_data(metadata, self)
@@ -577,7 +629,7 @@ class CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy(Electrochemica
         fig2 = self.make_bode_plot()
         self.figures = [PlotlyFigure(label='Nyquist Plot', figure=fig1.to_plotly_json()),
                         PlotlyFigure(label='Bode Plot', figure=fig2.to_plotly_json())]
-        super(CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 m_package.__init_metainfo__()

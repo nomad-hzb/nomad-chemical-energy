@@ -20,9 +20,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import re
-import locale
-from io import StringIO
 
-import pandas as pd
-from pandas.api.types import is_numeric_dtype

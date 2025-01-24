@@ -16,27 +16,29 @@
 # limitations under the License.
 #
 
-import os
 import datetime
-import pandas as pd
+import os
 
+from baseclasses.helper.utilities import (
+    create_archive,
+    get_entry_id_from_file_name,
+    get_reference,
+    set_sample_reference,
+)
 from nomad.datamodel import EntryArchive
-from nomad.parsing import MatchingParser
+from nomad.datamodel.data import (
+    EntryData,
+)
 from nomad.datamodel.metainfo.annotations import (
     ELNAnnotation,
 )
-from nomad.datamodel.data import (
-    EntryData,
+from nomad.datamodel.metainfo.basesections import (
+    Activity,
 )
 from nomad.metainfo import (
     Quantity,
 )
-from nomad.datamodel.metainfo.basesections import (
-    Activity, CompositeSystemReference,
-)
-
-from baseclasses.helper.utilities import (find_sample_by_id, create_archive, get_entry_id_from_file_name, get_reference,
-                                          search_class, set_sample_reference)
+from nomad.parsing import MatchingParser
 
 from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_NESD_Chronoamperometry,
@@ -49,8 +51,9 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_NESD_LinearSweepVoltammetry,
     CE_NESD_Measurement,
     CE_NESD_OpenCircuitVoltage,
-    CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy
+    CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy,
 )
+
 
 class ParsedBioLogicFile(EntryData):
     activity = Quantity(
@@ -91,7 +94,9 @@ class CENESDBioLogicParser(MatchingParser):
         if not file.endswith(".mpr"):
             return
 
-        from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import get_header_and_data
+        from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+            get_header_and_data,
+        )
         with archive.m_context.raw_file(os.path.basename(mainfile)) as f:
             metadata, _ = get_header_and_data(f)
         technique = metadata.get('technique')

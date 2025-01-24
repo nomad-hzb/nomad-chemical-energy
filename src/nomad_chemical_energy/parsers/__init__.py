@@ -173,19 +173,19 @@ ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
 ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
     name='CENESDBioLogicParser',
     description='Parser for CENESD csv and mpr files of BioLogic potentiostats',
-    mainfile_name_re='^.*\.mpr',
+    mainfile_name_re=r'^.*\.mpr',
 )
 
 ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
     name='CENESDLabviewParser',
     description='Parser for CENESD LabVIEW Electrolyser files',
-    mainfile_name_re='^.*\.tdms',
+    mainfile_name_re=r'^.*\.tdms',
 )
 
 ce_nesd_palmsens_parser = CENESDPalmSensParserEntryPoint(
     name='CENESDPalmSensParser',
     description='Parser for CENESD csv files of PalmSens potentiostats',
-    mainfile_name_re='^.*\.csv',
+    mainfile_name_re=r'^.*\.csv',
 )
 
 ce_nome_gamry_parser = CENOMEGamryParserEntryPoint(
