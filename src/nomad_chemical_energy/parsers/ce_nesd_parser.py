@@ -151,3 +151,9 @@ class CENESDLabviewParser(MatchingParser):
         entry_id = get_entry_id_from_file_name(file_name, archive)
         archive.data = ParsedLabVIEWFile(activity=[get_reference(archive.metadata.upload_id, entry_id)])
         archive.metadata.entry_name = file
+
+
+class CENESDPalmSensParser(MatchingParser):
+
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        pass

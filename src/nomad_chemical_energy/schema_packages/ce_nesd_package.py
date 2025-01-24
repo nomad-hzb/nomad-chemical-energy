@@ -30,14 +30,18 @@ from nomad.metainfo import (
     Section, SubSection, SchemaPackage)
 
 from baseclasses import BaseMeasurement
+from nomad.datamodel.metainfo.basesections import CompositeSystemReference
+from baseclasses.helper.utilities import create_archive, get_entry_id_from_file_name, get_reference
 
 from baseclasses.chemical_energy import (
     CENOMESample, ElectroChemicalSetup, Environment, SampleIDCENOME,
+    NESDElectrode,
     Chronoamperometry,
     Chronopotentiometry,
     CyclicVoltammetry,
     ElectrochemicalImpedanceSpectroscopy,
     ElectrolyserPerformanceEvaluation,
+    ElectrolyserProperties,
     LinearSweepVoltammetry,
     OpenCircuitVoltage,
 )
@@ -94,6 +98,34 @@ class CE_NESD_Environment(Environment, EntryData):
                     'solvent'])))
 
     environment_id = SubSection(section_def=SampleIDCENOME)
+
+
+class CE_NESD_Electrode(NESDElectrode, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'components', 'elemental_composition'
+            ],
+            properties=dict(
+                order=[
+                    'name', 'data_file', 'samples'
+                ])),
+    )
+
+
+class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'components', 'elemental_composition'
+            ],
+            properties=dict(
+                order=[
+                    #'name', 'data_file', 'samples'
+                ])),
+    )
+    def normalize(self, archive, logger):
+        super(CE_NESD_Electrolyser, self).normalize(archive, logger)
 
 
 # %% ####################### Generic Entries
@@ -325,7 +357,7 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(ElectrolyserPerformanceEvaluatio
     m_def = Section(
         a_eln=dict(
             hide=[
-                'location', 'steps', 'instruments', 'results'
+                'location', 'steps', 'instruments', 'results', 'samples'
                 ],
             properties=dict(
                 order=[
@@ -345,8 +377,16 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(ElectrolyserPerformanceEvaluatio
                     self.name = metadata.get('name')
                     self.description = metadata.get('Comments')
                     # TODO add user name and maybe rename description to comment (or use label?)
-                    if not self.properties:
-                        self.properties = get_electrolyser_properties(metadata)
+                    if not self.electrolyser_properties:
+                        # TODO make ID
+                        #self.properties = get_electrolyser_properties(metadata)
+                        electrolyser = get_electrolyser_properties(metadata, CE_NESD_Electrolyser())
+                        file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_electrolyser.archive.json"
+                        create_archive(electrolyser, archive, file_name, overwrite=False)
+                        electrolyser_entry_id = get_entry_id_from_file_name(file_name, archive)
+                        self.electrolyser_properties = CompositeSystemReference(reference=get_reference(archive.metadata.upload_id, electrolyser_entry_id))
+                        self.electrolyser_properties.normalize(archive, logger)
+
         super(CE_NESD_ElectrolyserPerformanceEvaluation, self).normalize(archive, logger)
 
 
