@@ -173,7 +173,8 @@ ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
 ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
     name='CENESDBioLogicParser',
     description='Parser for CENESD csv and mpr files of BioLogic potentiostats',
-    mainfile_name_re=r'^.*\.mpr',
+    # mainfile_name_re=r'^.*\.mpr',
+    mainfile_name_re=r'somefilename.mpr',
 )
 
 ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
@@ -185,7 +186,8 @@ ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
 ce_nesd_palmsens_parser = CENESDPalmSensParserEntryPoint(
     name='CENESDPalmSensParser',
     description='Parser for CENESD csv files of PalmSens potentiostats',
-    mainfile_name_re=r'^.*\.csv',
+    # mainfile_name_re=r'^.*\.csv',
+    mainfile_name_re=r'somefilename.csv',
 )
 
 ce_nome_gamry_parser = CENOMEGamryParserEntryPoint(
@@ -262,7 +264,7 @@ dlr_ec_cp_parser = DLRECCPParserEntryPoint(
 dlr_ec_eis_parser = DLRECEISParserEntryPoint(
     name='DLRECEISParser',
     description='Parser for DLR EIS files',
-    mainfile_contents_re="""^.*\nIndex\tFrequency\s\(Hz\)\tZ'\s\(Ω\)\s-Z''\s\(Ω\)\tZ\s\(Ω\)\s-Phase\s\(°\)\tTime\s\(s\)""",
+    mainfile_contents_re=r"^.*\nIndex\tFrequency\s\(Hz\)\tZ'\s\(Ω\)\s-Z''\s\(Ω\)\tZ\s\(Ω\)\s-Phase\s\(°\)\tTime\s\(s\)",
 )
 
 hzb_catlab_parser = CatlabParserEntryPoint(

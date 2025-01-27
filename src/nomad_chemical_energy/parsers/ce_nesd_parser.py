@@ -148,11 +148,10 @@ class CENESDLabviewParser(MatchingParser):
             return
 
         entry = CE_NESD_ElectrolyserPerformanceEvaluation(data_file=file)
-        # TODO use correct search_id
-        search_id = file.split('#')[0]
-        set_sample_reference(archive, entry, search_id)
+        electrolyser_id = file.split('.')[0][:8]
+        set_sample_reference(archive, entry, electrolyser_id)
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        entry.name = f'{search_id}'
+        entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)
 

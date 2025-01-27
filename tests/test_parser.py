@@ -2,7 +2,6 @@ import os
 
 import pytest
 from nomad.client import normalize_all, parse
-from nomad.metainfo import MProxy
 
 
 def set_monkey_patch(monkeypatch):
@@ -34,6 +33,10 @@ def set_monkey_patch(monkeypatch):
     )
     monkeypatch.setattr(
         'nomad_chemical_energy.parsers.ce_nesd_parser.set_sample_reference',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.schema_packages.ce_nesd_package.create_archive',
         mockreturn_search,
     )
 
@@ -142,9 +145,8 @@ def test_labview_nesd_parser(monkeypatch):
     file = 'labview_metadata_nesd.tdms'
     archive = get_archive(file, monkeypatch)
     assert archive.data
-    assert archive.data.electrolyser_properties
-    assert isinstance(archive.data.electrolyser_properties.reference, MProxy)
     assert len(archive.data.time) == 344
+    assert archive.data.name == '20241202_091736_Softwaretest001_001'
 
 
 def test_tfc_sputtering_parser(monkeypatch):

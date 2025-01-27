@@ -21,19 +21,19 @@ import os
 import plotly.graph_objs as go
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
-    CENOMESample,
     Chronoamperometry,
     Chronopotentiometry,
     CyclicVoltammetry,
     ElectrochemicalImpedanceSpectroscopy,
-    ElectroChemicalSetup,
     ElectrolyserPerformanceEvaluation,
     ElectrolyserProperties,
-    Environment,
     LinearSweepVoltammetry,
     NESDElectrode,
     OpenCircuitVoltage,
-    SampleIDCENOME,
+)
+from baseclasses.helper.archive_builder.labview_archive import (
+    get_electrolyser_properties,
+    get_tdms_archive,
 )
 from baseclasses.helper.utilities import (
     create_archive,
@@ -43,94 +43,21 @@ from baseclasses.helper.utilities import (
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.basesections import CompositeSystemReference
 from nomad.datamodel.metainfo.plot import PlotlyFigure
-from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
+from nomad.metainfo import Quantity, SchemaPackage, Section
+
+from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import (
+    get_info_and_data,
+)
 
 m_package = SchemaPackage()
 
-
 # %% ####################### Entities
-
-
-# TODO decide whether to reuse nome sample, environment, setup
-class CE_NESD_Sample(CENOMESample, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'users',
-                'components',
-                'elemental_composition',
-                'id_of_preparation_protocol',
-            ],
-            properties=dict(
-                order=[
-                    'name',
-                    'lab_id',
-                    'chemical_composition_or_formulas',
-                ]
-            ),
-        ),
-        label_quantity='sample_id',
-    )
-
-
-class CE_NESD_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'users',
-                'components',
-                'elemental_composition',
-                'origin',
-                'substrate',
-            ],
-            properties=dict(
-                order=[
-                    'name',
-                    'lab_id',
-                    'chemical_composition_or_formulas',
-                    'setup',
-                    'reference_electrode',
-                    'counter_electrode',
-                    'equipment',
-                ]
-            ),
-        ),
-    )
-
-    setup_id = SubSection(section_def=SampleIDCENOME)
-
-
-class CE_NESD_Environment(Environment, EntryData):
-    m_def = Section(
-        a_eln=dict(
-            hide=[
-                'users',
-                'components',
-                'elemental_composition',
-                'origin',
-                'substrate',
-            ],
-            properties=dict(
-                editable=dict(exclude=['chemical_composition_or_formulas']),
-                order=[
-                    'name',
-                    'lab_id',
-                    'chemical_composition_or_formulas',
-                    'ph_value',
-                    'solvent',
-                ],
-            ),
-        )
-    )
-
-    environment_id = SubSection(section_def=SampleIDCENOME)
 
 
 class CE_NESD_Electrode(NESDElectrode, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['components', 'elemental_composition'],
-            properties=dict(order=['name', 'data_file', 'samples']),
         ),
     )
 
@@ -141,7 +68,10 @@ class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
             hide=['components', 'elemental_composition'],
             properties=dict(
                 order=[
-                    #'name', 'data_file', 'samples'
+                    'name',
+                    'cell_name',
+                    'lab_id',
+                    'datetime',
                 ]
             ),
         ),
@@ -537,7 +467,7 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
 ):
     m_def = Section(
         a_eln=dict(
-            hide=['location', 'steps', 'instruments', 'results', 'samples'],
+            hide=['location', 'steps', 'instruments', 'results', 'lab_id'],
             properties=dict(
                 order=[
                     'name',
@@ -550,41 +480,38 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
-                # TODO difference to tdms_index files
                 if os.path.splitext(self.data_file)[-1] == '.tdms':
-                    from baseclasses.helper.archive_builder.labview_archive import (
-                        get_electrolyser_properties,
-                        get_tdms_archive,
-                    )
-
-                    from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import (
-                        get_info_and_data,
-                    )
-
                     metadata, data = get_info_and_data(f)
                     get_tdms_archive(data, self)
                     self.name = metadata.get('name')
                     self.description = metadata.get('Comments')
-                    # TODO add user name and maybe rename description to comment (or use label?)
-                    if not self.electrolyser_properties:
-                        # TODO make ID
-                        # self.properties = get_electrolyser_properties(metadata)
+                    # caution: samples has the "electrolyser properties" label in the GUI
+                    if not self.samples:
+                        # if filename starts with id this is already used for reference
+                        # otherwise create a new CE_NESD_Electrolyser and reference this one
+                        file_name = archive.metadata.mainfile.split('.')[0]
+                        electrolyser_file_name = (
+                            f'{file_name}_electrolyser.archive.json'
+                        )
                         electrolyser = get_electrolyser_properties(
                             metadata, CE_NESD_Electrolyser()
                         )
-                        file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_electrolyser.archive.json"
                         create_archive(
-                            electrolyser, archive, file_name, overwrite=False
+                            electrolyser,
+                            archive,
+                            electrolyser_file_name,
+                            overwrite=False,
                         )
                         electrolyser_entry_id = get_entry_id_from_file_name(
-                            file_name, archive
+                            electrolyser_file_name, archive
                         )
-                        self.electrolyser_properties = CompositeSystemReference(
-                            reference=get_reference(
-                                archive.metadata.upload_id, electrolyser_entry_id
+                        self.samples = [
+                            CompositeSystemReference(
+                                reference=get_reference(
+                                    archive.metadata.upload_id, electrolyser_entry_id
+                                )
                             )
-                        )
-                        self.electrolyser_properties.normalize(archive, logger)
+                        ]
 
         super().normalize(archive, logger)
 
