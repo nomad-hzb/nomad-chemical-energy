@@ -484,6 +484,7 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
                     metadata, data = get_info_and_data(f)
                     get_tdms_archive(data, self)
                     self.name = metadata.get('name')
+                    self.labview_user = metadata.get('User_Name')
                     self.description = metadata.get('Comments')
                     # caution: samples has the "electrolyser properties" label in the GUI
                     if not self.samples:
