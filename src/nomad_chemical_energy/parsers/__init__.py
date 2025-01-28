@@ -181,6 +181,7 @@ ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
     name='CENESDLabviewParser',
     description='Parser for CENESD LabVIEW Electrolyser files',
     mainfile_name_re=r'^.*\.tdms',
+    mainfile_binary_header_re=r"[\s\S]*TDSm[\s\S]*'Measurements'[\s\S]*'Informations'[\s\S]*"
 )
 
 ce_nesd_palmsens_parser = CENESDPalmSensParserEntryPoint(
