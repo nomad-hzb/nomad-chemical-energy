@@ -72,7 +72,7 @@ exclude = [
 ]
 
 # Same as Black.
-line-length = 300
+line-length = 88
 indent-width = 4
 
 
