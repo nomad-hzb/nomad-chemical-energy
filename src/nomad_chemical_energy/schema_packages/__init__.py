@@ -15,6 +15,13 @@ class CENECCPackageEntryPoint(SchemaPackageEntryPoint):
         return m_package
 
 
+class CENESDPackageEntryPoint(SchemaPackageEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.schema_packages.ce_nesd_package import m_package
+
+        return m_package
+
+
 class CENSLIPackageEntryPoint(SchemaPackageEntryPoint):
     def load(self):
         from nomad_chemical_energy.schema_packages.ce_nsli_package import m_package
@@ -80,6 +87,11 @@ ce_nome_package = CENOMEPackageEntryPoint(
 ce_necc_package = CENECCPackageEntryPoint(
     name='CE_NECC',
     description='Package for HZB group CE-NECC',
+)
+
+ce_nesd_package = CENESDPackageEntryPoint(
+    name='CE_NESD',
+    description='Package for HZB group CE-NESD',
 )
 
 ce_nsli_package = CENSLIPackageEntryPoint(

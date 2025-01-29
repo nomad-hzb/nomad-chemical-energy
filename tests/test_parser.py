@@ -31,6 +31,14 @@ def set_monkey_patch(monkeypatch):
         'nomad_chemical_energy.schema_packages.tfc_package.set_sample_reference',
         mockreturn_search,
     )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_nesd_parser.set_sample_reference',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.schema_packages.ce_nesd_package.create_archive',
+        mockreturn_search,
+    )
 
 
 @pytest.fixture(
@@ -61,6 +69,7 @@ def set_monkey_patch(monkeypatch):
         'test1234.test.txt',
         'test double PTFETape 3 100724000001.txt',
         'testO2.oxy.xlsx',
+        'labview_metadata_nesd.tdms',
     ]
 )
 def parsed_archive(request, monkeypatch):
@@ -130,6 +139,14 @@ def test_gamry_CV_parser(monkeypatch):
     assert archive.data.cycles[0].voltage[0]
     assert archive.data.atmosphere[0].temperature.magnitude == 25
     assert archive.data.properties.limit_potential_1.magnitude == 0.5
+
+
+def test_labview_nesd_parser(monkeypatch):
+    file = 'labview_metadata_nesd.tdms'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert len(archive.data.time) == 344
+    assert archive.data.name == '20241202_091736_Softwaretest001_001'
 
 
 def test_tfc_sputtering_parser(monkeypatch):
