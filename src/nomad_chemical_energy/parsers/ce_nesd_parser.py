@@ -141,8 +141,7 @@ class CENESDBioLogicParser(MatchingParser):
 
 class CENESDLabviewParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        entry = None
-        file = mainfile.split('/')[-1]
+        file = mainfile.split('raw/')[-1]
 
         if not file.endswith('.tdms'):
             return
