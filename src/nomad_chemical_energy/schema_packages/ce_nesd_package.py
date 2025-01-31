@@ -472,6 +472,9 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
                 order=[
                     'name',
                     'data_file',
+                    'datetime',
+                    'laview_user',
+                    'description',
                 ]
             ),
         ),
