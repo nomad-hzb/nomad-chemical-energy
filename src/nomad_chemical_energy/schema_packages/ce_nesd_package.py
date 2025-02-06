@@ -42,7 +42,7 @@ from baseclasses.helper.utilities import (
 )
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.basesections import CompositeSystemReference
-from nomad.datamodel.metainfo.plot import PlotlyFigure
+from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 from nomad.metainfo import Quantity, SchemaPackage, Section
 
 from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import (
@@ -103,7 +103,7 @@ class CE_NESD_Measurement(BaseMeasurement, EntryData):
 # %% ####################### Measurements
 
 
-class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData):
+class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -111,7 +111,6 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData):
                 'lab_id',
                 'location',
                 'control',
-                'charge',
                 'charge_density',
                 'steps',
                 'cycles',
@@ -180,7 +179,7 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData):
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f)
+                    metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         # metadata_device_settings = json.loads(data.attrs.get('original_metadata')).get('params', {})
@@ -197,7 +196,7 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData):
+class CE_NESD_Chronopotentiometry(Chronopotentiometry, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -205,7 +204,6 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData):
                 'lab_id',
                 'location',
                 'control',
-                'charge',
                 'charge_density',
                 'steps',
                 'cycles',
@@ -257,7 +255,7 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData):
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f)
+                    metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
@@ -276,7 +274,6 @@ class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData):
                 'lab_id',
                 'location',
                 'control',
-                'charge',
                 'charge_density',
                 'steps',
                 'cycles',
@@ -311,7 +308,7 @@ class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData):
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f)
+                    metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
@@ -326,7 +323,6 @@ class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData):
                 'lab_id',
                 'location',
                 'control',
-                'charge',
                 'charge_density',
                 'steps',
                 'cycles',
@@ -361,14 +357,14 @@ class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData):
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f)
+                    metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
         super().normalize(archive, logger)
 
 
-class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData):
+class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -447,7 +443,7 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f)
+                    metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self, multiple=True)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
@@ -520,8 +516,8 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
         super().normalize(archive, logger)
 
 
-class CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy(
-    ElectrochemicalImpedanceSpectroscopy, EntryData
+class CE_NESD_GEIS(
+    ElectrochemicalImpedanceSpectroscopy, PlotSection, EntryData
 ):
     m_def = Section(
         a_eln=dict(
@@ -596,7 +592,7 @@ class CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f)
+                    metadata, data = get_header_and_data(f.name)
                     get_eis_data(data, self)
                     get_meta_data(metadata, self)
                     if not self.properties:
@@ -610,7 +606,7 @@ class CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy(
         super().normalize(archive, logger)
 
 
-class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
+class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -618,7 +614,6 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
                 'lab_id',
                 'location',
                 'control',
-                'charge',
                 'charge_density',
                 'steps',
                 'cycles',
@@ -689,7 +684,7 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f)
+                    metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
@@ -704,7 +699,7 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
+class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -764,7 +759,7 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f)
+                    metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.properties:
                         self.properties = get_biologic_properties(metadata)
@@ -775,9 +770,7 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy(
-    ElectrochemicalImpedanceSpectroscopy, EntryData
-):
+class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopy, PlotSection, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -851,7 +844,7 @@ class CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f)
+                    metadata, data = get_header_and_data(f.name)
                     get_eis_data(data, self)
                     get_meta_data(metadata, self)
                     if not self.properties:

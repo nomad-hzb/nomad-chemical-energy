@@ -47,11 +47,11 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_NESD_ConstantVoltageMode,
     CE_NESD_CyclicVoltammetry,
     CE_NESD_ElectrolyserPerformanceEvaluation,
-    CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy,
+    CE_NESD_GEIS,
     CE_NESD_LinearSweepVoltammetry,
     CE_NESD_Measurement,
     CE_NESD_OpenCircuitVoltage,
-    CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy,
+    CE_NESD_PEIS,
 )
 
 
@@ -87,7 +87,7 @@ class ParsedLabVIEWFile(EntryData):
 
 class CENESDBioLogicParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        file = mainfile.split('/')[-1]
+        file = mainfile.split('raw/')[-1]
 
         if not file.endswith('.mpr'):
             return
@@ -97,7 +97,7 @@ class CENESDBioLogicParser(MatchingParser):
         )
 
         with archive.m_context.raw_file(os.path.basename(mainfile)) as f:
-            metadata, _ = get_header_and_data(f)
+            metadata, _ = get_header_and_data(f.name)
         technique = metadata.get('technique')
         match technique:
             case 'CA':
@@ -111,17 +111,13 @@ class CENESDBioLogicParser(MatchingParser):
             case 'CV':
                 entry = CE_NESD_CyclicVoltammetry(data_file=file)
             case 'GEIS':
-                entry = CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy(
-                    data_file=file
-                )
+                entry = CE_NESD_GEIS(data_file=file)
             case 'LSV':
                 entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
             case 'OCV':
                 entry = CE_NESD_OpenCircuitVoltage(data_file=file)
             case 'PEIS':
-                entry = CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy(
-                    data_file=file
-                )
+                entry = CE_NESD_PEIS(data_file=file)
             case _:
                 entry = CE_NESD_Measurement(data_file=file)
 

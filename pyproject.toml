@@ -33,7 +33,8 @@ dependencies = [
     'nomad-baseclasses @ git+https://github.com/nomad-hzb/nomad-baseclasses.git',
     'nomad-measurements',
     'httpx==0.27.2',
-    'nptdms']
+    'nptdms',
+    'yadg @ git+https://github.com/carla-terboven/yadg.git',]
 
 [project.urls]
 Repository = "https://github.com/nomad-hzb/nomad-chemical-energy"
