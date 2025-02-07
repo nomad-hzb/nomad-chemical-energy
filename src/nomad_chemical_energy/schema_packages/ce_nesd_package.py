@@ -19,6 +19,8 @@
 import os
 
 import plotly.graph_objs as go
+import json
+
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
     Chronoamperometry,
@@ -133,36 +135,46 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
     )
 
     def make_current_plot(self):
+        if self.current is None:
+            return go.Figure().update_layout(title_text='Current over Time',)
         fig = go.Figure(
             data=[
                 go.Scatter(
                     name='Current',
                     x=self.time,
                     y=self.current,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
         fig.update_layout(
             title_text='Current over Time',
-            xaxis={'fixedrange': False},
-            yaxis={'fixedrange': False},
+            xaxis={'fixedrange': False, 'title': f'Time ({self.time.units:~P})',},
+            yaxis={'fixedrange': False, 'title': f'Current ({self.current.units:~P})',},
+            hovermode='x unified',
         )
         return fig
 
     def make_current_density_plot(self):
+        if self.current_density is None:
+            return go.Figure().update_layout(title_text='Current Density over Time',)
         fig = go.Figure(
             data=[
                 go.Scatter(
-                    name='Current',
+                    name='Current Density',
                     x=self.time,
                     y=self.current_density,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
         fig.update_layout(
             title_text='Current Density over Time',
-            xaxis={'fixedrange': False},
-            yaxis={'fixedrange': False},
+            xaxis={'fixedrange': False, 'title': f'Time ({self.time.units:~P})',},
+            yaxis={'fixedrange': False, 'title': f'Current Density ({self.current_density.units:~P})',},
+            hovermode='x unified',
         )
         return fig
 
@@ -188,9 +200,9 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
         fig1 = self.make_current_plot()
         fig2 = self.make_current_density_plot()
         self.figures = [
-            PlotlyFigure(label='Current over Time', figure=fig1.to_plotly_json()),
+            PlotlyFigure(label='Current over Time', figure=json.loads(fig1.to_json())),
             PlotlyFigure(
-                label='Current Density over Time', figure=fig2.to_plotly_json()
+                label='Current Density over Time', figure=json.loads(fig2.to_json())
             ),
         ]
         super().normalize(archive, logger)
@@ -226,19 +238,24 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, PlotSection, EntryData):
     )
 
     def make_voltage_plot(self):
+        if self.voltage is None:
+            return go.Figure().update_layout(title_text='Voltage over Time',)
         fig = go.Figure(
             data=[
                 go.Scatter(
                     name='Voltage',
                     x=self.time,
                     y=self.voltage,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
         fig.update_layout(
             title_text='Voltage over Time',
-            xaxis={'fixedrange': False},
-            yaxis={'fixedrange': False},
+            xaxis={'fixedrange': False, 'title': f'Time ({self.time.units:~P})',},
+            yaxis={'fixedrange': False, 'title': f'Voltage ({self.voltage.units:~P})',},
+            hovermode='x unified',
         )
         return fig
 
@@ -261,7 +278,7 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, PlotSection, EntryData):
                         self.properties = get_biologic_properties(metadata)
         fig1 = self.make_voltage_plot()
         self.figures = [
-            PlotlyFigure(label='Voltage over Time', figure=fig1.to_plotly_json()),
+            PlotlyFigure(label='Voltage over Time', figure=json.loads(fig1.to_json())),
         ]
         super().normalize(archive, logger)
 
@@ -397,36 +414,50 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
     )
 
     def make_current_density_plot(self):
-        fig = go.Figure()
-        for cycle in self.cycles:
+        fig = go.Figure().update_layout(title_text='Current Density over Voltage RHE')
+        if self.cycles is None:
+            return fig
+        for idx, cycle in enumerate(self.cycles):
+            if cycle.voltage_rhe_compensated is None or cycle.current_density is None:
+                return fig
             fig.add_traces(
                 go.Scatter(
-                    name='Current Density',
+                    name=f'Current Density {idx}',
                     x=cycle.voltage_rhe_compensated,
                     y=cycle.current_density,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             )
         fig.update_layout(
-            title_text='Current Density over Voltage RHE',
             showlegend=True,
-            xaxis={'fixedrange': False},
+            xaxis={'fixedrange': False, 'title': f'Voltage RHE compensated ({self.cycles[0].voltage_rhe_compensated.units:~P})', },
+            yaxis={'fixedrange': False, 'title': f'Current Density ({self.cycles[0].current_density.units:~P})', },
+            hovermode='x unified',
         )
         return fig
 
     def make_current_over_voltage_plot(self):
-        fig = go.Figure()
-        for cycle in self.cycles:
+        fig = go.Figure().update_layout(title_text='Current over Voltage',)
+        if self.cycles is None:
+            return fig
+        for idx, cycle in enumerate(self.cycles):
+            if cycle.voltage is None or cycle.current is None:
+                return fig
             fig.add_traces(
                 go.Scatter(
-                    name='Current',
+                    name=f'Current {idx}',
                     x=cycle.voltage,
                     y=cycle.current,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             )
         fig.update_layout(
-            title_text='Current over Voltage',
             showlegend=True,
-            xaxis={'fixedrange': False},
+            xaxis={'fixedrange': False, 'title': f'Voltage ({self.cycles[0].voltage.units:~P})', },
+            yaxis={'fixedrange': False, 'title': f'Current ({self.cycles[0].current.units:~P})', },
+            hovermode='x unified',
         )
         return fig
 
@@ -451,9 +482,9 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
         fig2 = self.make_current_over_voltage_plot()
         self.figures = [
             PlotlyFigure(
-                label='Current Density over Voltage RHE', figure=fig1.to_plotly_json()
+                label='Current Density over Voltage RHE', figure=json.loads(fig1.to_json())
             ),
-            PlotlyFigure(label='Current over Voltage', figure=fig2.to_plotly_json()),
+            PlotlyFigure(label='Current over Voltage', figure=json.loads(fig2.to_json())),
         ]
         super().normalize(archive, logger)
 
@@ -543,12 +574,16 @@ class CE_NESD_GEIS(
     )
 
     def make_nyquist_plot(self):
+        if self.z_imaginary is None or self.z_real is None:
+            return go.Figure().update_layout(title_text='Nyquist Plot',)
         fig = go.Figure(
             data=[
                 go.Scatter(
                     name='Nyquist',
                     x=self.z_real,
                     y=self.z_imaginary,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
@@ -556,16 +591,21 @@ class CE_NESD_GEIS(
             title_text='Nyquist Plot',
             xaxis={'fixedrange': False, 'title': 'Re(Z) (Ω)'},
             yaxis={'fixedrange': False, 'title': '-Im(Z) (Ω)'},
+            hovermode='closest',
         )
         return fig
 
     def make_bode_plot(self):
+        if self.frequency is None or self.z_modulus is None:
+            return go.Figure().update_layout(title_text='Bode Plot',)
         fig = go.Figure(
             data=[
                 go.Scatter(
                     name='|Z|',
                     x=self.frequency,
                     y=self.z_modulus,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
@@ -573,8 +613,9 @@ class CE_NESD_GEIS(
         fig.update_layout(
             title_text='Bode Plot',
             showlegend=True,
-            xaxis={'fixedrange': False, 'type': 'log'},
+            xaxis={'fixedrange': False, 'type': 'log', 'title': f'Frequency ({self.frequency.units:~P})'},
             yaxis={'fixedrange': False},
+            hovermode='closest',
         )
         return fig
 
@@ -600,8 +641,8 @@ class CE_NESD_GEIS(
         fig1 = self.make_nyquist_plot()
         fig2 = self.make_bode_plot()
         self.figures = [
-            PlotlyFigure(label='Nyquist Plot', figure=fig1.to_plotly_json()),
-            PlotlyFigure(label='Bode Plot', figure=fig2.to_plotly_json()),
+            PlotlyFigure(label='Nyquist Plot', figure=json.loads(fig1.to_json())),
+            PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
         ]
         super().normalize(archive, logger)
 
@@ -636,38 +677,48 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryD
     )
 
     def make_current_density_plot(self):
+        if self.current_density is None or self.voltage_rhe_compensated is None:
+            return go.Figure().update_layout(title_text='Current Density over Voltage RHE',)
         fig = go.Figure(
             data=[
                 go.Scatter(
                     name='Current Density',
                     x=self.voltage_rhe_compensated,
                     y=self.current_density,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
         fig.update_layout(
             title_text='Current Density over Voltage RHE',
             showlegend=True,
-            xaxis={'fixedrange': False},
-            yaxis={'fixedrange': False},
+            xaxis={'fixedrange': False, 'title': f'Voltage RHE compensated ({self.voltage_rhe_compensated.units:~P})', },
+            yaxis={'fixedrange': False, 'title': f'Current Density ({self.current_density.units:~P})', },
+            hovermode='x unified',
         )
         return fig
 
     def make_current_over_voltage_plot(self):
+        if self.current is None or self.voltage is None:
+            return go.Figure().update_layout(title_text='Current over Voltage',)
         fig = go.Figure(
             data=[
                 go.Scatter(
                     name='Current',
                     x=self.voltage,
                     y=self.current,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
         fig.update_layout(
             title_text='Current over Voltage',
             showlegend=True,
-            xaxis={'fixedrange': False},
-            yaxis={'fixedrange': False},
+            xaxis={'fixedrange': False, 'title': f'Voltage ({self.voltage.units:~P})', },
+            yaxis={'fixedrange': False, 'title': f'Current ({self.current.units:~P})', },
+            hovermode='x unified',
         )
         return fig
 
@@ -692,9 +743,9 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryD
         fig2 = self.make_current_over_voltage_plot()
         self.figures = [
             PlotlyFigure(
-                label='Current Density over Voltage RHE', figure=fig1.to_plotly_json()
+                label='Current Density over Voltage RHE', figure=json.loads(fig1.to_json())
             ),
-            PlotlyFigure(label='Current over Voltage', figure=fig2.to_plotly_json()),
+            PlotlyFigure(label='Current over Voltage', figure=json.loads(fig2.to_json())),
         ]
         super().normalize(archive, logger)
 
@@ -730,19 +781,24 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
     )
 
     def make_voltage_plot(self):
+        if self.voltage is None:
+            return go.Figure().update_layout(title_text='Voltage over Time',)
         fig = go.Figure(
             data=[
                 go.Scatter(
                     name='Voltage',
                     x=self.time,
                     y=self.voltage,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
         fig.update_layout(
             title_text='Voltage over Time',
-            xaxis={'fixedrange': False},
-            yaxis={'fixedrange': False},
+            xaxis={'fixedrange': False, 'title': f'Time ({self.time.units:~P})', },
+            yaxis={'fixedrange': False, 'title': f'Voltage ({self.voltage.units:~P})', },
+            hovermode='x unified',
         )
         return fig
 
@@ -765,7 +821,7 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
                         self.properties = get_biologic_properties(metadata)
         fig1 = self.make_voltage_plot()
         self.figures = [
-            PlotlyFigure(label='Voltage over Time', figure=fig1.to_plotly_json()),
+            PlotlyFigure(label='Voltage over Time', figure=json.loads(fig1.to_json())),
         ]
         super().normalize(archive, logger)
 
@@ -795,12 +851,16 @@ class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopy, PlotSection, EntryData)
     )
 
     def make_nyquist_plot(self):
+        if self.z_imaginary is None or self.z_real is None:
+            return go.Figure().update_layout(title_text='Nyquist Plot', )
         fig = go.Figure(
             data=[
                 go.Scatter(
                     name='Nyquist',
                     x=self.z_real,
                     y=self.z_imaginary,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
@@ -808,16 +868,21 @@ class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopy, PlotSection, EntryData)
             title_text='Nyquist Plot',
             xaxis={'fixedrange': False, 'title': 'Re(Z) (Ω)'},
             yaxis={'fixedrange': False, 'title': '-Im(Z) (Ω)'},
+            hovermode='closest',
         )
         return fig
 
     def make_bode_plot(self):
+        if self.frequency is None or self.z_modulus is None:
+            return go.Figure().update_layout(title_text='Bode Plot', )
         fig = go.Figure(
             data=[
                 go.Scatter(
                     name='|Z|',
                     x=self.frequency,
                     y=self.z_modulus,
+                    mode='lines',
+                    hoverinfo='x+y+name',
                 )
             ]
         )
@@ -825,8 +890,9 @@ class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopy, PlotSection, EntryData)
         fig.update_layout(
             title_text='Bode Plot',
             showlegend=True,
-            xaxis={'fixedrange': False, 'type': 'log'},
+            xaxis={'fixedrange': False, 'type': 'log', 'title': f'Frequency ({self.frequency.units:~P})'},
             yaxis={'fixedrange': False},
+            hovermode='closest',
         )
         return fig
 
@@ -852,8 +918,8 @@ class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopy, PlotSection, EntryData)
         fig1 = self.make_nyquist_plot()
         fig2 = self.make_bode_plot()
         self.figures = [
-            PlotlyFigure(label='Nyquist Plot', figure=fig1.to_plotly_json()),
-            PlotlyFigure(label='Bode Plot', figure=fig2.to_plotly_json()),
+            PlotlyFigure(label='Nyquist Plot', figure=json.loads(fig1.to_json())),
+            PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
         ]
         super().normalize(archive, logger)
 
