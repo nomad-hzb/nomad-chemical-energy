@@ -32,5 +32,5 @@ def get_header_and_data(filename):
         print(f'Error during extraction: {e}')
         return None, None
 
-    metadata = json.loads(data_tree.attrs.get('original_metadata')).get('settings', {})
+    metadata = json.loads(data_tree.attrs.get('original_metadata'))
     return metadata, data_tree

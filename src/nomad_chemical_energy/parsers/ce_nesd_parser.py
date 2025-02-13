@@ -98,7 +98,7 @@ class CENESDBioLogicParser(MatchingParser):
 
         with archive.m_context.raw_file(os.path.basename(mainfile)) as f:
             metadata, _ = get_header_and_data(f.name)
-        technique = metadata.get('technique')
+        technique = metadata.get('settings', {}).get('technique')
         match technique:
             case 'CA':
                 entry = CE_NESD_Chronoamperometry(data_file=file)
@@ -121,10 +121,10 @@ class CENESDBioLogicParser(MatchingParser):
             case _:
                 entry = CE_NESD_Measurement(data_file=file)
 
-        search_id = file.split('#')[0]
-        set_sample_reference(archive, entry, search_id)
+        electrolyser_id = file.split('/')[-1][:8]
+        set_sample_reference(archive, entry, electrolyser_id)
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        entry.name = f'{search_id}'
+        entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)
 
