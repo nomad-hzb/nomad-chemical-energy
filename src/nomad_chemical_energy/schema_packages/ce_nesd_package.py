@@ -16,17 +16,15 @@
 # limitations under the License.
 #
 
+import json
 import os
 
 import plotly.graph_objs as go
-import json
-
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
     Chronoamperometry,
     Chronopotentiometry,
     CyclicVoltammetry,
-    ElectrochemicalImpedanceSpectroscopy,
     ElectrochemicalImpedanceSpectroscopyMultiple,
     ElectrolyserPerformanceEvaluation,
     ElectrolyserProperties,
@@ -137,7 +135,9 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
 
     def make_current_plot(self):
         if self.current is None:
-            return go.Figure().update_layout(title_text='Current over Time',)
+            return go.Figure().update_layout(
+                title_text='Current over Time',
+            )
         fig = go.Figure(
             data=[
                 go.Scatter(
@@ -151,15 +151,23 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
         )
         fig.update_layout(
             title_text='Current over Time',
-            xaxis={'fixedrange': False, 'title': f'Time ({self.time.units:~P})',},
-            yaxis={'fixedrange': False, 'title': f'Current ({self.current.units:~P})',},
+            xaxis={
+                'fixedrange': False,
+                'title': f'Time ({self.time.units:~P})',
+            },
+            yaxis={
+                'fixedrange': False,
+                'title': f'Current ({self.current.units:~P})',
+            },
             hovermode='x unified',
         )
         return fig
 
     def make_current_density_plot(self):
         if self.current_density is None:
-            return go.Figure().update_layout(title_text='Current Density over Time',)
+            return go.Figure().update_layout(
+                title_text='Current Density over Time',
+            )
         fig = go.Figure(
             data=[
                 go.Scatter(
@@ -173,8 +181,14 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
         )
         fig.update_layout(
             title_text='Current Density over Time',
-            xaxis={'fixedrange': False, 'title': f'Time ({self.time.units:~P})',},
-            yaxis={'fixedrange': False, 'title': f'Current Density ({self.current_density.units:~P})',},
+            xaxis={
+                'fixedrange': False,
+                'title': f'Time ({self.time.units:~P})',
+            },
+            yaxis={
+                'fixedrange': False,
+                'title': f'Current Density ({self.current_density.units:~P})',
+            },
             hovermode='x unified',
         )
         return fig
@@ -185,8 +199,8 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
-                        get_voltammetry_archive,
                         get_ca_properties,
+                        get_voltammetry_archive,
                     )
 
                     from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
@@ -196,10 +210,14 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
                     metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
-                        self.setup_parameters = get_biologic_properties(metadata.get('settings', {}))
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
                     if not self.properties:
                         self.properties = get_ca_properties(metadata.get('params', {}))
-                        self.properties.sample_area = self.setup_parameters.get('sample_area')
+                        self.properties.sample_area = self.setup_parameters.get(
+                            'sample_area'
+                        )
         super().normalize(archive, logger)
         fig1 = self.make_current_plot()
         fig2 = self.make_current_density_plot()
@@ -242,7 +260,9 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, PlotSection, EntryData):
 
     def make_voltage_plot(self):
         if self.voltage is None:
-            return go.Figure().update_layout(title_text='Voltage over Time',)
+            return go.Figure().update_layout(
+                title_text='Voltage over Time',
+            )
         fig = go.Figure(
             data=[
                 go.Scatter(
@@ -256,8 +276,14 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, PlotSection, EntryData):
         )
         fig.update_layout(
             title_text='Voltage over Time',
-            xaxis={'fixedrange': False, 'title': f'Time ({self.time.units:~P})',},
-            yaxis={'fixedrange': False, 'title': f'Voltage ({self.voltage.units:~P})',},
+            xaxis={
+                'fixedrange': False,
+                'title': f'Time ({self.time.units:~P})',
+            },
+            yaxis={
+                'fixedrange': False,
+                'title': f'Voltage ({self.voltage.units:~P})',
+            },
             hovermode='x unified',
         )
         return fig
@@ -268,8 +294,8 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, PlotSection, EntryData):
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
-                        get_voltammetry_archive,
                         get_cp_properties,
+                        get_voltammetry_archive,
                     )
 
                     from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
@@ -279,10 +305,14 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, PlotSection, EntryData):
                     metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
-                        self.setup_parameters = get_biologic_properties(metadata.get('settings', {}))
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
                     if not self.properties:
                         self.properties = get_cp_properties(metadata.get('params', {}))
-                        self.properties.sample_area = self.setup_parameters.get('sample_area')
+                        self.properties.sample_area = self.setup_parameters.get(
+                            'sample_area'
+                        )
         super().normalize(archive, logger)
         fig1 = self.make_voltage_plot()
         self.figures = [
@@ -337,10 +367,16 @@ class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData):
                     metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
-                        self.setup_parameters = get_biologic_properties(metadata.get('settings', {}))
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
                     if not self.properties:
-                        self.properties = get_const_properties(metadata.get('params', {}), constC=True)
-                        self.properties.sample_area = self.setup_parameters.get('sample_area')
+                        self.properties = get_const_properties(
+                            metadata.get('params', {}), constC=True
+                        )
+                        self.properties.sample_area = self.setup_parameters.get(
+                            'sample_area'
+                        )
         super().normalize(archive, logger)
 
 
@@ -391,10 +427,16 @@ class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData):
                     metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
-                        self.setup_parameters = get_biologic_properties(metadata.get('settings', {}))
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
                     if not self.properties:
-                        self.properties = get_const_properties(metadata.get('params', {}), constC=False)
-                        self.properties.sample_area = self.setup_parameters.get('sample_area')
+                        self.properties = get_const_properties(
+                            metadata.get('params', {}), constC=False
+                        )
+                        self.properties.sample_area = self.setup_parameters.get(
+                            'sample_area'
+                        )
         super().normalize(archive, logger)
 
 
@@ -448,14 +490,22 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
             )
         fig.update_layout(
             showlegend=True,
-            xaxis={'fixedrange': False, 'title': f'Voltage RHE compensated ({self.cycles[0].voltage_rhe_compensated.units:~P})', },
-            yaxis={'fixedrange': False, 'title': f'Current Density ({self.cycles[0].current_density.units:~P})', },
+            xaxis={
+                'fixedrange': False,
+                'title': f'Voltage RHE compensated ({self.cycles[0].voltage_rhe_compensated.units:~P})',
+            },
+            yaxis={
+                'fixedrange': False,
+                'title': f'Current Density ({self.cycles[0].current_density.units:~P})',
+            },
             hovermode='x unified',
         )
         return fig
 
     def make_current_over_voltage_plot(self):
-        fig = go.Figure().update_layout(title_text='Current over Voltage',)
+        fig = go.Figure().update_layout(
+            title_text='Current over Voltage',
+        )
         if self.cycles is None:
             return fig
         for idx, cycle in enumerate(self.cycles):
@@ -472,8 +522,14 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
             )
         fig.update_layout(
             showlegend=True,
-            xaxis={'fixedrange': False, 'title': f'Voltage ({self.cycles[0].voltage.units:~P})', },
-            yaxis={'fixedrange': False, 'title': f'Current ({self.cycles[0].current.units:~P})', },
+            xaxis={
+                'fixedrange': False,
+                'title': f'Voltage ({self.cycles[0].voltage.units:~P})',
+            },
+            yaxis={
+                'fixedrange': False,
+                'title': f'Current ({self.cycles[0].current.units:~P})',
+            },
             hovermode='x unified',
         )
         return fig
@@ -484,8 +540,8 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
-                        get_voltammetry_archive,
                         get_cv_properties,
+                        get_voltammetry_archive,
                     )
 
                     from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
@@ -495,18 +551,25 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
                     metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self, multiple=True)
                     if not self.setup_parameters:
-                        self.setup_parameters = get_biologic_properties(metadata.get('settings', {}))
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
                     if not self.properties:
                         self.properties = get_cv_properties(metadata.get('params', {}))
-                        self.properties.sample_area = self.setup_parameters.get('sample_area')
+                        self.properties.sample_area = self.setup_parameters.get(
+                            'sample_area'
+                        )
         super().normalize(archive, logger)
         fig1 = self.make_current_density_plot()
         fig2 = self.make_current_over_voltage_plot()
         self.figures = [
             PlotlyFigure(
-                label='Current Density over Voltage RHE', figure=json.loads(fig1.to_json())
+                label='Current Density over Voltage RHE',
+                figure=json.loads(fig1.to_json()),
             ),
-            PlotlyFigure(label='Current over Voltage', figure=json.loads(fig2.to_json())),
+            PlotlyFigure(
+                label='Current over Voltage', figure=json.loads(fig2.to_json())
+            ),
         ]
 
 
@@ -568,7 +631,9 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
         super().normalize(archive, logger)
 
 
-class CE_NESD_GEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, EntryData):
+class CE_NESD_GEIS(
+    ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, EntryData
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -595,7 +660,9 @@ class CE_NESD_GEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
     )
 
     def make_nyquist_plot(self):
-        fig = go.Figure().update_layout(title_text='Nyquist Plot', )
+        fig = go.Figure().update_layout(
+            title_text='Nyquist Plot',
+        )
         if self.measurements is None:
             return fig
         for idx, cycle in enumerate(self.measurements):
@@ -621,13 +688,19 @@ class CE_NESD_GEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
         return fig
 
     def make_bode_plot(self):
-        fig = go.Figure().update_layout(title_text='Bode Plot', )
+        fig = go.Figure().update_layout(
+            title_text='Bode Plot',
+        )
         if self.measurements is None:
             return fig
         for idx, cycle in enumerate(self.measurements):
             if cycle.data is None:
                 return fig
-            if cycle.data.frequency is None or cycle.data.z_modulus is None or cycle.data.z_angle is None:
+            if (
+                cycle.data.frequency is None
+                or cycle.data.z_modulus is None
+                or cycle.data.z_angle is None
+            ):
                 return fig
             fig.add_traces(
                 go.Scatter(
@@ -638,11 +711,19 @@ class CE_NESD_GEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
                     hoverinfo='x+y+name',
                 )
             )
-            fig.add_traces(go.Scatter(name=f'Phase(Z) {idx}', x=cycle.data.frequency, y=cycle.data.z_angle))
+            fig.add_traces(
+                go.Scatter(
+                    name=f'Phase(Z) {idx}', x=cycle.data.frequency, y=cycle.data.z_angle
+                )
+            )
         fig.update_layout(
             title_text='Bode Plot',
             showlegend=True,
-            xaxis={'fixedrange': False, 'type': 'log', 'title': f'Frequency ({self.measurements[0].data.frequency.units:~P})'},
+            xaxis={
+                'fixedrange': False,
+                'type': 'log',
+                'title': f'Frequency ({self.measurements[0].data.frequency.units:~P})',
+            },
             yaxis={'fixedrange': False},
             hovermode='closest',
         )
@@ -655,8 +736,8 @@ class CE_NESD_GEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
                         get_eis_data,
-                        get_meta_data,
                         get_eis_properties,
+                        get_meta_data,
                         get_start_time,
                     )
 
@@ -670,9 +751,13 @@ class CE_NESD_GEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
                     start_time_offset = data.get('time')[0].item()
                     self.datetime = get_start_time(ole_timestamp, start_time_offset)
                     if not self.setup_parameters:
-                        self.setup_parameters = get_biologic_properties(metadata.get('settings', {}))
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
                     if not self.measurements:
-                        self.measurements = get_eis_properties(metadata.get('params', {}))
+                        self.measurements = get_eis_properties(
+                            metadata.get('params', {})
+                        )
                         get_eis_data(data, self.measurements)
                     for cycle in self.measurements:
                         cycle.sample_area = self.setup_parameters.get('sample_area')
@@ -716,7 +801,9 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryD
 
     def make_current_density_plot(self):
         if self.current_density is None or self.voltage_rhe_compensated is None:
-            return go.Figure().update_layout(title_text='Current Density over Voltage RHE',)
+            return go.Figure().update_layout(
+                title_text='Current Density over Voltage RHE',
+            )
         fig = go.Figure(
             data=[
                 go.Scatter(
@@ -731,15 +818,23 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryD
         fig.update_layout(
             title_text='Current Density over Voltage RHE',
             showlegend=True,
-            xaxis={'fixedrange': False, 'title': f'Voltage RHE compensated ({self.voltage_rhe_compensated.units:~P})', },
-            yaxis={'fixedrange': False, 'title': f'Current Density ({self.current_density.units:~P})', },
+            xaxis={
+                'fixedrange': False,
+                'title': f'Voltage RHE compensated ({self.voltage_rhe_compensated.units:~P})',
+            },
+            yaxis={
+                'fixedrange': False,
+                'title': f'Current Density ({self.current_density.units:~P})',
+            },
             hovermode='x unified',
         )
         return fig
 
     def make_current_over_voltage_plot(self):
         if self.current is None or self.voltage is None:
-            return go.Figure().update_layout(title_text='Current over Voltage',)
+            return go.Figure().update_layout(
+                title_text='Current over Voltage',
+            )
         fig = go.Figure(
             data=[
                 go.Scatter(
@@ -754,8 +849,14 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryD
         fig.update_layout(
             title_text='Current over Voltage',
             showlegend=True,
-            xaxis={'fixedrange': False, 'title': f'Voltage ({self.voltage.units:~P})', },
-            yaxis={'fixedrange': False, 'title': f'Current ({self.current.units:~P})', },
+            xaxis={
+                'fixedrange': False,
+                'title': f'Voltage ({self.voltage.units:~P})',
+            },
+            yaxis={
+                'fixedrange': False,
+                'title': f'Current ({self.current.units:~P})',
+            },
             hovermode='x unified',
         )
         return fig
@@ -766,8 +867,8 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryD
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
-                        get_voltammetry_archive,
                         get_lsv_properties,
+                        get_voltammetry_archive,
                     )
 
                     from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
@@ -777,18 +878,25 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryD
                     metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
-                        self.setup_parameters = get_biologic_properties(metadata.get('settings', {}))
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
                     if not self.properties:
                         self.properties = get_lsv_properties(metadata.get('params', {}))
-                        self.properties.sample_area = self.setup_parameters.get('sample_area')
+                        self.properties.sample_area = self.setup_parameters.get(
+                            'sample_area'
+                        )
         super().normalize(archive, logger)
         fig1 = self.make_current_density_plot()
         fig2 = self.make_current_over_voltage_plot()
         self.figures = [
             PlotlyFigure(
-                label='Current Density over Voltage RHE', figure=json.loads(fig1.to_json())
+                label='Current Density over Voltage RHE',
+                figure=json.loads(fig1.to_json()),
             ),
-            PlotlyFigure(label='Current over Voltage', figure=json.loads(fig2.to_json())),
+            PlotlyFigure(
+                label='Current over Voltage', figure=json.loads(fig2.to_json())
+            ),
         ]
 
 
@@ -824,7 +932,9 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
 
     def make_voltage_plot(self):
         if self.voltage is None:
-            return go.Figure().update_layout(title_text='Voltage over Time',)
+            return go.Figure().update_layout(
+                title_text='Voltage over Time',
+            )
         fig = go.Figure(
             data=[
                 go.Scatter(
@@ -838,8 +948,14 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
         )
         fig.update_layout(
             title_text='Voltage over Time',
-            xaxis={'fixedrange': False, 'title': f'Time ({self.time.units:~P})', },
-            yaxis={'fixedrange': False, 'title': f'Voltage ({self.voltage.units:~P})', },
+            xaxis={
+                'fixedrange': False,
+                'title': f'Time ({self.time.units:~P})',
+            },
+            yaxis={
+                'fixedrange': False,
+                'title': f'Voltage ({self.voltage.units:~P})',
+            },
             hovermode='x unified',
         )
         return fig
@@ -850,8 +966,8 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
-                        get_voltammetry_archive,
                         get_ocv_properties,
+                        get_voltammetry_archive,
                     )
 
                     from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
@@ -861,10 +977,14 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
                     metadata, data = get_header_and_data(f.name)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
-                        self.setup_parameters = get_biologic_properties(metadata.get('settings', {}))
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
                     if not self.properties:
                         self.properties = get_ocv_properties(metadata.get('params', {}))
-                        self.properties.sample_area = self.setup_parameters.get('sample_area')
+                        self.properties.sample_area = self.setup_parameters.get(
+                            'sample_area'
+                        )
         super().normalize(archive, logger)
         fig1 = self.make_voltage_plot()
         self.figures = [
@@ -872,7 +992,9 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
         ]
 
 
-class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, EntryData):
+class CE_NESD_PEIS(
+    ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, EntryData
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -899,7 +1021,9 @@ class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
     )
 
     def make_nyquist_plot(self):
-        fig = go.Figure().update_layout(title_text='Nyquist Plot', )
+        fig = go.Figure().update_layout(
+            title_text='Nyquist Plot',
+        )
         if self.measurements is None:
             return fig
         for idx, cycle in enumerate(self.measurements):
@@ -925,13 +1049,19 @@ class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
         return fig
 
     def make_bode_plot(self):
-        fig = go.Figure().update_layout(title_text='Bode Plot', )
+        fig = go.Figure().update_layout(
+            title_text='Bode Plot',
+        )
         if self.measurements is None:
             return fig
         for idx, cycle in enumerate(self.measurements):
             if cycle.data is None:
                 return fig
-            if cycle.data.frequency is None or cycle.data.z_modulus is None or cycle.data.z_angle is None:
+            if (
+                cycle.data.frequency is None
+                or cycle.data.z_modulus is None
+                or cycle.data.z_angle is None
+            ):
                 return fig
             fig.add_traces(
                 go.Scatter(
@@ -942,12 +1072,19 @@ class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
                     hoverinfo='x+y+name',
                 )
             )
-            fig.add_traces(go.Scatter(name=f'Phase(Z) {idx}', x=cycle.data.frequency, y=cycle.data.z_angle))
+            fig.add_traces(
+                go.Scatter(
+                    name=f'Phase(Z) {idx}', x=cycle.data.frequency, y=cycle.data.z_angle
+                )
+            )
         fig.update_layout(
             title_text='Bode Plot',
             showlegend=True,
-            xaxis={'fixedrange': False, 'type': 'log',
-                   'title': f'Frequency ({self.measurements[0].data.frequency.units:~P})'},
+            xaxis={
+                'fixedrange': False,
+                'type': 'log',
+                'title': f'Frequency ({self.measurements[0].data.frequency.units:~P})',
+            },
             yaxis={'fixedrange': False},
             hovermode='closest',
         )
@@ -960,8 +1097,8 @@ class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
                         get_eis_data,
-                        get_meta_data,
                         get_eis_properties,
+                        get_meta_data,
                         get_start_time,
                     )
 
@@ -975,9 +1112,13 @@ class CE_NESD_PEIS(ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, En
                     start_time_offset = data.get('time')[0].item()
                     self.datetime = get_start_time(ole_timestamp, start_time_offset)
                     if not self.setup_parameters:
-                        self.setup_parameters = get_biologic_properties(metadata.get('settings', {}))
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
                     if not self.measurements:
-                        self.measurements = get_eis_properties(metadata.get('params', {}))
+                        self.measurements = get_eis_properties(
+                            metadata.get('params', {})
+                        )
                         get_eis_data(data, self.measurements)
                     for cycle in self.measurements:
                         cycle.sample_area = self.setup_parameters.get('sample_area')

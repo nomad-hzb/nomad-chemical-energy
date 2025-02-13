@@ -41,17 +41,17 @@ from nomad.metainfo import (
 from nomad.parsing import MatchingParser
 
 from nomad_chemical_energy.schema_packages.ce_nesd_package import (
+    CE_NESD_GEIS,
+    CE_NESD_PEIS,
     CE_NESD_Chronoamperometry,
     CE_NESD_Chronopotentiometry,
     CE_NESD_ConstantCurrentMode,
     CE_NESD_ConstantVoltageMode,
     CE_NESD_CyclicVoltammetry,
     CE_NESD_ElectrolyserPerformanceEvaluation,
-    CE_NESD_GEIS,
     CE_NESD_LinearSweepVoltammetry,
     CE_NESD_Measurement,
     CE_NESD_OpenCircuitVoltage,
-    CE_NESD_PEIS,
 )
 
 
