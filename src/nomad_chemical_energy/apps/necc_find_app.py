@@ -42,22 +42,21 @@ necc_find_experiments_app = App(
             'data.properties.anode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe',
         ],
         options={
-                'entry_type': Column(label='Entry type', align='left'),
-                'entry_name': Column(label='Name', align='left'),
-                'entry_create_time': Column(label='Entry time', align='left'),
-                'authors': Column(label='Authors', align='left'),
-                'upload_name': Column(label='Upload name', align='left'),
-                'data.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC': Column(
-                    label='Experiment ID', align='left'
-                ),
-                'data.properties.cathode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode': Column(
-                    label='Cathode ID', align='left'
-                ),
-                'data.properties.anode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe': Column(
-                    label='Anode ID', align='left'
-                ),
-            },
-
+            'entry_type': Column(label='Entry type', align='left'),
+            'entry_name': Column(label='Name', align='left'),
+            'entry_create_time': Column(label='Entry time', align='left'),
+            'authors': Column(label='Authors', align='left'),
+            'upload_name': Column(label='Upload name', align='left'),
+            'data.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_EC_GC': Column(
+                label='Experiment ID', align='left'
+            ),
+            'data.properties.cathode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode': Column(
+                label='Cathode ID', align='left'
+            ),
+            'data.properties.anode.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe': Column(
+                label='Anode ID', align='left'
+            ),
+        },
     ),
     # Dictionary of search filters that are always enabled for queries made
     # within this app. This is especially important to narrow down the
@@ -76,9 +75,7 @@ necc_find_experiments_app = App(
             'custom_quantities': FilterMenu(
                 label='User Defined Quantities', level=0, size='l'
             ),
-            'author': FilterMenu(
-                label='Author / Origin / Dataset', level=0, size='m'
-            ),
+            'author': FilterMenu(label='Author / Origin / Dataset', level=0, size='m'),
             'metadata': FilterMenu(label='Visibility / IDs / Schema', level=0),
             'optimade': FilterMenu(label='Optimade', level=0, size='m'),
         }
