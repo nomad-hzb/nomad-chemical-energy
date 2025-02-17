@@ -21,7 +21,12 @@
 # SOFTWARE.
 
 import pandas as pd
-from baseclasses.chemical_energy import GasFEResults, NECCFeedGas
+from baseclasses.chemical_energy import (
+    GasFEResults,
+    NECCFeedGas,
+    NECCPotentiostatMeasurement,
+    PotentiometryGasChromatographyResults,
+)
 from nomad.datamodel.metainfo.basesections import CompositeSystemReference
 
 
@@ -32,28 +37,34 @@ def _round_not_zero(number):
     return rounded_num
 
 
-def _process_potentiostat_column(data, column_name):
-    if column_name in data.columns:
-        return data[column_name].dropna().apply(_round_not_zero)
+def _process_potentiostat_column(data, column_names):
+    for column_name in column_names:
+        if column_name in data.columns:
+            return data[column_name].dropna().apply(_round_not_zero)
     return None
 
 
 def read_potentiostat_data(data):
+    measurement = NECCPotentiostatMeasurement()
     data['time/s'] = pd.to_datetime(data['time/s'], errors='coerce')
     data = data.dropna(subset=['time/s'])
+    measurement.datetime = data['time/s'].to_list()
 
-    current = _process_potentiostat_column(data, 'I/mA')
-    working_electrode_potential = _process_potentiostat_column(data, 'Ewe/V')
-    counter_electrode_potential = _process_potentiostat_column(data, 'Ece/V')
-    ewe_ece_difference = _process_potentiostat_column(data, 'Ewe-Ece/V')
-
-    return (
-        data['time/s'],
-        current,
-        working_electrode_potential,
-        counter_electrode_potential,
-        ewe_ece_difference,
+    measurement.current = _process_potentiostat_column(
+        data, ['I/mA', '<I/mA>', '<I>/mA']
     )
+    measurement.working_electrode_potential = _process_potentiostat_column(
+        data, ['Ewe/V', '<Ewe/V>', '<Ewe>/V']
+    )
+    measurement.counter_electrode_potential = _process_potentiostat_column(
+        data, ['Ece/V', '<Ece/V>', '<Ece>/V']
+    )
+    measurement.ewe_ece_difference = _process_potentiostat_column(
+        data, ['Ewe-Ece/V', '<Ewe-Ece/V>', '<Ewe-Ece>/V']
+    )
+    measurement.capacity = _process_potentiostat_column(data, ['dQ/C'])
+
+    return measurement
 
 
 def read_thermocouple_data(data, start_time, end_time):
@@ -104,18 +115,19 @@ def read_gaschromatography_data(data):
     return instrument_file_names, datetimes, gas_types, retention_times, areas, ppms
 
 
-def read_results_data(data):
+def read_results_data(data, pH_start=None, ph_end=None):
+    results_data = PotentiometryGasChromatographyResults()
     data['DateTime'] = pd.to_datetime(data['Time'].astype(str))
     data['Date'] = pd.to_datetime(data['Date'].astype(str))
     data['DateTime'] = data['Date'] + pd.to_timedelta(
         data['DateTime'].dt.strftime('%H:%M:%S')
     )
-    datetimes = data['DateTime'].dropna()
+    results_data.datetime = data['DateTime'].dropna().to_list()
 
-    total_flow_rate = data['Total flow rate (ml/min)'].dropna()
-    total_fe = data['Total FE (%)'].dropna()
-    cell_current = data['Current(mA)'].dropna()
-    cell_voltage = data['Cell Voltage'].dropna()
+    results_data.total_flow_rate = data['Total flow rate (ml/min)'].dropna()
+    results_data.total_fe = data['Total FE (%)'].dropna()
+    results_data.cell_current = data['Current(mA)'].dropna()
+    results_data.cell_voltage = data['Cell Voltage'].dropna()
 
     gas_measurements = []
     current_column_headers = [col for col in data.columns if col.endswith('I (mA)')]
@@ -124,23 +136,22 @@ def read_results_data(data):
         gas_type = col_header.split(' ', 1)[0]
         current = data[col_header].dropna()
         fe = data[' '.join([gas_type, 'FE (%)'])].dropna()
+        if (fe <= 0).all():
+            fe = abs(fe)
         gas_measurements.append(
             GasFEResults(
                 gas_type=gas_type,
-                datetime=datetimes.to_list(),
+                datetime=results_data.datetime,
                 current=current,
                 faradaic_efficiency=fe,
             )
         )
+    results_data.gas_results = gas_measurements
 
-    return (
-        datetimes,
-        total_flow_rate,
-        total_fe,
-        cell_current,
-        cell_voltage,
-        gas_measurements,
-    )
+    results_data.pH_start = pH_start
+    results_data.pH_end = ph_end
+
+    return results_data
 
 
 def read_properties(file):
