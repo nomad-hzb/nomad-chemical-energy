@@ -23,9 +23,7 @@ from baseclasses.chemical_energy import (
     CENECCElectrodeRecipe,
     GasChromatographyMeasurement,
     NECCExperimentalProperties,
-    NECCPotentiostatMeasurement,
     PotentiometryGasChromatographyMeasurement,
-    PotentiometryGasChromatographyResults,
     ThermocoupleMeasurement,
 )
 from nomad.datamodel.data import EntryData
@@ -256,7 +254,22 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         'area',
                         'ppm value',
                     ]
-                    pot_columns = ['time/s', 'I/mA', 'Ewe/V', 'Ece/V', 'Ewe-Ece/V']
+                    pot_columns = [
+                        'time/s',
+                        'I/mA',
+                        '<I/mA>',
+                        '<I>/mA',
+                        'Ewe/V',
+                        '<Ewe/V>',
+                        '<Ewe>/V',
+                        'Ece/V',
+                        '<Ece/V>',
+                        '<Ece>/V',
+                        'Ewe-Ece/V',
+                        '<Ewe-Ece/V>',
+                        '<Ewe-Ece>/V',
+                        'dQ/C',
+                    ]
                     thermo_columns = [
                         'Date',
                         'Time Stamp Local',
@@ -293,7 +306,20 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                             fid_data, tcd_data, on=['Date', 'Time '], how='inner'
                         )
 
-                    results_data.dropna(axis=0, how='any', inplace=True)
+                    pH_start, pH_end = None, None
+                    if 'pH' in results_data.columns:
+                        pH_start = results_data['pH'].iloc[0]
+                        pH_end = results_data['pH'].iloc[1]
+                    results_data.dropna(
+                        axis=0,
+                        how='any',
+                        inplace=True,
+                        subset=[
+                            'Current(mA)',
+                            'Total flow rate (ml/min)',
+                            'Total FE (%)',
+                        ],
+                    )
 
                     from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
                         read_gaschromatography_data,
@@ -333,23 +359,10 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         read_potentiostat_data,
                     )
 
-                    (
-                        datetimes,
-                        current,
-                        working_electrode_potential,
-                        counter_electrode_potential,
-                        ewe_ece_difference,
-                    ) = read_potentiostat_data(pot_data)
+                    self.potentiometry = read_potentiostat_data(pot_data)
                     if start_time is None or end_time is None:
-                        start_time = datetimes.iat[0]
-                        end_time = datetimes.iat[-1]
-                    self.potentiometry = NECCPotentiostatMeasurement(
-                        datetime=datetimes.to_list(),
-                        current=current,
-                        working_electrode_potential=working_electrode_potential,
-                        counter_electrode_potential=counter_electrode_potential,
-                        ewe_ece_difference=ewe_ece_difference,
-                    )
+                        start_time = datetimes[0]
+                        end_time = datetimes[-1]
                     from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
                         read_thermocouple_data,
                     )
@@ -373,22 +386,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         read_results_data,
                     )
 
-                    (
-                        datetimes,
-                        total_flow_rate,
-                        total_fe,
-                        cell_current,
-                        cell_voltage,
-                        gas_measurements,
-                    ) = read_results_data(results_data)
-                    self.fe_results = PotentiometryGasChromatographyResults(
-                        datetime=datetimes.to_list(),
-                        total_flow_rate=total_flow_rate,
-                        cell_current=cell_current,
-                        cell_voltage=cell_voltage,
-                        gas_results=gas_measurements,
-                        total_fe=total_fe,
-                    )
+                    self.fe_results = read_results_data(results_data, pH_start, pH_end)
 
         self.properties.normalize(archive, logger)
         self.thermocouple.normalize(archive, logger)
