@@ -215,11 +215,11 @@ def read_properties(file):
     experimental_properties_dict.update({'feed_gases': feed_gases})
 
     if not pd.isna(data.loc['Anode ID', 1]):
-        anode = CompositeSystemReference(lab_id=data.loc['Anode ID', 1])
+        anode = CompositeSystemReference(lab_id=data.loc['Anode ID', 1].strip())
         experimental_properties_dict.update({'anode': anode})
 
     if not pd.isna(data.loc['Cathode ID', 1]):
-        cathode = CompositeSystemReference(lab_id=data.loc['Cathode ID', 1])
+        cathode = CompositeSystemReference(lab_id=data.loc['Cathode ID', 1].strip())
         experimental_properties_dict.update({'cathode': cathode})
 
     return experimental_properties_dict
