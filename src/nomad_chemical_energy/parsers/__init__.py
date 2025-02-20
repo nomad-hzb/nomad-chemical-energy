@@ -174,7 +174,6 @@ ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
     name='CENESDBioLogicParser',
     description='Parser for CENESD csv and mpr files of BioLogic potentiostats',
     mainfile_name_re=r'^.*\.mpr',
-    # mainfile_name_re=r'somefilename.mpr',
 )
 
 ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
