@@ -172,7 +172,7 @@ ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
 
 ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
     name='CENESDBioLogicParser',
-    description='Parser for CENESD csv and mpr files of BioLogic potentiostats',
+    description='Parser for CENESD mpr files of BioLogic/EC-Lab potentiostats',
     mainfile_name_re=r'^.*\.mpr',
 )
 
