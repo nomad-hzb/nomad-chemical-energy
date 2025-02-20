@@ -115,19 +115,19 @@ class CE_NESD_Chronoamperometry(
 ):
     m_def = Section(
         a_eln=dict(
+            hide=[
+                'metadata_file',
+                'lab_id',
+                'location',
+                'control',
+                'environment',
+                'setup',
+                'steps',
+                'cycles',
+                'instruments',
+                'results',
+            ],
             properties=dict(
-                hide=[
-                    'metadata_file',
-                    'lab_id',
-                    'location',
-                    'control',
-                    'environment',
-                    'setup',
-                    'steps',
-                    'cycles',
-                    'instruments',
-                    'results',
-                ],
                 order=[
                     'name',
                     'data_file',
