@@ -19,6 +19,7 @@
 import json
 import os
 
+import numpy as np
 import plotly.graph_objs as go
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
@@ -85,6 +86,11 @@ class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
 # %% ####################### Generic Entries
 
 
+class CE_NESD_Electrolyser_Measurement(BaseMeasurement, PlotSection, EntryData):
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = 'electrolyser'
+
+
 class CE_NESD_Measurement(BaseMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -104,23 +110,24 @@ class CE_NESD_Measurement(BaseMeasurement, EntryData):
 # %% ####################### Measurements
 
 
-class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
+class CE_NESD_Chronoamperometry(
+    CE_NESD_Electrolyser_Measurement, Chronoamperometry, EntryData
+):
     m_def = Section(
         a_eln=dict(
-            hide=[
-                'metadata_file',
-                'lab_id',
-                'location',
-                'control',
-                'charge_density',
-                'environment',
-                'setup',
-                'steps',
-                'cycles',
-                'instruments',
-                'results',
-            ],
             properties=dict(
+                hide=[
+                    'metadata_file',
+                    'lab_id',
+                    'location',
+                    'control',
+                    'environment',
+                    'setup',
+                    'steps',
+                    'cycles',
+                    'instruments',
+                    'results',
+                ],
                 order=[
                     'name',
                     'data_file',
@@ -128,7 +135,7 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
                     'station',
                     'voltage_shift',
                     'resistance',
-                ]
+                ],
             ),
         ),
     )
@@ -229,7 +236,9 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, PlotSection, EntryData):
         ]
 
 
-class CE_NESD_Chronopotentiometry(Chronopotentiometry, PlotSection, EntryData):
+class CE_NESD_Chronopotentiometry(
+    CE_NESD_Electrolyser_Measurement, Chronopotentiometry, EntryData
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -320,7 +329,9 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, PlotSection, EntryData):
         ]
 
 
-class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData):
+class CE_NESD_ConstantCurrentMode(
+    CE_NESD_Electrolyser_Measurement, Chronopotentiometry, EntryData
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -380,7 +391,9 @@ class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData):
+class CE_NESD_ConstantVoltageMode(
+    CE_NESD_Electrolyser_Measurement, Chronoamperometry, EntryData
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -440,7 +453,9 @@ class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
+class CE_NESD_CyclicVoltammetry(
+    CE_NESD_Electrolyser_Measurement, CyclicVoltammetry, EntryData
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -474,7 +489,7 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
 
     def make_current_density_plot(self):
         fig = go.Figure().update_layout(title_text='Current Density over Voltage RHE')
-        if self.cycles is None:
+        if not self.cycles or self.cycles is None:
             return fig
         for idx, cycle in enumerate(self.cycles):
             if cycle.voltage_rhe_compensated is None or cycle.current_density is None:
@@ -506,7 +521,7 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
         fig = go.Figure().update_layout(
             title_text='Current over Voltage',
         )
-        if self.cycles is None:
+        if not self.cycles or self.cycles is None:
             return fig
         for idx, cycle in enumerate(self.cycles):
             if cycle.voltage is None or cycle.current is None:
@@ -574,7 +589,7 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, PlotSection, EntryData):
 
 
 class CE_NESD_ElectrolyserPerformanceEvaluation(
-    ElectrolyserPerformanceEvaluation, EntryData
+    CE_NESD_Electrolyser_Measurement, ElectrolyserPerformanceEvaluation, EntryData
 ):
     m_def = Section(
         a_eln=dict(
@@ -632,7 +647,9 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
 
 
 class CE_NESD_GEIS(
-    ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, EntryData
+    CE_NESD_Electrolyser_Measurement,
+    ElectrochemicalImpedanceSpectroscopyMultiple,
+    EntryData,
 ):
     m_def = Section(
         a_eln=dict(
@@ -748,7 +765,7 @@ class CE_NESD_GEIS(
                     metadata, data = get_header_and_data(f.name)
                     get_meta_data(metadata.get('settings', {}), self)
                     ole_timestamp = metadata.get('log', {}).get('ole_timestamp', 0)
-                    start_time_offset = data.get('time')[0].item()
+                    start_time_offset = data.get('time', np.array([0]))[0].item()
                     self.datetime = get_start_time(ole_timestamp, start_time_offset)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -770,7 +787,9 @@ class CE_NESD_GEIS(
         ]
 
 
-class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryData):
+class CE_NESD_LinearSweepVoltammetry(
+    CE_NESD_Electrolyser_Measurement, LinearSweepVoltammetry, EntryData
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -900,7 +919,9 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, PlotSection, EntryD
         ]
 
 
-class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
+class CE_NESD_OpenCircuitVoltage(
+    CE_NESD_Electrolyser_Measurement, OpenCircuitVoltage, EntryData
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -993,7 +1014,9 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, PlotSection, EntryData):
 
 
 class CE_NESD_PEIS(
-    ElectrochemicalImpedanceSpectroscopyMultiple, PlotSection, EntryData
+    CE_NESD_Electrolyser_Measurement,
+    ElectrochemicalImpedanceSpectroscopyMultiple,
+    EntryData,
 ):
     m_def = Section(
         a_eln=dict(

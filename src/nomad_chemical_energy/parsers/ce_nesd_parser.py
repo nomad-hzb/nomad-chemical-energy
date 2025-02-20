@@ -17,7 +17,6 @@
 #
 
 import datetime
-import os
 
 from baseclasses.helper.utilities import (
     create_archive,
@@ -53,6 +52,9 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_NESD_Measurement,
     CE_NESD_OpenCircuitVoltage,
 )
+from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+    get_header_and_data,
+)
 
 
 class ParsedBioLogicFile(EntryData):
@@ -86,18 +88,33 @@ class ParsedLabVIEWFile(EntryData):
 
 
 class CENESDBioLogicParser(MatchingParser):
-    def parse(self, mainfile: str, archive: EntryArchive, logger):
-        file = mainfile.split('raw/')[-1]
+    def is_mainfile(
+        self,
+        filename: str,
+        mime: str,
+        buffer: bytes,
+        decoded_buffer: str,
+        compression: str = None,
+    ):
+        is_mainfile_super = super().is_mainfile(
+            filename, mime, buffer, decoded_buffer, compression
+        )
+        if not is_mainfile_super:
+            return False
+        metadata, _ = get_header_and_data(filename)
+        device_number = metadata.get('log', {}).get('device_sn')
+        if device_number == '1581':
+            return True
+        return False
 
-        if not file.endswith('.mpr'):
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        if not mainfile.endswith('.mpr'):
             return
 
-        from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
-            get_header_and_data,
-        )
-
-        with archive.m_context.raw_file(os.path.basename(mainfile)) as f:
+        file = mainfile.split('raw/')[-1]
+        with archive.m_context.raw_file(file, 'rt') as f:
             metadata, _ = get_header_and_data(f.name)
+
         technique = metadata.get('settings', {}).get('technique')
         match technique:
             case 'CA':
