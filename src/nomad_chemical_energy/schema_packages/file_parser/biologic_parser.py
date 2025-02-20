@@ -21,13 +21,19 @@
 # SOFTWARE.
 
 import json
+import tempfile
 
 import yadg
 
 
-def get_header_and_data(filename):
+def get_header_and_data(file):
+    file_content = file.read()
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.mpr') as temp_file:
+        temp_file.write(file_content)
+        temp_file_path = temp_file.name
+
     try:
-        data_tree = yadg.extractors.extract(filetype='eclab.mpr', path=filename)
+        data_tree = yadg.extractors.extract(filetype='eclab.mpr', path=temp_file_path)
     except Exception as e:
         print(f'Error during extraction: {e}')
         return None, None

@@ -101,7 +101,8 @@ class CENESDBioLogicParser(MatchingParser):
         )
         if not is_mainfile_super:
             return False
-        metadata, _ = get_header_and_data(filename)
+        with open(filename, 'rb') as f:
+            metadata, _ = get_header_and_data(f)
         device_number = metadata.get('log', {}).get('device_sn')
         if device_number == '1581':
             return True
@@ -112,8 +113,8 @@ class CENESDBioLogicParser(MatchingParser):
             return
 
         file = mainfile.split('raw/')[-1]
-        with archive.m_context.raw_file(file, 'rt') as f:
-            metadata, _ = get_header_and_data(f.name)
+        with archive.m_context.raw_file(file, 'rb') as f:
+            metadata, _ = get_header_and_data(f)
 
         technique = metadata.get('settings', {}).get('technique')
         match technique:

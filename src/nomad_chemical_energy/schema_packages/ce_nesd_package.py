@@ -202,7 +202,7 @@ class CE_NESD_Chronoamperometry(
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -214,7 +214,7 @@ class CE_NESD_Chronoamperometry(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f.name)
+                    metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -299,7 +299,7 @@ class CE_NESD_Chronopotentiometry(
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -311,7 +311,7 @@ class CE_NESD_Chronopotentiometry(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f.name)
+                    metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -363,7 +363,7 @@ class CE_NESD_ConstantCurrentMode(
     def normalize(self, archive, logger):
         self.method = 'Constant Current'
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -375,7 +375,7 @@ class CE_NESD_ConstantCurrentMode(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f.name)
+                    metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -425,7 +425,7 @@ class CE_NESD_ConstantVoltageMode(
     def normalize(self, archive, logger):
         self.method = 'Constant Voltage'
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -437,7 +437,7 @@ class CE_NESD_ConstantVoltageMode(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f.name)
+                    metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -551,7 +551,7 @@ class CE_NESD_CyclicVoltammetry(
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -563,7 +563,7 @@ class CE_NESD_CyclicVoltammetry(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f.name)
+                    metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self, multiple=True)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -748,7 +748,7 @@ class CE_NESD_GEIS(
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -762,7 +762,7 @@ class CE_NESD_GEIS(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f.name)
+                    metadata, data = get_header_and_data(f)
                     get_meta_data(metadata.get('settings', {}), self)
                     ole_timestamp = metadata.get('log', {}).get('ole_timestamp', 0)
                     start_time_offset = data.get('time', np.array([0]))[0].item()
@@ -882,7 +882,7 @@ class CE_NESD_LinearSweepVoltammetry(
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -894,7 +894,7 @@ class CE_NESD_LinearSweepVoltammetry(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f.name)
+                    metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -983,7 +983,7 @@ class CE_NESD_OpenCircuitVoltage(
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -995,7 +995,7 @@ class CE_NESD_OpenCircuitVoltage(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f.name)
+                    metadata, data = get_header_and_data(f)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -1115,7 +1115,7 @@ class CE_NESD_PEIS(
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -1129,7 +1129,7 @@ class CE_NESD_PEIS(
                         get_header_and_data,
                     )
 
-                    metadata, data = get_header_and_data(f.name)
+                    metadata, data = get_header_and_data(f)
                     get_meta_data(metadata.get('settings', {}), self)
                     ole_timestamp = metadata.get('log', {}).get('ole_timestamp', 0)
                     start_time_offset = data.get('time')[0].item()
