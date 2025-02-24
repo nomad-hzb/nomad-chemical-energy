@@ -17,7 +17,6 @@
 #
 
 import datetime
-import os
 
 from baseclasses.helper.utilities import (
     create_archive,
@@ -41,17 +40,20 @@ from nomad.metainfo import (
 from nomad.parsing import MatchingParser
 
 from nomad_chemical_energy.schema_packages.ce_nesd_package import (
+    CE_NESD_GEIS,
+    CE_NESD_PEIS,
     CE_NESD_Chronoamperometry,
     CE_NESD_Chronopotentiometry,
     CE_NESD_ConstantCurrentMode,
     CE_NESD_ConstantVoltageMode,
     CE_NESD_CyclicVoltammetry,
     CE_NESD_ElectrolyserPerformanceEvaluation,
-    CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy,
     CE_NESD_LinearSweepVoltammetry,
     CE_NESD_Measurement,
     CE_NESD_OpenCircuitVoltage,
-    CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy,
+)
+from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+    get_header_and_data,
 )
 
 
@@ -86,19 +88,35 @@ class ParsedLabVIEWFile(EntryData):
 
 
 class CENESDBioLogicParser(MatchingParser):
-    def parse(self, mainfile: str, archive: EntryArchive, logger):
-        file = mainfile.split('/')[-1]
+    def is_mainfile(
+        self,
+        filename: str,
+        mime: str,
+        buffer: bytes,
+        decoded_buffer: str,
+        compression: str = None,
+    ):
+        is_mainfile_super = super().is_mainfile(
+            filename, mime, buffer, decoded_buffer, compression
+        )
+        if not is_mainfile_super:
+            return False
+        with open(filename, 'rb') as f:
+            metadata, _ = get_header_and_data(f)
+        device_number = metadata.get('log', {}).get('device_sn')
+        if device_number in ['1581', '1659']:
+            return True
+        return False
 
-        if not file.endswith('.mpr'):
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        if not mainfile.endswith('.mpr'):
             return
 
-        from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
-            get_header_and_data,
-        )
-
-        with archive.m_context.raw_file(os.path.basename(mainfile)) as f:
+        file = mainfile.split('raw/')[-1]
+        with archive.m_context.raw_file(file, 'rb') as f:
             metadata, _ = get_header_and_data(f)
-        technique = metadata.get('technique')
+
+        technique = metadata.get('settings', {}).get('technique')
         match technique:
             case 'CA':
                 entry = CE_NESD_Chronoamperometry(data_file=file)
@@ -111,24 +129,20 @@ class CENESDBioLogicParser(MatchingParser):
             case 'CV':
                 entry = CE_NESD_CyclicVoltammetry(data_file=file)
             case 'GEIS':
-                entry = CE_NESD_GalvanodynamicElectrochemicalImpedanceSpectroscopy(
-                    data_file=file
-                )
+                entry = CE_NESD_GEIS(data_file=file)
             case 'LSV':
                 entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
             case 'OCV':
                 entry = CE_NESD_OpenCircuitVoltage(data_file=file)
             case 'PEIS':
-                entry = CE_NESD_PotentiodynamicElectrochemicalImpedanceSpectroscopy(
-                    data_file=file
-                )
+                entry = CE_NESD_PEIS(data_file=file)
             case _:
                 entry = CE_NESD_Measurement(data_file=file)
 
-        search_id = file.split('#')[0]
-        set_sample_reference(archive, entry, search_id)
+        electrolyser_id = file.split('/')[-1][:8]
+        set_sample_reference(archive, entry, electrolyser_id)
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        entry.name = f'{search_id}'
+        entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)
 
