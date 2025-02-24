@@ -1132,7 +1132,7 @@ class CE_NESD_PEIS(
                     metadata, data = get_header_and_data(f)
                     get_meta_data(metadata.get('settings', {}), self)
                     ole_timestamp = metadata.get('log', {}).get('ole_timestamp', 0)
-                    start_time_offset = data.get('time')[0].item()
+                    start_time_offset = data.get('time', np.array([0]))[0].item()
                     self.datetime = get_start_time(ole_timestamp, start_time_offset)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
