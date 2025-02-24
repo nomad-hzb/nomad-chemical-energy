@@ -21,7 +21,6 @@ import os
 
 from baseclasses.helper.utilities import (
     create_archive,
-    find_sample_by_id,
     get_entry_id_from_file_name,
     get_reference,
     set_sample_reference,
@@ -35,7 +34,6 @@ from nomad.datamodel.metainfo.annotations import (
 )
 from nomad.datamodel.metainfo.basesections import (
     Activity,
-    CompositeSystemReference,
 )
 from nomad.metainfo import (
     Quantity,
@@ -74,87 +72,6 @@ class ParsedCORFile(EntryData):
             component='ReferenceEditQuantity',
         ),
     )
-
-
-class MPTParser(MatchingParser):
-    def parse(self, mainfile: str, archive: EntryArchive, logger):
-        mainfile_split = os.path.basename(mainfile).split('.')
-        notes = mainfile_split[0]
-        if len(mainfile_split) > 2:
-            notes = mainfile_split[1]
-        cam_measurements = None
-
-        from nomad_chemical_energy.schema_packages.file_parser.mps_file_parser import (
-            read_mpt_file,
-        )
-
-        metadata, _, technique = read_mpt_file(mainfile)
-
-        if 'Cyclic Voltammetry' in technique:
-            from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
-                Wannsee_B307_CyclicVoltammetry_ECLab,
-            )
-
-            cam_measurements = Wannsee_B307_CyclicVoltammetry_ECLab()
-
-        if 'Open Circuit Voltage' in technique:
-            from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
-                Wannsee_B307_OpenCircuitVoltage_ECLab,
-            )
-
-            cam_measurements = Wannsee_B307_OpenCircuitVoltage_ECLab()
-
-        if 'Potentio Electrochemical Impedance Spectroscopy' in technique:
-            from nomad_chemical_energy.schema_packages.ce_wannsee_package import (
-                Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab,
-            )
-
-            cam_measurements = Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab()
-
-        archive.metadata.entry_name = os.path.basename(mainfile)
-
-        sample_id = metadata.get('Electrode material')
-        setup_id = metadata.get('Initial state')
-        environment_id = metadata.get('Electrolyte')
-
-        from baseclasses.chemical_energy import PotentiostatSetup
-
-        setup_parameters = PotentiostatSetup()
-        setup_params = metadata.get('Comments')
-        if setup_params is not None:
-            setup_params = setup_params.split(',')
-            for param in setup_params:
-                if '=' not in param:
-                    continue
-                try:
-                    key, value = param.split('=')
-                    setattr(setup_parameters, key.strip(), value.strip())
-                except Exception:
-                    pass
-
-        cam_measurements.setup_parameters = setup_parameters
-        sample_ref = find_sample_by_id(archive, sample_id)
-        if sample_ref is not None:
-            cam_measurements.samples = [CompositeSystemReference(reference=sample_ref)]
-        environment_ref = find_sample_by_id(archive, environment_id)
-        if environment_ref is not None:
-            cam_measurements.environment = environment_ref
-        setup_ref = find_sample_by_id(archive, setup_id)
-        if setup_ref is not None:
-            cam_measurements.setup = setup_ref
-
-        cam_measurements.name = f'{mainfile_split[0]} {notes}'
-        cam_measurements.description = f'Notes from file name: {notes}'
-        cam_measurements.data_file = os.path.basename(mainfile)
-
-        if cam_measurements is not None:
-            file_name = f'{os.path.basename(mainfile)}.archive.json'
-            create_archive(cam_measurements, archive, file_name)
-
-            eid = get_entry_id_from_file_name(file_name, archive)
-            ref = get_reference(archive.metadata.upload_id, eid)
-            archive.data = ParsedMPTFile(activity=ref)
-            archive.metadata.entry_name = f'{mainfile_split[0]} {notes}'
 
 
 class CORParser(MatchingParser):
