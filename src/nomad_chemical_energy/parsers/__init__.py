@@ -71,13 +71,6 @@ class CENOMEMassspectrometryParserEntryPoint(ParserEntryPoint):
         return MassspectrometryParser(**self.dict())
 
 
-class CEWannseeMPTParserEntryPoint(ParserEntryPoint):
-    def load(self):
-        from nomad_chemical_energy.parsers.ce_wannsee_parser import MPTParser
-
-        return MPTParser(**self.dict())
-
-
 class CEWannseeCORParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_wannsee_parser import CORParser
@@ -230,12 +223,6 @@ ce_nome_massspectrometry_parser = CENOMEMassspectrometryParserEntryPoint(
     description='Parser for CE-NOME Massspectrometry files',
     mainfile_name_re=r'^(.*(\.txt))',
     mainfile_contents_re='^.*Spectra International Data File',
-)
-
-ce_wannsee_mpt_parser = CEWannseeMPTParserEntryPoint(
-    name='CEWannseeMPTParser',
-    description='Parser for Wannsee mpt files',
-    mainfile_name_re=r'^.*\.mpt$',
 )
 
 ce_wannsee_cor_parser = CEWannseeCORParserEntryPoint(
