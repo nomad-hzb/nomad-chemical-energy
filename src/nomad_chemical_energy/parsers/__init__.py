@@ -8,6 +8,27 @@ class CENECCxlsxParserEntryPoint(ParserEntryPoint):
         return NECCXlsxParser(**self.dict())
 
 
+class CENESDBioLogicParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDBioLogicParser
+
+        return CENESDBioLogicParser(**self.dict())
+
+
+class CENESDLabviewParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDLabviewParser
+
+        return CENESDLabviewParser(**self.dict())
+
+
+class CENESDPalmSensParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDPalmSensParser
+
+        return CENESDPalmSensParser(**self.dict())
+
+
 class CENOMEGamryParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import GamryParser
@@ -48,13 +69,6 @@ class CENOMEMassspectrometryParserEntryPoint(ParserEntryPoint):
         from nomad_chemical_energy.parsers.ce_nome_parser import MassspectrometryParser
 
         return MassspectrometryParser(**self.dict())
-
-
-class CEWannseeMPTParserEntryPoint(ParserEntryPoint):
-    def load(self):
-        from nomad_chemical_energy.parsers.ce_wannsee_parser import MPTParser
-
-        return MPTParser(**self.dict())
 
 
 class CEWannseeCORParserEntryPoint(ParserEntryPoint):
@@ -149,6 +163,27 @@ ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     mainfile_mime_re='(application|text)/.*',
 )
 
+ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
+    name='CENESDBioLogicParser',
+    description='Parser for CENESD csv and mpr files of BioLogic potentiostats',
+    # mainfile_name_re=r'^.*\.mpr',
+    mainfile_name_re=r'somefilename.mpr',
+)
+
+ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
+    name='CENESDLabviewParser',
+    description='Parser for CENESD LabVIEW Electrolyser files',
+    mainfile_name_re=r'^.*\.tdms',
+    mainfile_binary_header_re=r"[\s\S]*TDSm[\s\S]*'Measurements'[\s\S]*'Informations'[\s\S]*",
+)
+
+ce_nesd_palmsens_parser = CENESDPalmSensParserEntryPoint(
+    name='CENESDPalmSensParser',
+    description='Parser for CENESD csv files of PalmSens potentiostats',
+    # mainfile_name_re=r'^.*\.csv',
+    mainfile_name_re=r'somefilename.csv',
+)
+
 ce_nome_gamry_parser = CENOMEGamryParserEntryPoint(
     name='CENOMEGamryParser',
     description='Parser for CENOME Gamry files',
@@ -190,12 +225,6 @@ ce_nome_massspectrometry_parser = CENOMEMassspectrometryParserEntryPoint(
     mainfile_contents_re='^.*Spectra International Data File',
 )
 
-ce_wannsee_mpt_parser = CEWannseeMPTParserEntryPoint(
-    name='CEWannseeMPTParser',
-    description='Parser for Wannsee mpt files',
-    mainfile_name_re=r'^.*\.mpt$',
-)
-
 ce_wannsee_cor_parser = CEWannseeCORParserEntryPoint(
     name='CEWannseeCORParser',
     description='Parser for Wannsee cor files',
@@ -223,7 +252,7 @@ dlr_ec_cp_parser = DLRECCPParserEntryPoint(
 dlr_ec_eis_parser = DLRECEISParserEntryPoint(
     name='DLRECEISParser',
     description='Parser for DLR EIS files',
-    mainfile_contents_re="""^.*\nIndex\tFrequency\s\(Hz\)\tZ'\s\(Ω\)\s-Z''\s\(Ω\)\tZ\s\(Ω\)\s-Phase\s\(°\)\tTime\s\(s\)""",
+    mainfile_contents_re=r"^.*\nIndex\tFrequency\s\(Hz\)\tZ'\s\(Ω\)\s-Z''\s\(Ω\)\tZ\s\(Ω\)\s-Phase\s\(°\)\tTime\s\(s\)",
 )
 
 hzb_catlab_parser = CatlabParserEntryPoint(

@@ -462,7 +462,7 @@ def get_channels(data_root: ElTree.Element) -> np.array:
     :return: array that contains the counts
     :rtype: np.array
     """
-    search_str = "./ClassInstance/[@Type='TRTSpectrum']" '/Channels'
+    search_str = "./ClassInstance/[@Type='TRTSpectrum']/Channels"
     channel_node = data_root.find(search_str)
     spectrum = channel_node.text.split(',')  # list containing the counts
     return np.array(
@@ -480,7 +480,7 @@ def is_results_in_file(data_root: ElTree.Element) -> bool:
     :rtype: bool
     """
     search_str = (
-        "./ClassInstance/[@Type='TRTSpectrum']" "/ClassInstance/[@Type='TRTResult']"
+        "./ClassInstance/[@Type='TRTSpectrum']/ClassInstance/[@Type='TRTResult']"
     )
     if len(data_root.findall(search_str)) > 0:
         return True

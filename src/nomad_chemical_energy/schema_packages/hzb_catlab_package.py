@@ -19,9 +19,9 @@
 
 from baseclasses import BaseMeasurement
 from baseclasses.catalysis import CatalysisLibrary, CatalysisSample, CatalysisXYSample
+from baseclasses.helper.utilities import export_lab_id
 from baseclasses.vapour_based_deposition import MultiTargetSputtering, PECVDeposition
 from nomad.datamodel.data import EntryData
-from nomad.datamodel.results import ELN, Results
 
 # from nomad.units import ureg
 from nomad.metainfo import Quantity, SchemaPackage, Section
@@ -30,16 +30,6 @@ from nomad.metainfo import Quantity, SchemaPackage, Section
 from unidecode import unidecode
 
 m_package = SchemaPackage()
-
-
-def export_lab_id(archive, lab_id):
-    if not archive.results:
-        archive.results = Results(eln=ELN())
-    if not archive.results.eln:
-        archive.results.eln = ELN()
-    if lab_id:
-        archive.results.eln.lab_ids = []
-        archive.results.eln.lab_ids = [lab_id, lab_id[:4]]
 
 
 def correct_lab_id(lab_id):

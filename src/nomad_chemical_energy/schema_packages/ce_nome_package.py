@@ -522,7 +522,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                         if not edit
                         else row[0]
                     )
-                    file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_sample_{idx}.archive.json"
+                    file_name = f'{archive.metadata.mainfile.replace(".archive.json", "")}_sample_{idx}.archive.json'
                     create_archive(ce_nome_sample, archive, file_name, overwrite=edit)
                     samples.at[idx, 'id'] = ce_nome_sample.lab_id
 
@@ -545,7 +545,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                         if not edit
                         else row[0]
                     )
-                    file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_env_{idx}.archive.json"
+                    file_name = f'{archive.metadata.mainfile.replace(".archive.json", "")}_env_{idx}.archive.json'
                     create_archive(ce_nome_envs, archive, file_name, overwrite=edit)
                     envs.at[idx, 'id'] = ce_nome_envs.lab_id
 
@@ -569,7 +569,7 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
                         if not edit
                         else row[0]
                     )
-                    file_name = f"{archive.metadata.mainfile.replace('.archive.json', '')}_setup_{idx}.archive.json"
+                    file_name = f'{archive.metadata.mainfile.replace(".archive.json", "")}_setup_{idx}.archive.json'
                     create_archive(ce_nome_setup, archive, file_name, overwrite=edit)
                     setups.at[idx, 'id'] = ce_nome_setup.lab_id
 
