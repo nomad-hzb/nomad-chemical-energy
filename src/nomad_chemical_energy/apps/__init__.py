@@ -16,6 +16,9 @@ from nomad.config.models.ui import (
     RowSelection,
 )
 
+from nomad_chemical_energy.apps.catlab_combinatorial_app import catlab_combinatorial_app
+from nomad_chemical_energy.apps.necc_find_app import necc_find_experiments_app
+
 schema_name = (
     'nomad_chemical_energy.schema_packages.ce_nome_package.CE_NOME_VoilaNotebook'
 )
@@ -103,8 +106,6 @@ nome_documentation_app = AppEntryPoint(
     ),
 )
 
-from nomad_chemical_energy.apps.catlab_combinatorial_app import catlab_combinatorial_app
-from nomad_chemical_energy.apps.necc_find_app import necc_find_experiments_app
 
 catlab_combinatorial_library_app = AppEntryPoint(
     name='Compinatorial Samples',
