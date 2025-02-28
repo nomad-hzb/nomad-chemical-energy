@@ -726,11 +726,17 @@ class CE_NESD_GEIS(
                     y=cycle.data.z_modulus,
                     mode='lines',
                     hoverinfo='x+y+name',
+                    yaxis='y1',
                 )
             )
             fig.add_traces(
                 go.Scatter(
-                    name=f'Phase(Z) {idx}', x=cycle.data.frequency, y=cycle.data.z_angle
+                    name=f'Phase(Z) {idx}',
+                    x=cycle.data.frequency,
+                    y=cycle.data.z_angle,
+                    mode='lines',
+                    hoverinfo='x+y+name',
+                    yaxis='y2',
                 )
             )
         fig.update_layout(
@@ -741,7 +747,16 @@ class CE_NESD_GEIS(
                 'type': 'log',
                 'title': f'Frequency ({self.measurements[0].data.frequency.units:~P})',
             },
-            yaxis={'fixedrange': False},
+            yaxis={
+                'title': f'|Z| ({self.measurements[0].data.z_modulus.units:~P})',
+                'fixedrange': False,
+            },
+            yaxis2={
+                'title': f'Phase ({self.measurements[0].data.z_angle.units:~P})',
+                'overlaying': 'y',
+                'side': 'right',
+                'fixedrange': False,
+            },
             hovermode='closest',
         )
         return fig
@@ -1093,11 +1108,17 @@ class CE_NESD_PEIS(
                     y=cycle.data.z_modulus,
                     mode='lines',
                     hoverinfo='x+y+name',
+                    yaxis='y1',
                 )
             )
             fig.add_traces(
                 go.Scatter(
-                    name=f'Phase(Z) {idx}', x=cycle.data.frequency, y=cycle.data.z_angle
+                    name=f'Phase(Z) {idx}',
+                    x=cycle.data.frequency,
+                    y=cycle.data.z_angle,
+                    mode='lines',
+                    hoverinfo='x+y+name',
+                    yaxis='y2',
                 )
             )
         fig.update_layout(
@@ -1108,7 +1129,16 @@ class CE_NESD_PEIS(
                 'type': 'log',
                 'title': f'Frequency ({self.measurements[0].data.frequency.units:~P})',
             },
-            yaxis={'fixedrange': False},
+            yaxis={
+                'title': f'|Z| ({self.measurements[0].data.z_modulus.units:~P})',
+                'fixedrange': False,
+            },
+            yaxis2={
+                'title': f'Phase ({self.measurements[0].data.z_angle.units:~P})',
+                'overlaying': 'y',
+                'side': 'right',
+                'fixedrange': False,
+            },
             hovermode='closest',
         )
         return fig
