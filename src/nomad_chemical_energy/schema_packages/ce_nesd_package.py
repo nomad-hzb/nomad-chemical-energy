@@ -86,11 +86,6 @@ class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
 # %% ####################### Generic Entries
 
 
-class CE_NESD_Electrolyser_Measurement(BaseMeasurement, PlotSection, EntryData):
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = 'electrolyser'
-
-
 class CE_NESD_Measurement(BaseMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -109,10 +104,10 @@ class CE_NESD_Measurement(BaseMeasurement, EntryData):
 
 # %% ####################### Measurements
 
+nesd_sample_label = 'electrolyser'
 
-class CE_NESD_Chronoamperometry(
-    CE_NESD_Electrolyser_Measurement, Chronoamperometry, EntryData
-):
+
+class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -139,6 +134,8 @@ class CE_NESD_Chronoamperometry(
             ),
         ),
     )
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def make_current_plot(self):
         if self.current is None:
@@ -236,9 +233,7 @@ class CE_NESD_Chronoamperometry(
         ]
 
 
-class CE_NESD_Chronopotentiometry(
-    CE_NESD_Electrolyser_Measurement, Chronopotentiometry, EntryData
-):
+class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -266,6 +261,8 @@ class CE_NESD_Chronopotentiometry(
             ),
         ),
     )
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def make_voltage_plot(self):
         if self.voltage is None:
@@ -329,9 +326,7 @@ class CE_NESD_Chronopotentiometry(
         ]
 
 
-class CE_NESD_ConstantCurrentMode(
-    CE_NESD_Electrolyser_Measurement, Chronopotentiometry, EntryData
-):
+class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -359,6 +354,8 @@ class CE_NESD_ConstantCurrentMode(
             ),
         ),
     )
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def normalize(self, archive, logger):
         self.method = 'Constant Current'
@@ -391,9 +388,7 @@ class CE_NESD_ConstantCurrentMode(
         super().normalize(archive, logger)
 
 
-class CE_NESD_ConstantVoltageMode(
-    CE_NESD_Electrolyser_Measurement, Chronoamperometry, EntryData
-):
+class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -421,6 +416,8 @@ class CE_NESD_ConstantVoltageMode(
             ),
         ),
     )
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def normalize(self, archive, logger):
         self.method = 'Constant Voltage'
@@ -453,9 +450,7 @@ class CE_NESD_ConstantVoltageMode(
         super().normalize(archive, logger)
 
 
-class CE_NESD_CyclicVoltammetry(
-    CE_NESD_Electrolyser_Measurement, CyclicVoltammetry, EntryData
-):
+class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -486,6 +481,8 @@ class CE_NESD_CyclicVoltammetry(
             ),
         ),
     )
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def make_current_density_plot(self):
         fig = go.Figure().update_layout(title_text='Current Density over Voltage RHE')
@@ -589,7 +586,7 @@ class CE_NESD_CyclicVoltammetry(
 
 
 class CE_NESD_ElectrolyserPerformanceEvaluation(
-    CE_NESD_Electrolyser_Measurement, ElectrolyserPerformanceEvaluation, EntryData
+    ElectrolyserPerformanceEvaluation, EntryData, PlotSection
 ):
     m_def = Section(
         a_eln=dict(
@@ -605,6 +602,9 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
             ),
         ),
     )
+
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -647,9 +647,7 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
 
 
 class CE_NESD_GEIS(
-    CE_NESD_Electrolyser_Measurement,
-    ElectrochemicalImpedanceSpectroscopyMultiple,
-    EntryData,
+    ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection
 ):
     m_def = Section(
         a_eln=dict(
@@ -675,6 +673,9 @@ class CE_NESD_GEIS(
             ),
         ),
     )
+
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def make_nyquist_plot(self):
         fig = go.Figure().update_layout(
@@ -802,9 +803,7 @@ class CE_NESD_GEIS(
         ]
 
 
-class CE_NESD_LinearSweepVoltammetry(
-    CE_NESD_Electrolyser_Measurement, LinearSweepVoltammetry, EntryData
-):
+class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -832,6 +831,9 @@ class CE_NESD_LinearSweepVoltammetry(
             ),
         ),
     )
+
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def make_current_density_plot(self):
         if self.current_density is None or self.voltage_rhe_compensated is None:
@@ -934,9 +936,7 @@ class CE_NESD_LinearSweepVoltammetry(
         ]
 
 
-class CE_NESD_OpenCircuitVoltage(
-    CE_NESD_Electrolyser_Measurement, OpenCircuitVoltage, EntryData
-):
+class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -965,6 +965,9 @@ class CE_NESD_OpenCircuitVoltage(
             ),
         ),
     )
+
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def make_voltage_plot(self):
         if self.voltage is None:
@@ -1029,9 +1032,7 @@ class CE_NESD_OpenCircuitVoltage(
 
 
 class CE_NESD_PEIS(
-    CE_NESD_Electrolyser_Measurement,
-    ElectrochemicalImpedanceSpectroscopyMultiple,
-    EntryData,
+    ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection
 ):
     m_def = Section(
         a_eln=dict(
@@ -1057,6 +1058,9 @@ class CE_NESD_PEIS(
             ),
         ),
     )
+
+    samples = BaseMeasurement.samples.m_copy()
+    samples.label = nesd_sample_label
 
     def make_nyquist_plot(self):
         fig = go.Figure().update_layout(
