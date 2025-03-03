@@ -120,6 +120,70 @@ def get_archive(file_base, monkeypatch):
     return measurement_archive
 
 
+def test_biologic_eclab_constC_parser(monkeypatch):
+    file = 'CstC_nesd.mpr'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.properties
+    assert archive.data.properties.lower_limit_potential.magnitude == -2.5
+    assert round(archive.data.voltage[0].magnitude, 4) == 0.0028
+    assert (
+        round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
+    )
+
+
+def test_biologic_eclab_constV_parser(monkeypatch):
+    file = 'CstV_nesd.mpr'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.properties
+    assert archive.data.properties.sample_period.magnitude == 5
+    assert round(archive.data.voltage[0].magnitude, 5) == 0.00012
+    assert (
+        round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
+    )
+
+
+def test_biologic_eclab_GEIS_parser(monkeypatch):
+    file = 'GEIS_nesd.mpr'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.description == 'abc'
+    assert archive.data.measurements
+    assert len(archive.data.measurements) == 3
+    assert archive.data.measurements[0].initial_frequency.magnitude == 1000
+    assert round(archive.data.measurements[0].data.z_real[0].magnitude, 3) == 1488.236
+    assert (
+        round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
+    )
+
+
+def test_biologic_eclab_LSV_parser(monkeypatch):
+    file = 'LSV_nesd.mpr'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.properties
+    assert archive.data.properties.final_potential.magnitude == 1
+    assert round(archive.data.voltage[0].magnitude, 4) == -0.0001
+    assert (
+        round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
+    )
+
+
+def test_biologic_eclab_PEIS_parser(monkeypatch):
+    file = 'PEIS_nesd.mpr'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.description == 'abc'
+    assert archive.data.measurements
+    assert len(archive.data.measurements) == 3
+    assert archive.data.measurements[0].dc_voltage.magnitude == 0.25
+    assert round(archive.data.measurements[0].data.z_real[0].magnitude, 3) == 1489.251
+    assert (
+        round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
+    )
+
+
 def test_gamry_EIS_parser(monkeypatch):
     file = 'EISPOT.DTA'
     archive = get_archive(file, monkeypatch)
