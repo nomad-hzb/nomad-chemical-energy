@@ -34,7 +34,7 @@ dependencies = [
     'nomad-measurements',
     'httpx==0.27.2',
     'nptdms',
-    'yadg @ git+https://github.com/carla-terboven/yadg.git',]
+    'yadg @ git+https://github.com/carla-terboven/yadg.git@extract-from-raw-bytes',]
 
 [project.urls]
 Repository = "https://github.com/nomad-hzb/nomad-chemical-energy"

@@ -27,13 +27,9 @@ import yadg
 
 
 def get_header_and_data(file):
-    file_content = file.read()
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.mpr') as temp_file:
-        temp_file.write(file_content)
-        temp_file_path = temp_file.name
-
     try:
-        data_tree = yadg.extractors.extract(filetype='eclab.mpr', path=temp_file_path)
+        file_content = file.read()
+        data_tree = yadg.extractors.extract(filetype='eclab.mpr', path=file_content, timezone='Europe/Berlin',  extract_func='extract_raw_content',)
     except Exception as e:
         print(f'Error during extraction: {e}')
         return None, None
