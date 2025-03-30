@@ -97,7 +97,7 @@ class CatLab_XYSample(CatalysisXYSample, EntryData):
 class CatLab_Sample(CatalysisSample, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['users', 'elemental_composition', 'components'],
+            hide=['users'],
             properties=dict(
                 order=[
                     'name',
@@ -130,7 +130,7 @@ class CatLab_Sample(CatalysisSample, EntryData):
 class CatLab_Library(CatalysisLibrary, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['users', 'elemental_composition', 'components'],
+            hide=['users'],
             properties=dict(
                 order=[
                     'name',
