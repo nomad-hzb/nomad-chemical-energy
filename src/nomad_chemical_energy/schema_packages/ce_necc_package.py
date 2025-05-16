@@ -16,42 +16,42 @@
 # limitations under the License.
 #
 
-import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
 import json
 import os
 
-from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
-    make_bode_plot,
-    make_current_plot,
-    make_current_density_over_voltage_rhe_cv_plot,
-    make_current_density_over_voltage_rhe_plot,
-    make_current_density_plot,
-    make_current_over_voltage_cv_plot,
-    make_current_over_voltage_plot,
-    make_nyquist_plot,
-    make_voltage_plot,
-)
-
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
+    CENECCElectrode,
+    CENECCElectrodeRecipe,
     Chronoamperometry,
     Chronopotentiometry,
     CyclicVoltammetry,
     ElectrochemicalImpedanceSpectroscopyMultiple,
-    LinearSweepVoltammetry,
-    OpenCircuitVoltage,
-    CENECCElectrode,
-    CENECCElectrodeRecipe,
     GasChromatographyMeasurement,
+    LinearSweepVoltammetry,
     NECCExperimentalProperties,
+    OpenCircuitVoltage,
     PotentiometryGasChromatographyMeasurement,
     ThermocoupleMeasurement,
 )
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 from nomad.metainfo import Quantity, SchemaPackage, Section
+
+from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
+    make_bode_plot,
+    make_current_density_over_voltage_rhe_cv_plot,
+    make_current_density_over_voltage_rhe_plot,
+    make_current_density_plot,
+    make_current_over_voltage_cv_plot,
+    make_current_over_voltage_plot,
+    make_current_plot,
+    make_nyquist_plot,
+    make_voltage_plot,
+)
 
 m_package = SchemaPackage()
 
@@ -117,6 +117,7 @@ class CE_NECC_Measurement(BaseMeasurement, EntryData):
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'),
     )
+
 
 # %%####################################### Measurements
 
@@ -915,7 +916,9 @@ class CE_NECC_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                             'sample_area'
                         )
         super().normalize(archive, logger)
-        fig1 = make_current_density_over_voltage_rhe_plot(self.current_density, self.voltage_rhe_compensated)
+        fig1 = make_current_density_over_voltage_rhe_plot(
+            self.current_density, self.voltage_rhe_compensated
+        )
         fig2 = make_current_over_voltage_plot(self.current, self.voltage)
         self.figures = [
             PlotlyFigure(
@@ -1058,5 +1061,6 @@ class CE_NECC_PEIS(
             PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
         ]
         super().normalize(archive, logger)
+
 
 m_package.__init_metainfo__()

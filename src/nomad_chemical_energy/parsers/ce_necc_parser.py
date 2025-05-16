@@ -40,6 +40,7 @@ from nomad.metainfo import (
 )
 from nomad.parsing import MatchingParser
 
+from nomad_chemical_energy.parsers.ce_nesd_parser import ParsedBioLogicFile
 from nomad_chemical_energy.schema_packages.ce_necc_package import (
     CE_NECC_EC_GC,
     CE_NECC_GEIS,
@@ -56,7 +57,7 @@ from nomad_chemical_energy.schema_packages.ce_necc_package import (
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
-from nomad_chemical_energy.parsers.ce_nesd_parser import ParsedBioLogicFile
+
 
 class ParsedExcelFile(EntryData):
     activity = Quantity(

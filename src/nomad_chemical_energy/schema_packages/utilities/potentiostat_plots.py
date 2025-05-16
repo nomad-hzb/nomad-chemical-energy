@@ -11,9 +11,9 @@ def make_bode_plot(measurements):
         if cycle.data is None:
             return fig
         if (
-                cycle.data.frequency is None
-                or cycle.data.z_modulus is None
-                or cycle.data.z_angle is None
+            cycle.data.frequency is None
+            or cycle.data.z_modulus is None
+            or cycle.data.z_angle is None
         ):
             return fig
         fig.add_traces(
@@ -120,7 +120,10 @@ def make_current_density_plot(current_density, time):
     )
     return fig
 
-def make_current_density_over_voltage_rhe_plot(current_density, voltage_rhe_compensated):
+
+def make_current_density_over_voltage_rhe_plot(
+    current_density, voltage_rhe_compensated
+):
     if current_density is None or voltage_rhe_compensated is None:
         return go.Figure().update_layout(
             title_text='Current Density over Voltage RHE',
@@ -181,6 +184,7 @@ def make_current_density_over_voltage_rhe_cv_plot(cycles):
         hovermode='x unified',
     )
     return fig
+
 
 def make_current_over_voltage_cv_plot(cycles):
     fig = go.Figure().update_layout(

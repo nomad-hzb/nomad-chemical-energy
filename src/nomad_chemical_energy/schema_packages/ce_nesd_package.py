@@ -20,17 +20,6 @@ import json
 import os
 
 import numpy as np
-from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
-    make_bode_plot,
-    make_current_plot,
-    make_current_density_over_voltage_rhe_cv_plot,
-    make_current_density_over_voltage_rhe_plot,
-    make_current_density_plot,
-    make_current_over_voltage_cv_plot,
-    make_current_over_voltage_plot,
-    make_nyquist_plot,
-    make_voltage_plot,
-)
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
     Chronoamperometry,
@@ -59,6 +48,17 @@ from nomad.metainfo import Quantity, SchemaPackage, Section
 
 from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import (
     get_info_and_data,
+)
+from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
+    make_bode_plot,
+    make_current_density_over_voltage_rhe_cv_plot,
+    make_current_density_over_voltage_rhe_plot,
+    make_current_density_plot,
+    make_current_over_voltage_cv_plot,
+    make_current_over_voltage_plot,
+    make_current_plot,
+    make_nyquist_plot,
+    make_voltage_plot,
 )
 
 m_package = SchemaPackage()
@@ -634,7 +634,9 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                             'sample_area'
                         )
         super().normalize(archive, logger)
-        fig1 = make_current_density_over_voltage_rhe_plot(self.current_density, self.voltage_rhe_compensated)
+        fig1 = make_current_density_over_voltage_rhe_plot(
+            self.current_density, self.voltage_rhe_compensated
+        )
         fig2 = make_current_over_voltage_plot(self.current, self.voltage)
         self.figures = [
             PlotlyFigure(
