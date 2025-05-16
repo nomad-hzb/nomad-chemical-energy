@@ -136,10 +136,13 @@ hzb_general_process_package = "nomad_chemical_energy.schema_packages:hzb_general
 tfc_package = "nomad_chemical_energy.schema_packages:tfc_schema_package"
 
 hzb_catlab_parser = "nomad_chemical_energy.parsers:hzb_catlab_parser"
-ce_necc_xlsx_parser = "nomad_chemical_energy.parsers:ce_necc_xlsx_parser"
+
 ce_nesd_biologic_parser = "nomad_chemical_energy.parsers:ce_nesd_biologic_parser"
 ce_nesd_labview_parser = "nomad_chemical_energy.parsers:ce_nesd_labview_parser"
 ce_nesd_palmsens_parser = "nomad_chemical_energy.parsers:ce_nesd_palmsens_parser"
+
+ce_necc_xlsx_parser = "nomad_chemical_energy.parsers:ce_necc_xlsx_parser"
+ce_necc_biologic_parser = "nomad_chemical_energy.parsers:ce_necc_biologic_parser"
 
 ce_nome_gamry_parser = "nomad_chemical_energy.parsers:ce_nome_gamry_parser"
 ce_nome_csv_parser = "nomad_chemical_energy.parsers:ce_nome_csv_parser"

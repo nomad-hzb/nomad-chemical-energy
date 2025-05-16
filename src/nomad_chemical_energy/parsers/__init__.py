@@ -8,6 +8,13 @@ class CENECCxlsxParserEntryPoint(ParserEntryPoint):
         return NECCXlsxParser(**self.dict())
 
 
+class CENECCBioLogicParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_necc_parser import CENECCBioLogicParser
+
+        return CENECCBioLogicParser(**self.dict())
+
+
 class CENESDBioLogicParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDBioLogicParser
@@ -161,6 +168,12 @@ ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     description='Parser for CENECC xls files',
     mainfile_name_re=r'^.*\.xlsx$',
     mainfile_mime_re='(application|text)/.*',
+)
+
+ce_necc_biologic_parser = CENECCBioLogicParserEntryPoint(
+    name='CENECCBioLogicParser',
+    description='Parser for CENECC mpr files of BioLogic/EC-Lab potentiostats',
+    mainfile_name_re=r'^.*\.mpr',
 )
 
 ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
