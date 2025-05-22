@@ -32,6 +32,7 @@ dependencies = [
     "nomad-lab>=1.3.16rc3",
     'nomad-baseclasses @ git+https://github.com/nomad-hzb/nomad-baseclasses.git',
     'nomad-measurements',
+    'nomad-material-processing',
     'httpx==0.27.2',
     'nptdms',
     'yadg @ git+https://github.com/carla-terboven/yadg.git',]
