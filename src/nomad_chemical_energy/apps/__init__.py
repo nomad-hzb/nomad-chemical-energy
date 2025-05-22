@@ -9,6 +9,7 @@ from nomad.config.models.ui import (
     Filters,
     Format,
     ModeEnum,
+    RowActionNorth,
     RowActions,
     RowActionURL,
     RowDetails,
@@ -93,6 +94,12 @@ nome_documentation_app = AppEntryPoint(
         rows=Rows(
             actions=RowActions(
                 items=[
+                    RowActionNorth(
+                        filepath=f'data.notebook_file#{schema_name}',
+                        tool_name='voila',
+                        description='Launch voila tool in new tab',
+                        icon='rocket_launch',
+                    ),
                     RowActionURL(
                         path=f'data.file_uri#{schema_name}',
                         description='View in file browser',
