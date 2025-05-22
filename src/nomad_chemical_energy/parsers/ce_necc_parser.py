@@ -178,6 +178,8 @@ class CENECCBioLogicParser(MatchingParser):
                 entry = CE_NECC_OpenCircuitVoltage(data_file=file)
             case 'PEIS':
                 entry = CE_NECC_PEIS(data_file=file)
+            case 'ZIR':
+                entry = CE_NECC_PEIS(data_file=file)
             case _:
                 entry = CE_NECC_Measurement(data_file=file)
 
