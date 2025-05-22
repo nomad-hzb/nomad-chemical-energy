@@ -476,6 +476,16 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 # %% ####################### Potentiostat Measurements
 
 
+def get_station_from_biologic_metadata(metadata):
+    device_number = metadata.get('log', {}).get('device_sn')
+    station_dict = {
+        '0694': 'B507_SP200',
+        '1284': 'B508_SP200',
+        '1285': 'B508_SP240'
+    }
+    return station_dict.get(device_number)
+
+
 class CE_NECC_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
@@ -519,6 +529,7 @@ class CE_NECC_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
                     )
 
                     metadata, data = get_header_and_data(f)
+                    self.station = get_station_from_biologic_metadata(metadata)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -584,6 +595,7 @@ class CE_NECC_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
                     )
 
                     metadata, data = get_header_and_data(f)
+                    self.station = get_station_from_biologic_metadata(metadata)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -646,6 +658,7 @@ class CE_NECC_ConstantCurrentMode(Chronopotentiometry, EntryData, PlotSection):
                     )
 
                     metadata, data = get_header_and_data(f)
+                    self.station = get_station_from_biologic_metadata(metadata)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -706,6 +719,7 @@ class CE_NECC_ConstantVoltageMode(Chronoamperometry, EntryData, PlotSection):
                     )
 
                     metadata, data = get_header_and_data(f)
+                    self.station = get_station_from_biologic_metadata(metadata)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -768,6 +782,7 @@ class CE_NECC_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
                     )
 
                     metadata, data = get_header_and_data(f)
+                    self.station = get_station_from_biologic_metadata(metadata)
                     get_voltammetry_archive(data, metadata, self, multiple=True)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -837,6 +852,7 @@ class CE_NECC_GEIS(
                     )
 
                     metadata, data = get_header_and_data(f)
+                    self.station = get_station_from_biologic_metadata(metadata)
                     get_meta_data(metadata.get('settings', {}), self)
                     ole_timestamp = metadata.get('log', {}).get('ole_timestamp', 0)
                     start_time_offset = data.get('time', np.array([0]))[0].item()
@@ -905,6 +921,7 @@ class CE_NECC_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                     )
 
                     metadata, data = get_header_and_data(f)
+                    self.station = get_station_from_biologic_metadata(metadata)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -976,6 +993,7 @@ class CE_NECC_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
                     )
 
                     metadata, data = get_header_and_data(f)
+                    self.station = get_station_from_biologic_metadata(metadata)
                     get_voltammetry_archive(data, metadata, self)
                     if not self.setup_parameters:
                         self.setup_parameters = get_biologic_properties(
@@ -1038,6 +1056,7 @@ class CE_NECC_PEIS(
                     )
 
                     metadata, data = get_header_and_data(f)
+                    self.station = get_station_from_biologic_metadata(metadata)
                     get_meta_data(metadata.get('settings', {}), self)
                     ole_timestamp = metadata.get('log', {}).get('ole_timestamp', 0)
                     start_time_offset = data.get('time', np.array([0]))[0].item()
