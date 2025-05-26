@@ -164,6 +164,6 @@ tfc_xrd_parser = "nomad_chemical_energy.parsers:tfc_xrd_parser"
 
 necc_find_app = "nomad_chemical_energy.apps:necc_find_app"
 necc_compare_app = "nomad_chemical_energy.apps:necc_compare_app"
-nome_oer_cp_app = "nomad_chemical_energy.apps:nome_oer_cp_app"
 nome_documentation_app = "nomad_chemical_energy.apps:nome_documentation_app"
+nome_oer_cp_analysis_app = "nomad_chemical_energy.apps:nome_oer_cp_analysis_app"
 catlab_combinatorial_library_app = "nomad_chemical_energy.apps:catlab_combinatorial_library_app"
