@@ -660,6 +660,41 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
         super().normalize(archive, logger)
 
 
+class Bessy2_KMC3_XASFluorescence(XASFluorescence, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(order=['name', 'data_file', 'samples']),
+        )
+    )
+
+    def normalize(self, archive, logger):
+        if self.data_file:
+            if os.path.splitext(self.data_file)[-1] == '.dat':
+                with archive.m_context.raw_file(self.data_file, 'rt') as f:
+                    from nomad_chemical_energy.schema_packages.file_parser.xas_parser import (
+                        get_xas_data,
+                    )
+                    prefixes = ['fluo', 'icr', 'ocr', 'tlt', 'lt', 'rt']
+                    header = ['energy', 'k00', 'k0', 'k1', 'k3'] + [f'{p}{i}' for p in prefixes for i in range(1, 14)]
+                    data, dateline = get_xas_data(f, header)
+                from baseclasses.helper.archive_builder.xas_archive import (
+                    get_xas_archive,
+                )
+
+                get_xas_archive(data, dateline, self)
+
+        super().normalize(archive, logger)
+
+
 class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
     ElectrochemicalImpedanceSpectroscopy, EntryData
 ):
