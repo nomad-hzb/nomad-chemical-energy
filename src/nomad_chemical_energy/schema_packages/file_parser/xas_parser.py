@@ -19,8 +19,12 @@ def getHeader(file_data):
     return header, date_line.strip()
 
 
-def get_xas_data(file_obj):
+def get_xas_data(file_obj, header=None, dateline=None):
     file_data = file_obj.read()
-    header, dateline = getHeader(file_data)
-    data = pd.read_csv(StringIO(file_data), header=header, sep='\t')
+    if header is None:
+        header, dateline = getHeader(file_data)
+        data = pd.read_csv(StringIO(file_data), header=header, sep='\t')
+    else:
+        file_data = file_data.replace('\t\n', '\n')
+        data = pd.read_csv(StringIO(file_data), names=header, sep='\t')
     return data, dateline
