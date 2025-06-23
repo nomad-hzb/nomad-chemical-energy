@@ -235,7 +235,7 @@ kmc3_xas_parser = CENOMEKMC3XASParserEntryPoint(
     description='Parser for CENOME xas kmc3 files',
     mainfile_name_re=r'^(.*\.\d{3})$',
     mainfile_contents_re=r'[\d\.\-eE\t\n]+',
-    #mainfile_mime_re='(text/plain)/.*',
+    mainfile_mime_re=r'(text\/plain).*',
 )
 
 ce_nome_tif_parser = CENOMETIFParserEntryPoint(
