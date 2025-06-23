@@ -357,7 +357,6 @@ class MassspectrometryParser(MatchingParser):
 
 class XASParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-
         measurement_base, measurement_name = os.path.split(mainfile)
         archive.metadata.entry_name = measurement_name
 
@@ -402,7 +401,7 @@ class KMC3XASParser(MatchingParser):
         file = mainfile.split('raw/')[-1]
 
         entry = Bessy2_KMC3_XASFluorescence(data_file=file)
-        sample_id = file.split('.')[0][:8]  #TODO
+        sample_id = file.split('.')[0][:8]  # TODO
         set_sample_reference(archive, entry, sample_id)
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         entry.name = file.split('.')[0]
