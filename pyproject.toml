@@ -125,6 +125,7 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [project.entry-points.'nomad.plugin']
+ce_amcc_package = "nomad_chemical_energy.schema_packages:ce_amcc_package"
 ce_nome_package = "nomad_chemical_energy.schema_packages:ce_nome_package"
 ce_necc_package = "nomad_chemical_energy.schema_packages:ce_necc_package"
 ce_nesd_package = "nomad_chemical_energy.schema_packages:ce_nesd_package"
@@ -137,6 +138,8 @@ hzb_general_process_package = "nomad_chemical_energy.schema_packages:hzb_general
 tfc_package = "nomad_chemical_energy.schema_packages:tfc_schema_package"
 
 hzb_catlab_parser = "nomad_chemical_energy.parsers:hzb_catlab_parser"
+
+ce_amcc_biologic_parser = "nomad_chemical_energy.parsers:ce_amcc_biologic_parser"
 
 ce_nesd_biologic_parser = "nomad_chemical_energy.parsers:ce_nesd_biologic_parser"
 ce_nesd_labview_parser = "nomad_chemical_energy.parsers:ce_nesd_labview_parser"

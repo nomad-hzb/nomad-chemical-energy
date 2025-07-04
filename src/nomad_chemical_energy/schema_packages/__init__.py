@@ -1,6 +1,13 @@
 from nomad.config.models.plugins import SchemaPackageEntryPoint
 
 
+class CEAMCCPackageEntryPoint(SchemaPackageEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.schema_packages.ce_amcc_package import m_package
+
+        return m_package
+
+
 class CENOMEPackageEntryPoint(SchemaPackageEntryPoint):
     def load(self):
         from nomad_chemical_energy.schema_packages.ce_nome_package import m_package
@@ -78,6 +85,11 @@ class TFCPackageEntryPoint(SchemaPackageEntryPoint):
 
         return m_package
 
+
+ce_amcc_package = CEAMCCPackageEntryPoint(
+    name='CE_AMCC',
+    description='Package for HZB group CE-AMCC',
+)
 
 ce_nome_package = CENOMEPackageEntryPoint(
     name='CE_NOME',
