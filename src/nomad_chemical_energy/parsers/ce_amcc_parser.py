@@ -50,6 +50,7 @@ from nomad_chemical_energy.schema_packages.ce_amcc_package import (
     CE_AMCC_LinearSweepVoltammetry,
     CE_AMCC_Measurement,
     CE_AMCC_OpenCircuitVoltage,
+    CE_AMCC_ZIR,
 )
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
@@ -84,7 +85,7 @@ class CEAMCCBioLogicParser(MatchingParser):
         with open(filename, 'rb') as f:
             metadata, _ = get_header_and_data(f)
         device_number = metadata.get('log', {}).get('device_sn')
-        if device_number in ['1581', '1659']: #TODO change to niklas device number
+        if device_number in ['0315']:
             return True
         return False
 
@@ -116,6 +117,8 @@ class CEAMCCBioLogicParser(MatchingParser):
                 entry = CE_AMCC_OpenCircuitVoltage(data_file=file)
             case 'PEIS':
                 entry = CE_AMCC_PEIS(data_file=file)
+            case 'ZIR':
+                entry = CE_AMCC_ZIR(data_file=file)
             case _:
                 entry = CE_AMCC_Measurement(data_file=file)
 

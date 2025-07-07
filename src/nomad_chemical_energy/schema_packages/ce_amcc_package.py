@@ -22,6 +22,7 @@ import os
 import numpy as np
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
+    CENOMESample,
     Chronoamperometry,
     Chronopotentiometry,
     CyclicVoltammetry,
@@ -50,13 +51,21 @@ m_package = SchemaPackage()
 # %% ####################### Entities
 
 
-class CE_AMCC_Electrode(AMCCElectrode, EntryData):
+class CE_AMCC_Sample(CENOMESample, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['components', 'elemental_composition'],
+            hide=['users', 'elemental_composition', 'components'],
+            properties=dict(
+                order=[
+                    'name',
+                    'lab_id',
+                    'chemical_composition_or_formulas',
+                    'id_of_preparation_protocol',
+                ]
+            ),
         ),
+        label_quantity='sample_id',
     )
-
 
 
 # %% ####################### Generic Entries
@@ -72,7 +81,6 @@ class CE_AMCC_Measurement(BaseMeasurement, EntryData):
 
     data_file = Quantity(
         type=str,
-        shape=['*'],
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'),
     )
@@ -671,6 +679,21 @@ class CE_AMCC_PEIS(
             PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
         ]
         super().normalize(archive, logger)
+
+
+class CE_AMCC_ZIR(BaseMeasurement, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'location', 'steps', 'instruments', 'results'],
+            properties=dict(order=['name', 'data_file', 'samples']),
+        ),
+    )
+
+    data_file = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
 
 
 m_package.__init_metainfo__()
