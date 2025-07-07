@@ -676,7 +676,7 @@ class CE_AMCC_PEIS(
         super().normalize(archive, logger)
 
 
-class CE_AMCC_ZIR(ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection):
+class CE_AMCC_ZIR(ElectrochemicalImpedanceSpectroscopyMultiple, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -736,12 +736,6 @@ class CE_AMCC_ZIR(ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotS
                     for cycle in self.measurements:
                         cycle.sample_area = self.setup_parameters.get('sample_area')
         super().normalize(archive, logger)
-        fig1 = make_nyquist_plot(self.measurements)
-        fig2 = make_bode_plot(self.measurements)
-        self.figures = [
-            PlotlyFigure(label='Nyquist Plot', figure=json.loads(fig1.to_json())),
-            PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
-        ]
 
 
 m_package.__init_metainfo__()
