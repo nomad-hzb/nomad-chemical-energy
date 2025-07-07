@@ -243,7 +243,6 @@ class CE_AMCC_ConstantCurrentMode(Chronopotentiometry, EntryData, PlotSection):
         ),
     )
 
-
     def normalize(self, archive, logger):
         self.method = 'Constant Current'
         if self.data_file:
@@ -303,7 +302,6 @@ class CE_AMCC_ConstantVoltageMode(Chronoamperometry, EntryData, PlotSection):
             ),
         ),
     )
-
 
     def normalize(self, archive, logger):
         self.method = 'Constant Voltage'
@@ -367,7 +365,6 @@ class CE_AMCC_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
             ),
         ),
     )
-
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -435,7 +432,6 @@ class CE_AMCC_GEIS(
             ),
         ),
     )
-
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -506,7 +502,6 @@ class CE_AMCC_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
             ),
         ),
     )
-
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -681,19 +676,72 @@ class CE_AMCC_PEIS(
         super().normalize(archive, logger)
 
 
-class CE_AMCC_ZIR(BaseMeasurement, EntryData):
+class CE_AMCC_ZIR(ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'location', 'steps', 'instruments', 'results'],
-            properties=dict(order=['name', 'data_file', 'samples']),
+            hide=[
+                'environment',
+                'setup',
+                'metadata_file',
+                'lab_id',
+                'location',
+                'steps',
+                'instruments',
+                'results',
+                'pretreatment',
+                'properties',
+                'connected_experiments',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'samples',
+                    'station',
+                ]
+            ),
         ),
     )
 
-    data_file = Quantity(
-        type=str,
-        a_eln=dict(component='FileEditQuantity'),
-        a_browser=dict(adaptor='RawFileAdaptor'),
-    )
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
+                if os.path.splitext(self.data_file)[-1] == '.mpr':
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_eis_data,
+                        get_eis_properties,
+                        get_meta_data,
+                        get_start_time,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
+
+                    metadata, data = get_header_and_data(f)
+                    get_meta_data(metadata.get('settings', {}), self)
+                    ole_timestamp = metadata.get('log', {}).get('ole_timestamp', 0)
+                    start_time_offset = data.get('time', np.array([0]))[0].item()
+                    self.datetime = get_start_time(ole_timestamp, start_time_offset)
+                    if not self.setup_parameters:
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
+                    if not self.measurements:
+                        self.measurements = get_eis_properties(
+                            metadata.get('params', {})
+                        )
+                        get_eis_data(data, self.measurements)
+                    for cycle in self.measurements:
+                        cycle.sample_area = self.setup_parameters.get('sample_area')
+        super().normalize(archive, logger)
+        fig1 = make_nyquist_plot(self.measurements)
+        fig2 = make_bode_plot(self.measurements)
+        self.figures = [
+            PlotlyFigure(label='Nyquist Plot', figure=json.loads(fig1.to_json())),
+            PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
+        ]
 
 
 m_package.__init_metainfo__()

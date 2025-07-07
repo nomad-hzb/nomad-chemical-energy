@@ -42,6 +42,7 @@ from nomad.parsing import MatchingParser
 from nomad_chemical_energy.schema_packages.ce_amcc_package import (
     CE_AMCC_GEIS,
     CE_AMCC_PEIS,
+    CE_AMCC_ZIR,
     CE_AMCC_Chronoamperometry,
     CE_AMCC_Chronopotentiometry,
     CE_AMCC_ConstantCurrentMode,
@@ -50,7 +51,6 @@ from nomad_chemical_energy.schema_packages.ce_amcc_package import (
     CE_AMCC_LinearSweepVoltammetry,
     CE_AMCC_Measurement,
     CE_AMCC_OpenCircuitVoltage,
-    CE_AMCC_ZIR,
 )
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
@@ -65,7 +65,6 @@ class ParsedBioLogicFile(EntryData):
             component='ReferenceEditQuantity',
         ),
     )
-
 
 
 class CEAMCCBioLogicParser(MatchingParser):
@@ -134,4 +133,3 @@ class CEAMCCBioLogicParser(MatchingParser):
             activity=[get_reference(archive.metadata.upload_id, entry_id)]
         )
         archive.metadata.entry_name = file
-
