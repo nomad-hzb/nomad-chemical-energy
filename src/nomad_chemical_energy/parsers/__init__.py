@@ -1,6 +1,13 @@
 from nomad.config.models.plugins import ParserEntryPoint
 
 
+class CEAMCCBioLogicParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_amcc_parser import CEAMCCBioLogicParser
+
+        return CEAMCCBioLogicParser(**self.dict())
+
+
 class CENECCxlsxParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_necc_parser import NECCXlsxParser
@@ -162,6 +169,12 @@ class TFCXRDLibraryParserEntryPoint(ParserEntryPoint):
 
         return TFCXRDParser(**self.dict())
 
+
+ce_amcc_biologic_parser = CEAMCCBioLogicParserEntryPoint(
+    name='CEAMCCBioLogicParser',
+    description='Parser for CEAMCC mpr files of BioLogic/EC-Lab potentiostats',
+    mainfile_name_re=r'^.*\.mpr',
+)
 
 ce_necc_xlsx_parser = CENECCxlsxParserEntryPoint(
     name='CENECCxlsxParser',
