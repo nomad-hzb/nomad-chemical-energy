@@ -20,6 +20,8 @@ import json
 import os
 
 import numpy as np
+import pandas as pd
+
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
     CENOMESample,
@@ -30,9 +32,11 @@ from baseclasses.chemical_energy import (
     LinearSweepVoltammetry,
     OpenCircuitVoltage,
 )
+from baseclasses.chemical_energy.voltammetry import VoltammetryCycleWithPlot
+
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
-from nomad.metainfo import Quantity, SchemaPackage, Section
+from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
     make_bode_plot,
@@ -737,5 +741,77 @@ class CE_AMCC_ZIR(ElectrochemicalImpedanceSpectroscopyMultiple, EntryData):
                         cycle.sample_area = self.setup_parameters.get('sample_area')
         super().normalize(archive, logger)
 
+
+class CE_AMCC_Interlaboratory(BaseMeasurement, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['lab_id', 'location', 'steps', 'instruments', 'results', 'method',],
+            properties=dict(order=['name',
+                                   'datetime',
+                                   'cv_activation',
+                                   'cv_after_activation',
+                                   'cp_file',
+                                   'eis_file',
+                                   'tafel_file',
+                                   'xrd_file',
+                                   'description',
+                                   'checklist_file',
+                                   'template_raw_file',
+                                   'samples',]),
+        ),
+    )
+
+    cv_activation = SubSection(section_def=CE_AMCC_CyclicVoltammetry)
+
+    cv_after_activation = SubSection(section_def=CE_AMCC_CyclicVoltammetry)
+
+    cp = SubSection(section_def=CE_AMCC_Chronopotentiometry)
+
+    eis_file = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
+
+    tafel_file = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
+
+    xrd_file = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
+
+    checklist_file = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
+
+    template_raw_file = Quantity(
+        type=str,
+        a_eln=dict(component='FileEditQuantity'),
+        a_browser=dict(adaptor='RawFileAdaptor'),
+    )
+
+    def normalize(self, archive, logger):
+        if self.cv_activation is None:
+            self.cv_activation = CE_AMCC_CyclicVoltammetry()
+            self.cv_activation.cycles = []
+            for cycle in range(10):
+                self.cv_activation.cycles.append(VoltammetryCycleWithPlot())
+
+        if self.cv_after_activation is None:
+            self.cv_after_activation = CE_AMCC_CyclicVoltammetry()
+            self.cv_after_activation.cycles = []
+            for cycle in range(10):
+                self.cv_after_activation.cycles.append(VoltammetryCycleWithPlot())
+
+
+
+        super().normalize(archive, logger)
 
 m_package.__init_metainfo__()
