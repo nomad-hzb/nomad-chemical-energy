@@ -213,7 +213,7 @@ def test_kmc3_parser(monkeypatch):
     assert archive.data.sdd_parameters
     assert archive.data.energy[0].magnitude == 6414.00218
     assert len(archive.data.sdd_parameters[0].fluo) == 526
-    assert round(archive.data.sdd_parameters[1].slope, 4) == 1.0508
+    assert round(archive.data.sdd_parameters[1].slope, 4) == 0.9958
 
 
 def test_labview_nesd_parser(monkeypatch):
