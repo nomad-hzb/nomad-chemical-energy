@@ -694,7 +694,7 @@ class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
                 )
 
                 prefixes = ['fluo', 'icr', 'ocr', 'tlt', 'lt', 'rt']
-                header = ['#monoE', 'K0', 'K1', 'K3'] + [
+                header = ['#monoE', 'K00', 'K0', 'K1', 'K3'] + [
                     f'{p}{i}' for p in prefixes for i in range(1, 14)
                 ]
                 data, _ = get_xas_data(f, header)
