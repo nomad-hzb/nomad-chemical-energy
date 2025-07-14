@@ -64,11 +64,18 @@ class CENOMEUVvisParserEntryPoint(ParserEntryPoint):
         return UVvisParser(**self.dict())
 
 
-class CENOMEXASParserEntryPoint(ParserEntryPoint):
+class CENOMEKMC2XASParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import XASParser
 
         return XASParser(**self.dict())
+
+
+class CENOMEKMC3XASParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nome_parser import KMC3XASParser
+
+        return KMC3XASParser(**self.dict())
 
 
 class CENOMETIFParserEntryPoint(ParserEntryPoint):
@@ -229,11 +236,19 @@ ce_nome_uvvis_parser = CENOMEUVvisParserEntryPoint(
     mainfile_contents_re=r'^(.*)(\r\n|\r|\n)((WL\/nm,Abs)|("  ABSOR->  Wave:.*))',
 )
 
-ce_nome_xas_parser = CENOMEXASParserEntryPoint(
-    name='CENOMEXASParser',
+kmc2_xas_parser = CENOMEKMC2XASParserEntryPoint(
+    name='CENOMEKMC2XASParser',
     description='Parser for CENOME xas kmc2 files',
     mainfile_name_re=r'^(.*(\.dat))',
     mainfile_contents_re='/home/kmc2/data/',
+)
+
+kmc3_xas_parser = CENOMEKMC3XASParserEntryPoint(
+    name='CENOMEKMC3XASParser',
+    description='Parser for CENOME xas kmc3 files',
+    mainfile_name_re=r'^(.*\.\d{3})$',
+    mainfile_contents_re=r'[\d\.\-eE\t\n]+',
+    mainfile_mime_re=r'(text\/plain).*',
 )
 
 ce_nome_tif_parser = CENOMETIFParserEntryPoint(

@@ -70,6 +70,7 @@ def set_monkey_patch(monkeypatch):
         'test double PTFETape 3 100724000001.txt',
         'testO2.oxy.xlsx',
         'labview_metadata_nesd.tdms',
+        'xas_kmc3_example.001',
     ]
 )
 def parsed_archive(request, monkeypatch):
@@ -203,6 +204,16 @@ def test_gamry_CV_parser(monkeypatch):
     assert archive.data.cycles[0].voltage[0]
     assert archive.data.atmosphere[0].temperature.magnitude == 25
     assert archive.data.properties.limit_potential_1.magnitude == 0.5
+
+
+def test_kmc3_parser(monkeypatch):
+    file = 'xas_kmc3_example.001'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.sdd_parameters
+    assert archive.data.energy[0].magnitude == 6414.00218
+    assert len(archive.data.sdd_parameters[0].fluo) == 526
+    assert round(archive.data.sdd_parameters[1].slope, 4) == 0.9958
 
 
 def test_labview_nesd_parser(monkeypatch):

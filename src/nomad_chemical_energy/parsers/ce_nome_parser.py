@@ -47,6 +47,7 @@ from nomad.parsing import MatchingParser
 from nomad_chemical_energy.schema_packages.ce_nome_package import (
     Bessy2_KMC2_XASFluorescence,
     Bessy2_KMC2_XASTransmission,
+    Bessy2_KMC3_XASFluorescence,
     CE_NOME_Chronoamperometry,
     CE_NOME_Chronocoulometry,
     CE_NOME_Chronopotentiometry,
@@ -91,6 +92,16 @@ class ParsedTxtFile(EntryData):
 class ParsedKMC2File(EntryData):
     activity = Quantity(
         type=Activity,
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        ),
+    )
+
+
+class ParsedKMC3File(EntryData):
+    activity = Quantity(
+        type=Activity,
+        shape=['*'],
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
         ),
@@ -346,9 +357,6 @@ class MassspectrometryParser(MatchingParser):
 
 class XASParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        # Log a hello world, just to get us started. TODO remove from an actual
-        # parser.
-
         measurement_base, measurement_name = os.path.split(mainfile)
         archive.metadata.entry_name = measurement_name
 
@@ -386,6 +394,25 @@ class XASParser(MatchingParser):
                 )
             )
             archive.metadata.entry_name = measurement_name
+
+
+class KMC3XASParser(MatchingParser):
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        file = mainfile.split('raw/')[-1]
+
+        entry = Bessy2_KMC3_XASFluorescence(data_file=file)
+        sample_id = file.split('.')[0][:8]  # TODO
+        set_sample_reference(archive, entry, sample_id)
+        entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        entry.name = file.split('.')[0]
+        file_name = f'{file}.archive.json'
+        create_archive(entry, archive, file_name)
+
+        entry_id = get_entry_id_from_file_name(file_name, archive)
+        archive.data = ParsedKMC3File(
+            activity=[get_reference(archive.metadata.upload_id, entry_id)]
+        )
+        archive.metadata.entry_name = file
 
 
 class CENOMETIFParser(MatchingParser):

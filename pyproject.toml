@@ -154,7 +154,6 @@ ce_necc_biologic_parser = "nomad_chemical_energy.parsers:ce_necc_biologic_parser
 ce_nome_gamry_parser = "nomad_chemical_energy.parsers:ce_nome_gamry_parser"
 ce_nome_csv_parser = "nomad_chemical_energy.parsers:ce_nome_csv_parser"
 ce_nome_uvvis_parser = "nomad_chemical_energy.parsers:ce_nome_uvvis_parser"
-ce_nome_xas_parser = "nomad_chemical_energy.parsers:ce_nome_xas_parser"
 ce_nome_tif_parser = "nomad_chemical_energy.parsers:ce_nome_tif_parser"
 ce_nome_general_parser = "nomad_chemical_energy.parsers:ce_nome_general_parser"
 ce_nome_massspectrometry_parser = "nomad_chemical_energy.parsers:ce_nome_massspectrometry_parser"
@@ -167,6 +166,8 @@ hzb_general_process_parser = "nomad_chemical_energy.parsers:hzb_general_process_
 tfc_sputtering_parser = "nomad_chemical_energy.parsers:tfc_sputtering_parser"
 tfc_xrf_parser = "nomad_chemical_energy.parsers:tfc_xrf_parser"
 tfc_xrd_parser = "nomad_chemical_energy.parsers:tfc_xrd_parser"
+kmc2_xas_parser = "nomad_chemical_energy.parsers:kmc2_xas_parser"
+kmc3_xas_parser = "nomad_chemical_energy.parsers:kmc3_xas_parser"
 
 necc_find_app = "nomad_chemical_energy.apps:necc_find_app"
 necc_compare_app = "nomad_chemical_energy.apps:necc_compare_app"
