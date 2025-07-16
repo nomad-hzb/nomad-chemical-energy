@@ -404,7 +404,7 @@ class KMC3XASParser(MatchingParser):
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         file_name_with_folders = file.split('.')[0]
         entry.name = file_name_with_folders
-        sample_id = file_name_with_folders.split("/")[-1][:24]
+        sample_id = file_name_with_folders.split('/')[-1][:24]
         set_sample_reference(archive, entry, sample_id)
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)
