@@ -692,17 +692,19 @@ class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
                 from nomad_chemical_energy.schema_packages.file_parser.xas_parser import (
                     get_xas_data,
                 )
-
-                prefixes = ['fluo', 'icr', 'ocr', 'tlt', 'lt', 'rt']
+                prefixes = ['fluo', 'ICR', 'OCR', 'TLT', 'LT', 'RT']
                 header = ['#monoE', 'K00', 'K0', 'K1', 'K3'] + [
-                    f'{p}{i}' for p in prefixes for i in range(1, 14)
+                    f'{p}.{i}' for p in prefixes for i in range(0, 13)
                 ]
-                data, _ = get_xas_data(f, header)
+                first_row = f.readline()
+                if first_row.startswith("#"):
+                    header = None
+                data, dateline = get_xas_data(f, header)
             from baseclasses.helper.archive_builder.xas_archive import (
                 get_xas_archive,
             )
 
-            get_xas_archive(data, None, self)
+            get_xas_archive(data, dateline, self)
 
         super().normalize(archive, logger)
 

@@ -230,11 +230,19 @@ kmc2_xas_parser = CENOMEKMC2XASParserEntryPoint(
     mainfile_contents_re='/home/kmc2/data/',
 )
 
+kmc3_xas_parser_before2021 = CENOMEKMC3XASParserEntryPoint(
+    name='CENOMEKMC3XASParser',
+    description='Parser for CENOME xas kmc3 files without header',
+    mainfile_name_re=r'^(.*\.\d{3})$',
+    mainfile_contents_re=r'[\d\.\-eE\t\n]+',
+    mainfile_mime_re=r'(text\/plain).*',
+)
+
 kmc3_xas_parser = CENOMEKMC3XASParserEntryPoint(
     name='CENOMEKMC3XASParser',
     description='Parser for CENOME xas kmc3 files',
-    mainfile_name_re=r'^(.*\.\d{3})$',
-    mainfile_contents_re=r'[\d\.\-eE\t\n]+',
+    mainfile_name_re=r'^(.*\.\d{4})$',
+    mainfile_contents_re=r'fluo.*ICR.*OCR.*LT',
     mainfile_mime_re=r'(text\/plain).*',
 )
 
