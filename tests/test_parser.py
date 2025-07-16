@@ -216,6 +216,16 @@ def test_kmc3_parser(monkeypatch):
     assert round(archive.data.sdd_parameters[1].slope, 4) == 0.9958
 
 
+def test_kmc3_parser_new_header(monkeypatch):
+    file = 'xas_kmc3_new_header.0003'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.sdd_parameters
+    assert archive.data.energy[0].magnitude == 8185.51000
+    assert len(archive.data.sdd_parameters[0].fluo) == 483
+    assert round(archive.data.sdd_parameters[1].slope, 5) == 1.00108
+
+
 def test_labview_nesd_parser(monkeypatch):
     file = 'labview_metadata_nesd.tdms'
     archive = get_archive(file, monkeypatch)
