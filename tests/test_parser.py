@@ -71,6 +71,7 @@ def set_monkey_patch(monkeypatch):
         'testO2.oxy.xlsx',
         'labview_metadata_nesd.tdms',
         'xas_kmc3_example.001',
+        'xas_kmc3_new_header.0003',
     ]
 )
 def parsed_archive(request, monkeypatch):
