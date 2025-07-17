@@ -35,7 +35,8 @@ dependencies = [
     'nomad-material-processing',
     'httpx==0.27.2',
     'nptdms',
-    'yadg @ git+https://github.com/carla-terboven/yadg.git',]
+    'yadg @ git+https://github.com/carla-terboven/yadg.git',
+]
 
 [project.urls]
 Repository = "https://github.com/nomad-hzb/nomad-chemical-energy"
@@ -96,7 +97,9 @@ pylint.max-branches = 25
 pylint.max-statements = 80
 ignore = [
     "F403", # 'from module import *' used; unable to detect undefined names
-    "PLR2004", "E501"
+    "PLR2004",
+    "E501",
+    "PLC0415"
 ]
 
 fixable = ["ALL"]
@@ -125,6 +128,7 @@ package-dir = { "" = "src" }
 where = ["src"]
 
 [project.entry-points.'nomad.plugin']
+ce_amcc_package = "nomad_chemical_energy.schema_packages:ce_amcc_package"
 ce_nome_package = "nomad_chemical_energy.schema_packages:ce_nome_package"
 ce_necc_package = "nomad_chemical_energy.schema_packages:ce_necc_package"
 ce_nesd_package = "nomad_chemical_energy.schema_packages:ce_nesd_package"
@@ -137,6 +141,8 @@ hzb_general_process_package = "nomad_chemical_energy.schema_packages:hzb_general
 tfc_package = "nomad_chemical_energy.schema_packages:tfc_schema_package"
 
 hzb_catlab_parser = "nomad_chemical_energy.parsers:hzb_catlab_parser"
+
+ce_amcc_biologic_parser = "nomad_chemical_energy.parsers:ce_amcc_biologic_parser"
 
 ce_nesd_biologic_parser = "nomad_chemical_energy.parsers:ce_nesd_biologic_parser"
 ce_nesd_labview_parser = "nomad_chemical_energy.parsers:ce_nesd_labview_parser"
