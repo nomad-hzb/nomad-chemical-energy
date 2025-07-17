@@ -401,10 +401,11 @@ class KMC3XASParser(MatchingParser):
         file = mainfile.split('raw/')[-1]
 
         entry = Bessy2_KMC3_XASFluorescence(data_file=file)
-        sample_id = file.split('.')[0][:8]  # TODO
-        set_sample_reference(archive, entry, sample_id)
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        entry.name = file.split('.')[0]
+        file_name_with_folders = file.split('.')[0]
+        entry.name = file_name_with_folders
+        sample_id = file_name_with_folders.split('/')[-1][:24]
+        set_sample_reference(archive, entry, sample_id)
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)
 

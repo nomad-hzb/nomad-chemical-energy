@@ -71,6 +71,7 @@ def set_monkey_patch(monkeypatch):
         'testO2.oxy.xlsx',
         'labview_metadata_nesd.tdms',
         'xas_kmc3_example.001',
+        'xas_kmc3_new_header.0003',
     ]
 )
 def parsed_archive(request, monkeypatch):
@@ -211,9 +212,19 @@ def test_kmc3_parser(monkeypatch):
     archive = get_archive(file, monkeypatch)
     assert archive.data
     assert archive.data.sdd_parameters
-    assert archive.data.energy[0].magnitude == 6414.00218
+    assert round(archive.data.energy[0].magnitude, 4) == 6.4140
     assert len(archive.data.sdd_parameters[0].fluo) == 526
     assert round(archive.data.sdd_parameters[1].slope, 4) == 0.9958
+
+
+def test_kmc3_parser_new_header(monkeypatch):
+    file = 'xas_kmc3_new_header.0003'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.sdd_parameters
+    assert archive.data.energy[0].magnitude == 8.18551
+    assert len(archive.data.sdd_parameters[0].fluo) == 483
+    assert round(archive.data.sdd_parameters[1].slope, 5) == 1.00108
 
 
 def test_labview_nesd_parser(monkeypatch):

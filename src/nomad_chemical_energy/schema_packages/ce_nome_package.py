@@ -693,16 +693,20 @@ class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
                     get_xas_data,
                 )
 
-                prefixes = ['fluo', 'icr', 'ocr', 'tlt', 'lt', 'rt']
-                header = ['#monoE', 'K00', 'K0', 'K1', 'K3'] + [
-                    f'{p}{i}' for p in prefixes for i in range(1, 14)
+                prefixes = ['fluo', 'ICR', 'OCR', 'TLT', 'LT', 'RT']
+                header = ['monoE_eV', 'K00', 'K0', 'K1', 'K3'] + [
+                    f'{p}.{i}' for p in prefixes for i in range(0, 13)
                 ]
-                data, _ = get_xas_data(f, header)
+                first_row = f.readline()
+                if first_row.startswith('#'):
+                    header = None
+                f.seek(0)  # reset cursor to use complete f (including first line)
+                data, dateline = get_xas_data(f, header)
             from baseclasses.helper.archive_builder.xas_archive import (
                 get_xas_archive,
             )
 
-            get_xas_archive(data, None, self)
+            get_xas_archive(data, dateline, self)
 
         super().normalize(archive, logger)
 
