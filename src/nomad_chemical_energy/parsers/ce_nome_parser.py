@@ -64,10 +64,19 @@ from nomad_chemical_energy.schema_packages.ce_nome_package import (
     CE_NOME_TIF_Image,
     CE_NOME_UVvismeasurement,
 )
+from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+    get_header_and_data,
+)
 
-"""
-This is a hello world style example for an example parser/converter.
-"""
+
+class ParsedBioLogicFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        shape=['*'],
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        ),
+    )
 
 
 class ParsedGamryFile(EntryData):
@@ -411,6 +420,57 @@ class KMC3XASParser(MatchingParser):
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
         archive.data = ParsedKMC3File(
+            activity=[get_reference(archive.metadata.upload_id, entry_id)]
+        )
+        archive.metadata.entry_name = file
+
+
+class CENOMEKMC3BioLogicParser(MatchingParser):
+    def is_mainfile(
+        self,
+        filename: str,
+        mime: str,
+        buffer: bytes,
+        decoded_buffer: str,
+        compression: str = None,
+    ):
+        is_mainfile_super = super().is_mainfile(
+            filename, mime, buffer, decoded_buffer, compression
+        )
+        if not is_mainfile_super:
+            return False
+        with open(filename, 'rb') as f:
+            metadata, _ = get_header_and_data(f)
+        device_number = metadata.get('log', {}).get('device_sn')
+        if device_number in ['0169']:
+            return True
+        return False
+
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        if not mainfile.endswith('.mpr'):
+            return
+
+        file = mainfile.split('raw/')[-1]
+        with archive.m_context.raw_file(file, 'rb') as f:
+            metadata, _ = get_header_and_data(f)
+
+        technique = metadata.get('settings', {}).get('technique')
+        match technique:
+            case 'CA':
+                entry = CE_NOME_Chronoamperometry(data_file=file)
+            case _:
+                entry = CE_NOME_Measurement(data_file=[file])
+
+        entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        file_name_with_folders = file.split('.')[0]
+        entry.name = file_name_with_folders
+        sample_id = file_name_with_folders.split('/')[-1][:24]
+        set_sample_reference(archive, entry, sample_id)
+        file_name = f'{file}.archive.json'
+        create_archive(entry, archive, file_name)
+
+        entry_id = get_entry_id_from_file_name(file_name, archive)
+        archive.data = ParsedBioLogicFile(
             activity=[get_reference(archive.metadata.upload_id, entry_id)]
         )
         archive.metadata.entry_name = file

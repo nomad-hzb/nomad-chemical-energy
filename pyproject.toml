@@ -152,6 +152,7 @@ ce_necc_xlsx_parser = "nomad_chemical_energy.parsers:ce_necc_xlsx_parser"
 ce_necc_biologic_parser = "nomad_chemical_energy.parsers:ce_necc_biologic_parser"
 
 ce_nome_gamry_parser = "nomad_chemical_energy.parsers:ce_nome_gamry_parser"
+kmc3_biologic_parser = "nomad_chemical_energy.parsers:kmc3_biologic_parser"
 ce_nome_csv_parser = "nomad_chemical_energy.parsers:ce_nome_csv_parser"
 ce_nome_uvvis_parser = "nomad_chemical_energy.parsers:ce_nome_uvvis_parser"
 ce_nome_tif_parser = "nomad_chemical_energy.parsers:ce_nome_tif_parser"
