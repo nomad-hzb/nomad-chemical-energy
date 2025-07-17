@@ -700,6 +700,7 @@ class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
                 first_row = f.readline()
                 if first_row.startswith('#'):
                     header = None
+                f.seek(0)  # reset cursor to use complete f (including first line)
                 data, dateline = get_xas_data(f, header)
             from baseclasses.helper.archive_builder.xas_archive import (
                 get_xas_archive,

@@ -211,7 +211,7 @@ def test_kmc3_parser(monkeypatch):
     archive = get_archive(file, monkeypatch)
     assert archive.data
     assert archive.data.sdd_parameters
-    assert archive.data.energy[0].magnitude == 6414.00218
+    assert archive.data.energy[0].magnitude == 6.41400
     assert len(archive.data.sdd_parameters[0].fluo) == 526
     assert round(archive.data.sdd_parameters[1].slope, 4) == 0.9958
 
@@ -221,7 +221,7 @@ def test_kmc3_parser_new_header(monkeypatch):
     archive = get_archive(file, monkeypatch)
     assert archive.data
     assert archive.data.sdd_parameters
-    assert archive.data.energy[0].magnitude == 8185.51000
+    assert archive.data.energy[0].magnitude == 8.18551
     assert len(archive.data.sdd_parameters[0].fluo) == 483
     assert round(archive.data.sdd_parameters[1].slope, 5) == 1.00108
 
