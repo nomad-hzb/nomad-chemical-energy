@@ -219,8 +219,8 @@ ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
 )
 
 ce_nesd_zahner_parser = CENESDZahnerParserEntryPoint(
-    name='CENESDBioLogicParser',
-    description='Parser for CENESD mpr files of BioLogic/EC-Lab potentiostats',
+    name='CENESDBZahnerParser',
+    description='Parser for CENESD isw,ism files of Zahner potentiostats',
     mainfile_name_re=r'^.*\.(isw|ism)',
 )
 

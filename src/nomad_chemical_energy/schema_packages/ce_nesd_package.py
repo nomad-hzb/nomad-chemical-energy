@@ -565,7 +565,6 @@ class CE_NESD_GEIS(
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.ism':
-
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
                         get_data_from_ism_file,
                         set_zahner_data_ism,

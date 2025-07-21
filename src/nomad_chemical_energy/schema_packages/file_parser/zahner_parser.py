@@ -5,7 +5,6 @@ Created on Thu Jul 17 13:17:46 2025
 @author: a2853
 """
 
-
 import numpy as np
 from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import (
     EISCycle,
