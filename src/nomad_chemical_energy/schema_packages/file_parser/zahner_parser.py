@@ -11,6 +11,7 @@ from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import (
     EISPropertiesWithData,
 )
 from baseclasses.helper.utilities import convert_datetime
+from zahner_analysis.file_import.isc_import import IscImport
 from zahner_analysis.file_import.ism_import import IsmImport
 from zahner_analysis.file_import.isw_import import IswImport
 
@@ -44,18 +45,6 @@ def determine_method_isw(t, c, v):
         return 'lsv'
 
 
-def determine_method_ism(c, v):
-    t = np.arange(len(c))
-    fit_c = np.polyfit(t, c, 0, full=True)
-    fit_v = np.polyfit(t, v, 0, full=True)
-
-    if fit_c[1] < fit_v[1]:
-        return 'geis'
-
-    if fit_v[1] < fit_c[1]:
-        return 'peis'
-
-
 def get_data_from_isw_file(filedata, filemetadata=None):
     isw_file = IswImport(filedata)
     datetime, method = parse_metadata(filemetadata) if filemetadata else (None, None)
@@ -75,6 +64,18 @@ def get_data_from_isw_file(filedata, filemetadata=None):
     }
 
 
+def determine_method_ism(c, v):
+    t = np.arange(len(c))
+    fit_c = np.polyfit(t, c, 0, full=True)
+    fit_v = np.polyfit(t, v, 0, full=True)
+
+    if fit_c[1] < fit_v[1]:
+        return 'geis'
+
+    if fit_v[1] < fit_c[1]:
+        return 'peis'
+
+
 def get_data_from_ism_file(filedata):
     ism_file = IsmImport(filedata)
     phase = ism_file.getPhaseArray()
@@ -86,7 +87,12 @@ def get_data_from_ism_file(filedata):
     current = ism_file.getTrack('Current/A')
     voltage = ism_file.getTrack('Voltage/V')
     method = determine_method_ism(current, voltage)
+    time = (
+        ism_file.getMeasurementDateTimeArray()
+        - ism_file.getMeasurementDateTimeArray()[-1]
+    )
     return {
+        'time': np.array([t.total_seconds() for t in time]),
         'datetime': datetime[0],
         'method': method,
         'frequency': freq,
@@ -97,6 +103,17 @@ def get_data_from_ism_file(filedata):
     }
 
 
+def get_data_from_isc_file(filedata):
+    isc_file = IscImport(filedata)
+
+    return {
+        'datetime': isc_file.getMeasurementStartDateTime(),
+        'time': isc_file.getTimeArray(),
+        'voltage': isc_file.getVoltageArray(),
+        'current': isc_file.getCurrentArray(),
+    }
+
+
 def set_zahner_data_isw(entry, d):
     entry.current = d['current']
     entry.time = d['time']
@@ -104,10 +121,15 @@ def set_zahner_data_isw(entry, d):
     entry.datetime = convert_datetime(d['datetime'], '%b,%d.%Y %H:%M:%S')
 
 
+def set_zahner_data_isc(entry, d):
+    entry.datetime = d['datetime']
+
+
 def set_zahner_data_ism(entry, d):
     entry.measurements = [
         EISPropertiesWithData(
             data=EISCycle(
+                time=d['time'].tolist(),
                 frequency=d['frequency'].tolist(),
                 z_real=d['Z_real'].tolist(),
                 z_imaginary=d['Z_imag'].tolist(),

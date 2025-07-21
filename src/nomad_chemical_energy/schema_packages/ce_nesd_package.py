@@ -118,6 +118,26 @@ class CE_NESD_Measurement(BaseMeasurement, EntryData):
 nesd_sample_label = 'electrolyser'
 
 
+def find_electrolyser_in_folder(archive, datafile):
+    folder = os.path.dirname(datafile)
+    tdms_files = []
+    for item in archive.m_context.upload_files.raw_directory_list(folder):
+        if not item.path.endswith('.tdms'):
+            continue
+        tdms_files.append(item.path)
+    if len(tdms_files) == 1:
+        electrolyser_entry_id = get_entry_id_from_file_name(
+            tdms_files[0].split('.')[0] + '_electrolyser.archive.json', archive
+        )
+        return [
+            CompositeSystemReference(
+                reference=get_reference(
+                    archive.metadata.upload_id, electrolyser_entry_id
+                )
+            )
+        ]
+
+
 class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
@@ -186,6 +206,8 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
+        if not self.samples:
+            self.samples = find_electrolyser_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_current_plot(self.current, self.time)
         fig2 = make_current_density_plot(self.current_density, self.time)
@@ -266,6 +288,8 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
+        if not self.samples:
+            self.samples = find_electrolyser_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_voltage_plot(self.time, self.voltage)
         self.figures = [
@@ -434,6 +458,15 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
+                if os.path.splitext(self.data_file)[-1] == '.isc':
+                    from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
+                        get_data_from_isc_file,
+                        set_zahner_data_isc,
+                    )
+
+                    d = get_data_from_isc_file(f.read())
+                    set_zahner_data_isc(self, d)
+
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -456,6 +489,8 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
+        if not self.samples:
+            self.samples = find_electrolyser_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_current_density_over_voltage_rhe_cv_plot(self.cycles)
         fig2 = make_current_over_voltage_cv_plot(self.cycles)
@@ -603,6 +638,8 @@ class CE_NESD_GEIS(
                         get_eis_data(data, self.measurements)
                     for cycle in self.measurements:
                         cycle.sample_area = self.setup_parameters.get('sample_area')
+        if not self.samples:
+            self.samples = find_electrolyser_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_nyquist_plot(self.measurements)
         fig2 = make_bode_plot(self.measurements)
@@ -682,6 +719,8 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
+        if not self.samples:
+            self.samples = find_electrolyser_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_current_density_over_voltage_rhe_plot(
             self.current_density, self.voltage_rhe_compensated
@@ -745,7 +784,8 @@ class CE_NESD_GalvanodynamicSweep(GalvanodynamicSweep, EntryData, PlotSection):
                         metadata = f_m.read()
                     d = get_data_from_isw_file(f.read(), metadata)
                     set_zahner_data_isw(self, d)
-
+        if not self.samples:
+            self.samples = find_electrolyser_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_current_density_over_voltage_rhe_plot(
             self.current_density, self.voltage_rhe_compensated
@@ -820,6 +860,8 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
+        if not self.samples:
+            self.samples = find_electrolyser_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_voltage_plot(self.time, self.voltage)
         self.figures = [
@@ -898,6 +940,8 @@ class CE_NESD_PEIS(
                         get_eis_data(data, self.measurements)
                     for cycle in self.measurements:
                         cycle.sample_area = self.setup_parameters.get('sample_area')
+        if not self.samples:
+            self.samples = find_electrolyser_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_nyquist_plot(self.measurements)
         fig2 = make_bode_plot(self.measurements)

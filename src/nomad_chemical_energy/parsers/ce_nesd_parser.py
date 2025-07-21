@@ -170,7 +170,11 @@ class CENESDBioLogicParser(MatchingParser):
 
 class CENESDZahnerParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        if not mainfile.endswith('.isw') and not mainfile.endswith('.ism'):
+        if (
+            not mainfile.endswith('.isw')
+            and not mainfile.endswith('.ism')
+            and not mainfile.endswith('.isc')
+        ):
             return
         file = mainfile.split('raw/')[-1]
 
@@ -184,11 +188,15 @@ class CENESDZahnerParser(MatchingParser):
         if mainfile.endswith('.ism'):
             with archive.m_context.raw_file(file, 'rb') as f:
                 d = get_data_from_ism_file(f.read())
+        if mainfile.endswith('.isc'):
+            d = {'method': 'cv'}
 
         technique = d.get('method')
         match technique:
             case 'ca':
                 entry = CE_NESD_Chronoamperometry(data_file=file)
+            case 'cv':
+                entry = CE_NESD_CyclicVoltammetry(data_file=file)
             case 'lsv':
                 entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
             case 'gds':
