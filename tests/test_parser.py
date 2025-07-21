@@ -246,6 +246,22 @@ def test_labview_nesd_parser(monkeypatch):
     assert archive.data.name == '20241202_091736_Softwaretest001_001'
 
 
+def test_zahner_isw_nesd_parser(monkeypatch):
+    file = '22-cp-1700mv-10min.isw'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert "chronoamperometry" in archive.data.m_def.lower()
+    assert len(archive.data.time) == 601
+
+
+def test_zahner_isw_nesd_parser(monkeypatch):
+    file = '21-cp-625ma-5min.isw'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert "chronopotentiometry" in archive.data.m_def.lower()
+    assert len(archive.data.time) == 301
+
+
 def test_tfc_sputtering_parser(monkeypatch):
     file = 'tfc_sputtering.xlsx'
     archive = get_archive(file, monkeypatch)

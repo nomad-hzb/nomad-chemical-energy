@@ -56,8 +56,20 @@ from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
 
+from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import get_data_from_isw_file
+
 
 class ParsedBioLogicFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        shape=['*'],
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        ),
+    )
+
+
+class ParsedZahnerFile(EntryData):
     activity = Quantity(
         type=Activity,
         shape=['*'],
@@ -148,6 +160,38 @@ class CENESDBioLogicParser(MatchingParser):
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
         archive.data = ParsedBioLogicFile(
+            activity=[get_reference(archive.metadata.upload_id, entry_id)]
+        )
+        archive.metadata.entry_name = file
+
+
+class CENESDZahnerParser(MatchingParser):
+
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        if not mainfile.endswith('.isw'):  # and not mainfile.endswith('.ism'):
+            return
+
+        file = mainfile.split('raw/')[-1]
+        with archive.m_context.raw_file(file, 'rb') as f:
+            with archive.m_context.raw_file(file.replace(".isw", "_c.txt"), "tr") as f_m:
+                metadata = f_m.read()
+            d = get_data_from_isw_file(f.read(), metadata)
+
+        technique = d.get('method')
+        match technique:
+            case 'ca':
+                entry = CE_NESD_Chronoamperometry(data_file=file)
+            case 'cp':
+                entry = CE_NESD_Chronopotentiometry(data_file=file)
+
+        # electrolyser_id = file.split('/')[-1][:8]
+        # set_sample_reference(archive, entry, electrolyser_id)
+        entry.name = file.split('.')[0]
+        file_name = f'{file}.archive.json'
+        create_archive(entry, archive, file_name)
+
+        entry_id = get_entry_id_from_file_name(file_name, archive)
+        archive.data = ParsedZahnerFile(
             activity=[get_reference(archive.metadata.upload_id, entry_id)]
         )
         archive.metadata.entry_name = file

@@ -1,0 +1,8 @@
+ZAHNER polarization file
+System : MEA6-ID3
+Control : 
+Temperature: 0.0+-0.3C
+Time : JUL,02.2025
+
+12:56:56 - 13:01:57
+21-cp-625mA-5min

@@ -1,0 +1,8 @@
+ZAHNER polarization file
+System : MEA13-ID1
+Control : 
+Temperature: 0.0+-0.2C
+Time : JUL,02.2025
+
+14:44:55 - 14:49:40
+currentscan 6,25A-625mA

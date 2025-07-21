@@ -38,6 +38,7 @@ from baseclasses.helper.archive_builder.labview_archive import (
 )
 from baseclasses.helper.utilities import (
     create_archive,
+    convert_datetime,
     get_entry_id_from_file_name,
     get_reference,
 )
@@ -150,7 +151,14 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
-                if os.path.splitext(self.data_file)[-1] == '.mpr':
+                if os.path.splitext(self.data_file)[-1] == '.isw':
+                    from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import get_data_from_isw_file, set_zahner_data_isw
+                    with archive.m_context.raw_file(self.data_file.replace(".isw", "_c.txt"), "tr") as f_m:
+                        metadata = f_m.read()
+                    d = get_data_from_isw_file(f.read(), metadata)
+                    set_zahner_data_isw(self, d)
+
+                elif os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
                         get_ca_properties,
@@ -217,7 +225,14 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
-                if os.path.splitext(self.data_file)[-1] == '.mpr':
+                if os.path.splitext(self.data_file)[-1] == '.isw':
+                    from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import get_data_from_isw_file, set_zahner_data_isw
+                    with archive.m_context.raw_file(self.data_file.replace(".isw", "_c.txt"), "tr") as f_m:
+                        metadata = f_m.read()
+                    d = get_data_from_isw_file(f.read(), metadata)
+                    set_zahner_data_isw(self, d)
+
+                elif os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
                         get_cp_properties,
@@ -629,7 +644,8 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                             metadata.get('settings', {})
                         )
                     if not self.properties:
-                        self.properties = get_lsv_properties(metadata.get('params', {}))
+                        self.properties = get_lsv_properties(
+                            metadata.get('params', {}))
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
@@ -703,7 +719,8 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
                             metadata.get('settings', {})
                         )
                     if not self.properties:
-                        self.properties = get_ocv_properties(metadata.get('params', {}))
+                        self.properties = get_ocv_properties(
+                            metadata.get('params', {}))
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
