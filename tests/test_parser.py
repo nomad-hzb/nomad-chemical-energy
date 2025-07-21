@@ -262,6 +262,14 @@ def test_zahner_isw_2_nesd_parser(monkeypatch):
     assert len(archive.data.time) == 301
 
 
+def test_zahner_isw_3_nesd_parser(monkeypatch):
+    file = '25-currentscan3.isw'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'galvanodynamicsweep' in str(archive.data.m_def).lower()
+    assert len(archive.data.time) == 282
+
+
 def test_zahner_ism_nesd_parser(monkeypatch):
     file = 'geis-100ma.ism'
     archive = get_archive(file, monkeypatch)

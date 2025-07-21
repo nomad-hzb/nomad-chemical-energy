@@ -20,9 +20,9 @@ def parse_metadata(filedata):
 
     datetime = lines[4].split(':', 1)[1] + ' ' + lines[6][:8]
     method = None
-    if 'cp' in lines[-1].lower():
+    if '-cp-' in lines[-1].lower():
         method = 'cp'
-    elif 'ca' in lines[-1].lower():
+    elif '-ca-' in lines[-1].lower():
         method = 'ca'
     return datetime.strip(), method
 
@@ -38,10 +38,10 @@ def determine_method_isw(t, c, v):
         return 'ca'
 
     if fit_c[1] < fit_v[1]:
-        return 'cp'
+        return 'gds'
 
     if fit_v[1] < fit_c[1]:
-        return 'ca'
+        return 'lsv'
 
 
 def determine_method_ism(c, v):

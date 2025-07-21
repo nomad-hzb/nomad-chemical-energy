@@ -48,6 +48,7 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_NESD_ConstantVoltageMode,
     CE_NESD_CyclicVoltammetry,
     CE_NESD_ElectrolyserPerformanceEvaluation,
+    CE_NESD_GalvanodynamicSweep,
     CE_NESD_LinearSweepVoltammetry,
     CE_NESD_Measurement,
     CE_NESD_OpenCircuitVoltage,
@@ -188,6 +189,10 @@ class CENESDZahnerParser(MatchingParser):
         match technique:
             case 'ca':
                 entry = CE_NESD_Chronoamperometry(data_file=file)
+            case 'lsv':
+                entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
+            case 'gds':
+                entry = CE_NESD_GalvanodynamicSweep(data_file=file)
             case 'geis':
                 entry = CE_NESD_GEIS(data_file=file)
             case 'peis':
