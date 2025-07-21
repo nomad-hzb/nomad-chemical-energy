@@ -250,7 +250,7 @@ def test_zahner_isw_nesd_parser(monkeypatch):
     file = '22-cp-1700mv-10min.isw'
     archive = get_archive(file, monkeypatch)
     assert archive.data
-    assert "chronoamperometry" in str(archive.data.m_def).lower()
+    assert 'chronoamperometry' in str(archive.data.m_def).lower()
     assert len(archive.data.time) == 601
 
 
@@ -258,7 +258,7 @@ def test_zahner_isw_2_nesd_parser(monkeypatch):
     file = '21-cp-625ma-5min.isw'
     archive = get_archive(file, monkeypatch)
     assert archive.data
-    assert "chronopotentiometry" in str(archive.data.m_def).lower()
+    assert 'chronopotentiometry' in str(archive.data.m_def).lower()
     assert len(archive.data.time) == 301
 
 
@@ -266,7 +266,7 @@ def test_zahner_ism_nesd_parser(monkeypatch):
     file = 'geis-100ma.ism'
     archive = get_archive(file, monkeypatch)
     assert archive.data
-    assert "geis" in str(archive.data.m_def).lower()
+    assert 'geis' in str(archive.data.m_def).lower()
     assert len(archive.data.measurements[0].frequency) == 33
 
 

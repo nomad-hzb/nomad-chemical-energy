@@ -55,8 +55,10 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
-
-from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import get_data_from_isw_file, get_data_from_ism_file
+from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
+    get_data_from_ism_file,
+    get_data_from_isw_file,
+)
 
 
 class ParsedBioLogicFile(EntryData):
@@ -166,7 +168,6 @@ class CENESDBioLogicParser(MatchingParser):
 
 
 class CENESDZahnerParser(MatchingParser):
-
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         if not mainfile.endswith('.isw') and not mainfile.endswith('.ism'):
             return
@@ -174,7 +175,9 @@ class CENESDZahnerParser(MatchingParser):
 
         if mainfile.endswith('.isw'):
             with archive.m_context.raw_file(file, 'rb') as f:
-                with archive.m_context.raw_file(file.replace(".isw", "_c.txt"), "tr") as f_m:
+                with archive.m_context.raw_file(
+                    file.replace('.isw', '_c.txt'), 'tr'
+                ) as f_m:
                     metadata = f_m.read()
                 d = get_data_from_isw_file(f.read(), metadata)
         if mainfile.endswith('.ism'):
