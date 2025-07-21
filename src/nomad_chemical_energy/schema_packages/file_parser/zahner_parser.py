@@ -52,7 +52,7 @@ def determine_method_ism(c, v):
     if fit_c[1] < fit_v[1]:
         return 'geis'
 
-    if fit_c[1] < fit_v[1]:
+    if fit_v[1] < fit_c[1]:
         return 'peis'
 
 

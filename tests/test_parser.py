@@ -278,6 +278,14 @@ def test_zahner_ism_nesd_parser(monkeypatch):
     assert len(archive.data.measurements[0].data.frequency) == 33
 
 
+def test_zahner_ism_2_nesd_parser(monkeypatch):
+    file = '02_peis_ocv.ism'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'peis' in str(archive.data.m_def).lower()
+    assert len(archive.data.measurements[0].data.frequency) == 66
+
+
 def test_tfc_sputtering_parser(monkeypatch):
     file = 'tfc_sputtering.xlsx'
     archive = get_archive(file, monkeypatch)
