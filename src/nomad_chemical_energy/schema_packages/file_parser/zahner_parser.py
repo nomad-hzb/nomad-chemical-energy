@@ -6,9 +6,13 @@ Created on Thu Jul 17 13:17:46 2025
 """
 
 import numpy as np
+from baseclasses.chemical_energy.cyclicvoltammetry import CVProperties
 from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import (
     EISCycle,
     EISPropertiesWithData,
+)
+from baseclasses.chemical_energy.voltammetry import (
+    VoltammetryCycleWithPlot,
 )
 from baseclasses.helper.utilities import convert_datetime
 from zahner_analysis.file_import.isc_import import IscImport
@@ -59,7 +63,7 @@ def get_data_from_isw_file(filedata, filemetadata=None):
         'datetime': datetime,
         'method': method,
         'time': t,
-        'current': c,
+        'current': c * 1000,
         'voltage': v,
     }
 
@@ -110,7 +114,11 @@ def get_data_from_isc_file(filedata):
         'datetime': isc_file.getMeasurementStartDateTime(),
         'time': isc_file.getTimeArray(),
         'voltage': isc_file.getVoltageArray(),
-        'current': isc_file.getCurrentArray(),
+        'current': isc_file.getCurrentArray() * 1000,
+        'p_lower': isc_file.Plower,
+        'p_upper': isc_file.Pupper,
+        'p_start': isc_file.Pstart,
+        'p_end': isc_file.Pend,
     }
 
 
@@ -123,6 +131,19 @@ def set_zahner_data_isw(entry, d):
 
 def set_zahner_data_isc(entry, d):
     entry.datetime = d['datetime']
+    entry.cycles = [
+        VoltammetryCycleWithPlot(
+            time=d['time'].tolist(),
+            current=d['current'].tolist(),
+            voltage=d['voltage'].tolist(),
+        )
+    ]
+    entry.properties = CVProperties(
+        initial_potential=d['p_start'],
+        final_potential=d['p_end'],
+        limit_potential_1=d['p_upper'],
+        limit_potential_2=d['p_lower'],
+    )
 
 
 def set_zahner_data_ism(entry, d):
