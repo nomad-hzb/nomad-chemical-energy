@@ -2,7 +2,6 @@ import os
 
 import pytest
 from nomad.client import normalize_all, parse
-from nomad.units import ureg
 
 
 def set_monkey_patch(monkeypatch):
@@ -293,7 +292,7 @@ def test_zahner_isc_nesd_parser(monkeypatch):
     assert archive.data
     assert 'cyclicvolt' in str(archive.data.m_def).lower()
     assert len(archive.data.cycles[0].current) == 3464
-    assert archive.data.properties.limit_potential_1 == 0.6 * ureg('V')
+    assert archive.data.properties.limit_potential_1.magnitude == 0.6
 
 
 def test_tfc_sputtering_parser(monkeypatch):
