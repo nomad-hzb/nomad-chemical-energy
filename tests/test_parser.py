@@ -267,7 +267,7 @@ def test_zahner_ism_nesd_parser(monkeypatch):
     archive = get_archive(file, monkeypatch)
     assert archive.data
     assert 'geis' in str(archive.data.m_def).lower()
-    assert len(archive.data.measurements[0].frequency) == 33
+    assert len(archive.data.measurements[0].data.frequency) == 33
 
 
 def test_tfc_sputtering_parser(monkeypatch):
