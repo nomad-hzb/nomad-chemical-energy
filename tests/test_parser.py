@@ -292,7 +292,7 @@ def test_zahner_isc_nesd_parser(monkeypatch):
     assert archive.data
     assert 'cyclicvolt' in str(archive.data.m_def).lower()
     assert len(archive.data.cycles[0].current) == 3464
-    assert archive.data.properties.limit_potential_1.magnitude == 0.6
+    assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.6
 
 
 def test_tfc_sputtering_parser(monkeypatch):
