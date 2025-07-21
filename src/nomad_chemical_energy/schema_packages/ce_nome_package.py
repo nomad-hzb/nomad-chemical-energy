@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+import json
 import os
 
 import pandas as pd
@@ -64,6 +65,11 @@ from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 
 # from nomad.units import ureg
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
+
+from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
+    make_current_density_plot,
+    make_current_plot,
+)
 
 m_package = SchemaPackage()
 
@@ -1053,7 +1059,7 @@ class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
+class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1085,34 +1091,6 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Current',
-                'x': 'time',
-                'y': 'current',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-                'config': {
-                    'scrollZoom': True,
-                    'staticPlot': False,
-                },
-            },
-            {
-                'label': 'Current Density',
-                'x': 'time',
-                'y': 'current_density',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-                'config': {
-                    'scrollZoom': True,
-                    'staticPlot': False,
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1133,7 +1111,40 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData):
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
                         self.properties = get_ca_properties(metadata)
+            with archive.m_context.raw_file(self.data_file, 'rb') as f:
+                if os.path.splitext(self.data_file)[-1] == '.mpr':
+                    from baseclasses.helper.archive_builder.biologic_archive import (
+                        get_biologic_properties,
+                        get_ca_properties,
+                        get_voltammetry_archive,
+                    )
+
+                    from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
+                        get_header_and_data,
+                    )
+
+                    metadata, data = get_header_and_data(f)
+                    get_voltammetry_archive(data, metadata, self)
+                    if not self.setup_parameters:
+                        self.setup_parameters = get_biologic_properties(
+                            metadata.get('settings', {})
+                        )
+                    if not self.properties:
+                        self.properties = get_ca_properties(metadata.get('params', {}))
+                        self.properties.sample_area = self.setup_parameters.get(
+                            'sample_area'
+                        )
+                    if not self.station:
+                        self.station = 'BESSY2 KMC3'
         super().normalize(archive, logger)
+        fig1 = make_current_plot(self.current, self.time)
+        fig2 = make_current_density_plot(self.current_density, self.time)
+        self.figures = [
+            PlotlyFigure(label='Current over Time', figure=json.loads(fig1.to_json())),
+            PlotlyFigure(
+                label='Current Density over Time', figure=json.loads(fig2.to_json())
+            ),
+        ]
 
 
 class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):

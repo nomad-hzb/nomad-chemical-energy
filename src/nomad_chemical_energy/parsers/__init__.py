@@ -78,6 +78,15 @@ class CENOMEKMC3XASParserEntryPoint(ParserEntryPoint):
         return KMC3XASParser(**self.dict())
 
 
+class CENOMEKMC3BioLogicParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nome_parser import (
+            CENOMEKMC3BioLogicParser,
+        )
+
+        return CENOMEKMC3BioLogicParser(**self.dict())
+
+
 class CENOMETIFParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import CENOMETIFParser
@@ -257,6 +266,12 @@ kmc3_xas_parser = CENOMEKMC3XASParserEntryPoint(
     mainfile_name_re=r'^(.*\.\d{4})$',
     mainfile_contents_re=r'fluo.*ICR.*OCR.*LT',
     mainfile_mime_re=r'(text\/plain).*',
+)
+
+kmc3_biologic_parser = CENOMEKMC3BioLogicParserEntryPoint(
+    name='KMC3CENOMEBioLogicParser',
+    description='Parser for in situ measurements at the KMC3 beamline. Parser reads mpr files of BioLogic/EC-Lab potentiostat.',
+    mainfile_name_re=r'^.*\.mpr',
 )
 
 ce_nome_tif_parser = CENOMETIFParserEntryPoint(

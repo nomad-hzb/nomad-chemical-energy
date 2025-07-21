@@ -72,6 +72,7 @@ def set_monkey_patch(monkeypatch):
         'labview_metadata_nesd.tdms',
         'xas_kmc3_example.001',
         'xas_kmc3_new_header.0003',
+        'kmc3_biologic_CA_example.mpr',
     ]
 )
 def parsed_archive(request, monkeypatch):
@@ -225,6 +226,16 @@ def test_kmc3_parser_new_header(monkeypatch):
     assert archive.data.energy[0].magnitude == 8.18551
     assert len(archive.data.sdd_parameters[0].fluo) == 483
     assert round(archive.data.sdd_parameters[1].slope, 5) == 1.00108
+
+
+def test_kmc3_insitu_biologic_parser(monkeypatch):
+    file = 'kmc3_biologic_CA_example.mpr'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.properties
+    assert len(archive.data.time) == 600
+    assert round(archive.data.current[0].magnitude, 5) == -1.84409
+    assert round(archive.data.voltage[2].magnitude, 5) == -0.44958
 
 
 def test_labview_nesd_parser(monkeypatch):
