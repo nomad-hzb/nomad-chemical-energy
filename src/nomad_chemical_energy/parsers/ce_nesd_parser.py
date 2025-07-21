@@ -56,7 +56,7 @@ from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
 
-from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import get_data_from_isw_file
+from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import get_data_from_isw_file, get_data_from_ism_file
 
 
 class ParsedBioLogicFile(EntryData):
@@ -168,19 +168,27 @@ class CENESDBioLogicParser(MatchingParser):
 class CENESDZahnerParser(MatchingParser):
 
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        if not mainfile.endswith('.isw'):  # and not mainfile.endswith('.ism'):
+        if not mainfile.endswith('.isw') and not mainfile.endswith('.ism'):
             return
-
         file = mainfile.split('raw/')[-1]
-        with archive.m_context.raw_file(file, 'rb') as f:
-            with archive.m_context.raw_file(file.replace(".isw", "_c.txt"), "tr") as f_m:
-                metadata = f_m.read()
-            d = get_data_from_isw_file(f.read(), metadata)
+
+        if mainfile.endswith('.isw'):
+            with archive.m_context.raw_file(file, 'rb') as f:
+                with archive.m_context.raw_file(file.replace(".isw", "_c.txt"), "tr") as f_m:
+                    metadata = f_m.read()
+                d = get_data_from_isw_file(f.read(), metadata)
+        if mainfile.endswith('.ism'):
+            with archive.m_context.raw_file(file, 'rb') as f:
+                d = get_data_from_ism_file(f.read())
 
         technique = d.get('method')
         match technique:
             case 'ca':
                 entry = CE_NESD_Chronoamperometry(data_file=file)
+            case 'geis':
+                entry = CE_NESD_GEIS(data_file=file)
+            case 'peis':
+                entry = CE_NESD_PEIS(data_file=file)
             case 'cp':
                 entry = CE_NESD_Chronopotentiometry(data_file=file)
 

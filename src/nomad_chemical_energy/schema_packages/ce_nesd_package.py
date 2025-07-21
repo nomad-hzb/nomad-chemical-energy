@@ -553,6 +553,14 @@ class CE_NESD_GEIS(
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
+                if os.path.splitext(self.data_file)[-1] == '.ism':
+                    from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
+                        get_data_from_ism_file, set_zahner_data_ism
+                    )
+                    from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import EISCycle
+                    d = get_data_from_ism_file(f.read())
+                    set_zahner_data_ism(self, d)
+
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
@@ -765,6 +773,12 @@ class CE_NESD_PEIS(
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
+                if os.path.splitext(self.data_file)[-1] == '.ism':
+                    from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
+                        get_data_from_ism_file, set_zahner_data_ism
+                    )
+                    d = get_data_from_ism_file(f.read())
+                    set_zahner_data_ism(self, d)
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,

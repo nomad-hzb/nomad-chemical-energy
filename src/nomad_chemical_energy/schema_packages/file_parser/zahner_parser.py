@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from baseclasses.helper.utilities import convert_datetime
+from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import EISCycle, EISPropertiesWithData
 
 
 def parse_metadata(filedata):
@@ -43,6 +44,18 @@ def determine_method_isw(t, c, v):
         return "ca"
 
 
+def determine_method_ism(c, v):
+    t = np.arange(len(c))
+    fit_c = np.polyfit(t, c, 0, full=True)
+    fit_v = np.polyfit(t, v, 0, full=True)
+
+    if fit_c[1] < fit_v[1]:
+        return "geis"
+
+    if fit_c[1] < fit_v[1]:
+        return "peis"
+
+
 def get_data_from_isw_file(filedata, filemetadata=None):
     isw_file = IswImport(filedata)
     datetime, method = parse_metadata(filemetadata) if filemetadata else (None, None)
@@ -64,11 +77,24 @@ def get_data_from_isw_file(filedata, filemetadata=None):
 
 def get_data_from_ism_file(filedata):
     ism_file = IsmImport(filedata)
+    phase = ism_file.getPhaseArray()
+    imp_mod = ism_file.getImpedanceArray()
 
-    imp = ism_file.getImpedanceArray()*np.exp(1j*ism_file.getPhaseArray())
-    f = ism_file.getFrequencyArray()
+    imp = imp_mod*np.exp(1j*phase)
+    freq = ism_file.getFrequencyArray()
     datetime = ism_file.getMeasurementDateTimeArray()
-    return ism_file
+    current = ism_file.getTrack('Current/A')
+    voltage = ism_file.getTrack('Voltage/V')
+    method = determine_method_ism(current, voltage)
+    return {
+        "datetime": datetime[0],
+        "method": method,
+        "frequency": freq,
+        "Z_phase": phase,
+        "Z_mod": imp_mod,
+        "Z_real": np.real(imp),
+        "Z_imag": np.imag(imp),
+    }
 
 
 def set_zahner_data_isw(entry, d):
@@ -76,3 +102,16 @@ def set_zahner_data_isw(entry, d):
     entry.time = d["time"]
     entry.voltage = d["voltage"]
     entry.datetime = convert_datetime(d["datetime"], "%b,%d.%Y %H:%M:%S")
+
+
+def set_zahner_data_ism(entry, d):
+    entry.measurements = [
+        EISPropertiesWithData(
+            data=EISCycle(
+                frequency=d["frequency"].tolist(),
+                z_real=d["Z_real"].tolist(),
+                z_imaginary=d["Z_imag"].tolist(),
+                z_modulus=d["Z_mod"].tolist(),
+                z_angle=d["Z_phase"].tolist()
+            ))]
+    entry.datetime = d["datetime"]
