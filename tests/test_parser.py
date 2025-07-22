@@ -73,6 +73,12 @@ def set_monkey_patch(monkeypatch):
         'xas_kmc3_example.001',
         'xas_kmc3_new_header.0003',
         'kmc3_biologic_CA_example.mpr',
+        'pt-wire-cv-.isc',
+        '22-cp-1700mv-10min.isw',
+        '21-cp-625ma-5min.isw',
+        '25-currentscan3.isw',
+        'geis-100ma.ism',
+        '02_peis_ocv.ism',
     ]
 )
 def parsed_archive(request, monkeypatch):

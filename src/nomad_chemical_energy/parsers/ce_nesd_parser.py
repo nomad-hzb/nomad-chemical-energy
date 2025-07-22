@@ -170,11 +170,7 @@ class CENESDBioLogicParser(MatchingParser):
 
 class CENESDZahnerParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        if (
-            not mainfile.endswith('.isw')
-            and not mainfile.endswith('.ism')
-            and not mainfile.endswith('.isc')
-        ):
+        if not mainfile.endswith(('.isw', '.ism', '.isc')):
             return
         file = mainfile.split('raw/')[-1]
 
