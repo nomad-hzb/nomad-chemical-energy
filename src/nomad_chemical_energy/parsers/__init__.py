@@ -29,6 +29,13 @@ class CENESDBioLogicParserEntryPoint(ParserEntryPoint):
         return CENESDBioLogicParser(**self.dict())
 
 
+class CENESDZahnerParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDZahnerParser
+
+        return CENESDZahnerParser(**self.dict())
+
+
 class CENESDLabviewParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDLabviewParser
@@ -209,6 +216,12 @@ ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
     name='CENESDBioLogicParser',
     description='Parser for CENESD mpr files of BioLogic/EC-Lab potentiostats',
     mainfile_name_re=r'^.*\.mpr',
+)
+
+ce_nesd_zahner_parser = CENESDZahnerParserEntryPoint(
+    name='CENESDZahnerParser',
+    description='Parser for CENESD isw,ism files of Zahner potentiostats',
+    mainfile_name_re=r'^.*\.(isw|ism|isc)',
 )
 
 ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(

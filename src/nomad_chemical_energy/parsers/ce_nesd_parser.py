@@ -48,6 +48,7 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_NESD_ConstantVoltageMode,
     CE_NESD_CyclicVoltammetry,
     CE_NESD_ElectrolyserPerformanceEvaluation,
+    CE_NESD_GalvanodynamicSweep,
     CE_NESD_LinearSweepVoltammetry,
     CE_NESD_Measurement,
     CE_NESD_OpenCircuitVoltage,
@@ -55,9 +56,23 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
+from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
+    get_data_from_ism_file,
+    get_data_from_isw_file,
+)
 
 
 class ParsedBioLogicFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        shape=['*'],
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        ),
+    )
+
+
+class ParsedZahnerFile(EntryData):
     activity = Quantity(
         type=Activity,
         shape=['*'],
@@ -148,6 +163,55 @@ class CENESDBioLogicParser(MatchingParser):
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
         archive.data = ParsedBioLogicFile(
+            activity=[get_reference(archive.metadata.upload_id, entry_id)]
+        )
+        archive.metadata.entry_name = file
+
+
+class CENESDZahnerParser(MatchingParser):
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        if not mainfile.endswith(('.isw', '.ism', '.isc')):
+            return
+        file = mainfile.split('raw/')[-1]
+
+        if mainfile.endswith('.isw'):
+            with archive.m_context.raw_file(file, 'rb') as f:
+                with archive.m_context.raw_file(
+                    file.replace('.isw', '_c.txt'), 'tr'
+                ) as f_m:
+                    metadata = f_m.read()
+                d = get_data_from_isw_file(f.read(), metadata)
+        if mainfile.endswith('.ism'):
+            with archive.m_context.raw_file(file, 'rb') as f:
+                d = get_data_from_ism_file(f.read())
+        if mainfile.endswith('.isc'):
+            d = {'method': 'cv'}
+
+        technique = d.get('method')
+        match technique:
+            case 'ca':
+                entry = CE_NESD_Chronoamperometry(data_file=file)
+            case 'cv':
+                entry = CE_NESD_CyclicVoltammetry(data_file=file)
+            case 'lsv':
+                entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
+            case 'gds':
+                entry = CE_NESD_GalvanodynamicSweep(data_file=file)
+            case 'geis':
+                entry = CE_NESD_GEIS(data_file=file)
+            case 'peis':
+                entry = CE_NESD_PEIS(data_file=file)
+            case 'cp':
+                entry = CE_NESD_Chronopotentiometry(data_file=file)
+
+        # electrolyser_id = file.split('/')[-1][:8]
+        # set_sample_reference(archive, entry, electrolyser_id)
+        entry.name = file.split('.')[0]
+        file_name = f'{file}.archive.json'
+        create_archive(entry, archive, file_name)
+
+        entry_id = get_entry_id_from_file_name(file_name, archive)
+        archive.data = ParsedZahnerFile(
             activity=[get_reference(archive.metadata.upload_id, entry_id)]
         )
         archive.metadata.entry_name = file

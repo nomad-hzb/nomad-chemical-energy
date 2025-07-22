@@ -73,6 +73,12 @@ def set_monkey_patch(monkeypatch):
         'xas_kmc3_example.001',
         'xas_kmc3_new_header.0003',
         'kmc3_biologic_CA_example.mpr',
+        'pt-wire-cv-.isc',
+        '22-cp-1700mv-10min.isw',
+        '21-cp-625ma-5min.isw',
+        '25-currentscan3.isw',
+        'geis-100ma.ism',
+        '02_peis_ocv.ism',
     ]
 )
 def parsed_archive(request, monkeypatch):
@@ -244,6 +250,55 @@ def test_labview_nesd_parser(monkeypatch):
     assert archive.data
     assert len(archive.data.time) == 344
     assert archive.data.name == '20241202_091736_Softwaretest001_001'
+
+
+def test_zahner_isw_nesd_parser(monkeypatch):
+    file = '22-cp-1700mv-10min.isw'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'chronoamperometry' in str(archive.data.m_def).lower()
+    assert len(archive.data.time) == 601
+
+
+def test_zahner_isw_2_nesd_parser(monkeypatch):
+    file = '21-cp-625ma-5min.isw'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'chronopotentiometry' in str(archive.data.m_def).lower()
+    assert len(archive.data.time) == 301
+
+
+def test_zahner_isw_3_nesd_parser(monkeypatch):
+    file = '25-currentscan3.isw'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'galvanodynamicsweep' in str(archive.data.m_def).lower()
+    assert len(archive.data.time) == 282
+
+
+def test_zahner_ism_nesd_parser(monkeypatch):
+    file = 'geis-100ma.ism'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'geis' in str(archive.data.m_def).lower()
+    assert len(archive.data.measurements[0].data.frequency) == 33
+
+
+def test_zahner_ism_2_nesd_parser(monkeypatch):
+    file = '02_peis_ocv.ism'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'peis' in str(archive.data.m_def).lower()
+    assert len(archive.data.measurements[0].data.frequency) == 66
+
+
+def test_zahner_isc_nesd_parser(monkeypatch):
+    file = 'pt-wire-cv-.isc'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'cyclicvolt' in str(archive.data.m_def).lower()
+    assert len(archive.data.cycles[0].current) == 3464
+    assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.6
 
 
 def test_tfc_sputtering_parser(monkeypatch):
