@@ -159,9 +159,14 @@ def make_current_density_over_voltage_rhe_cv_plot(cycles):
     fig = go.Figure().update_layout(title_text='Current Density over Voltage RHE')
     if not cycles or cycles is None:
         return fig
+    v_unit = None
+    cd_unit = None
     for idx, cycle in enumerate(cycles):
         if cycle.voltage_rhe_compensated is None or cycle.current_density is None:
-            return fig
+            continue
+        if v_unit is None or cd_unit is None:
+            v_unit = cycle.voltage_rhe_compensated.units
+            cd_unit = cycle.current_density.units
         fig.add_traces(
             go.Scatter(
                 name=f'Current Density {idx}',
@@ -175,11 +180,11 @@ def make_current_density_over_voltage_rhe_cv_plot(cycles):
         showlegend=True,
         xaxis={
             'fixedrange': False,
-            'title': f'Voltage RHE compensated ({cycles[0].voltage_rhe_compensated.units:~P})',
+            'title': f'Voltage RHE compensated ({v_unit:~P})',
         },
         yaxis={
             'fixedrange': False,
-            'title': f'Current Density ({cycles[0].current_density.units:~P})',
+            'title': f'Current Density ({cd_unit:~P})',
         },
         hovermode='x unified',
     )
