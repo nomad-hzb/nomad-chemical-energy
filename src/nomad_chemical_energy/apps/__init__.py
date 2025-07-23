@@ -17,6 +17,7 @@ from nomad.config.models.ui import (
     RowSelection,
 )
 
+from nomad_chemical_energy.apps.amcc_reproducibility_app import amcc_reproducibility_app
 from nomad_chemical_energy.apps.catlab_combinatorial_app import catlab_combinatorial_app
 from nomad_chemical_energy.apps.necc_find_app import necc_find_experiments_app
 from nomad_chemical_energy.apps.nome_oer_cp_app import nome_oer_cp_app
@@ -118,6 +119,12 @@ nome_oer_cp_analysis_app = AppEntryPoint(
     name='ExploreOERCP',
     description='Provides filters to explore OER CP entries of the NOME group.',
     app=nome_oer_cp_app,
+)
+
+amcc_reproducibility_app = AppEntryPoint(
+    name='ExploreReproducibility',
+    description='Provides filters to explore entries of the reproducibility study.',
+    app=amcc_reproducibility_app,
 )
 
 catlab_combinatorial_library_app = AppEntryPoint(

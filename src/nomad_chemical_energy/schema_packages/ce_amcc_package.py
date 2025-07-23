@@ -20,8 +20,6 @@ import json
 import os
 
 import numpy as np
-import pandas as pd
-
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
     CENOMESample,
@@ -32,11 +30,11 @@ from baseclasses.chemical_energy import (
     LinearSweepVoltammetry,
     OpenCircuitVoltage,
 )
-from baseclasses.chemical_energy.voltammetry import VoltammetryCycleWithPlot
-
 from nomad.datamodel.data import EntryData
+from nomad.datamodel.metainfo.basesections import AnalysisResult
 from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
+from nomad.units import ureg
 
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
     make_bode_plot,
@@ -188,8 +186,8 @@ class CE_AMCC_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rb') as f:
-                if os.path.splitext(self.data_file)[-1] == '.mpr':
+            if os.path.splitext(self.data_file)[-1] == '.mpr':
+                with archive.m_context.raw_file(self.data_file, 'rb') as f:
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
                         get_cp_properties,
@@ -360,6 +358,10 @@ class CE_AMCC_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
                 'control',
                 'charge',
                 'metadata_file',
+                'functon',
+                'connected_experiments',
+                'export_data_to_csv',
+                'export_file',
             ],
             properties=dict(
                 order=[
@@ -372,8 +374,8 @@ class CE_AMCC_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rb') as f:
-                if os.path.splitext(self.data_file)[-1] == '.mpr':
+            if os.path.splitext(self.data_file)[-1] == '.mpr':
+                with archive.m_context.raw_file(self.data_file, 'rb') as f:
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
                         get_cv_properties,
@@ -742,30 +744,110 @@ class CE_AMCC_ZIR(ElectrochemicalImpedanceSpectroscopyMultiple, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_AMCC_Interlaboratory(BaseMeasurement, EntryData):
+class CE_AMCC_CVMetrics(AnalysisResult):
+    overpotential_at_1_mA_cm2 = Quantity(
+        type=np.dtype(np.float64),
+        unit='mV',
+        description='Overpotential at 1 mA/cm² (mV).',
+    )
+
+    current_density_at_1_5_RHE = Quantity(
+        type=np.dtype(np.float64),
+        unit='mA/cm^2',
+        description='Current density at 1.5 V RHE. Data extracted from the first backscan of CV measurements.',
+    )
+
+    reduction_peak_integral = Quantity(
+        type=np.dtype(np.float64),
+        unit='mC',
+        description='Reduction Peak Integral (mC).',
+    )
+
+    ureg.define('decade = 1 = dec')
+    ureg.define('millivolt_per_decade = millivolt / decade = mV/dec')
+    tafel_slope = Quantity(
+        type=np.dtype(np.float64),
+        unit='mV/dec',
+        description='Tafel slope (mV/dec).',
+    )
+
+    cycle_number = Quantity(
+        type=np.dtype(np.int8),
+        description='Cycle Number of the Cyclic Voltammetry',
+    )
+
+    study_type = Quantity(
+        type=str,
+        a_eln=dict(
+            component='EnumEditQuantity',
+            props=dict(
+                suggestions=[
+                    'Process Characterization',
+                    'Interlaboratory Study',
+                ]
+            ),
+        ),
+    )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+
+
+class CE_AMCC_ReproducibilityStudy(BaseMeasurement, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
-            hide=['lab_id', 'location', 'steps', 'instruments', 'results', 'method',],
-            properties=dict(order=['name',
-                                   'datetime',
-                                   'cv_activation',
-                                   'cv_after_activation',
-                                   'cp_file',
-                                   'eis_file',
-                                   'tafel_file',
-                                   'xrd_file',
-                                   'description',
-                                   'checklist_file',
-                                   'template_raw_file',
-                                   'samples',]),
+            hide=[
+                'lab_id',
+                'location',
+                'steps',
+                'instruments',
+                'results',
+                'method',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'datetime',
+                    'group_name',
+                    'procedure_number',
+                    'description',
+                    'cv_metrics',
+                    'cv_activation',
+                    'cv_after_activation',
+                    'cv_after_testing',
+                    'cp',
+                    'eis_file',
+                    'tafel_file',
+                    'xrd_file',
+                    'checklist_file',
+                    'template_raw_file',
+                    'samples',
+                ]
+            ),
         ),
+    )
+
+    group_name = Quantity(
+        type=str,
+    )
+
+    procedure_number = Quantity(
+        type=str,
     )
 
     cv_activation = SubSection(section_def=CE_AMCC_CyclicVoltammetry)
 
     cv_after_activation = SubSection(section_def=CE_AMCC_CyclicVoltammetry)
 
+    cv_after_testing = SubSection(section_def=CE_AMCC_CyclicVoltammetry)
+
     cp = SubSection(section_def=CE_AMCC_Chronopotentiometry)
+
+    cv_metrics = SubSection(
+        section_def=CE_AMCC_CVMetrics,
+        description='Metrics to compare CV cycles across procedures.',
+        repeats=True,
+    )
 
     eis_file = Quantity(
         type=str,
@@ -791,27 +873,22 @@ class CE_AMCC_Interlaboratory(BaseMeasurement, EntryData):
         a_browser=dict(adaptor='RawFileAdaptor'),
     )
 
-    template_raw_file = Quantity(
+    raw_template_files = Quantity(
         type=str,
+        shape=['*'],
         a_eln=dict(component='FileEditQuantity'),
         a_browser=dict(adaptor='RawFileAdaptor'),
     )
 
     def normalize(self, archive, logger):
-        if self.cv_activation is None:
-            self.cv_activation = CE_AMCC_CyclicVoltammetry()
-            self.cv_activation.cycles = []
-            for cycle in range(10):
-                self.cv_activation.cycles.append(VoltammetryCycleWithPlot())
-
-        if self.cv_after_activation is None:
-            self.cv_after_activation = CE_AMCC_CyclicVoltammetry()
-            self.cv_after_activation.cycles = []
-            for cycle in range(10):
-                self.cv_after_activation.cycles.append(VoltammetryCycleWithPlot())
-
-
-
         super().normalize(archive, logger)
+        fig1 = make_current_density_over_voltage_rhe_cv_plot(self.cv_activation.cycles)
+        self.figures = [
+            PlotlyFigure(
+                label='Current Density over Voltage RHE',
+                figure=json.loads(fig1.to_json()),
+            ),
+        ]
+
 
 m_package.__init_metainfo__()
