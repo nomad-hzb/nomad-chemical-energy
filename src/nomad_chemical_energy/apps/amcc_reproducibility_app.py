@@ -12,6 +12,10 @@ from nomad.config.models.ui import (
     WidgetScatterPlot,
     WidgetTerms,
 )
+from nomad.units import ureg
+
+ureg.define('decade = 1 = dec')
+ureg.define('millivolt_per_decade = millivolt / decade = mV/dec')
 
 schema = (
     'nomad_chemical_energy.schema_packages.ce_amcc_package.CE_AMCC_ReproducibilityStudy'
@@ -20,7 +24,7 @@ amcc_reproducibility_app = App(
     # Label of the App
     label='Explore Reproducibility Study',
     # Path used in the URL, must be unique
-    path='amcc-repoducibility',
+    path='amcc-reproducibility',
     # Used to categorize apps in the explore menu
     category='AMCC Data',
     # Brief description used in the app menu
@@ -105,9 +109,7 @@ amcc_reproducibility_app = App(
             ),
             WidgetScatterPlot(
                 title='Overpotential at 1 mA/cm² (mV)',
-                show_input=False,
                 autorange=True,
-                scale='linear',
                 x=Axis(
                     search_quantity=f'data.cv_metrics[*].overpotential_at_1_mA_cm2#{schema}',
                     title='Overpotential at 1 mA/cm²',
@@ -125,9 +127,7 @@ amcc_reproducibility_app = App(
             ),
             WidgetScatterPlot(
                 title='Current Density at 1.5 V RHE (mA/cm²)',
-                show_input=False,
                 autorange=True,
-                scale='linear',
                 x=Axis(
                     search_quantity=f'data.cv_metrics[*].current_density_at_1_5_RHE#{schema}',
                     title='Current Density at 1.5 V RHE',
@@ -145,9 +145,7 @@ amcc_reproducibility_app = App(
             ),
             WidgetScatterPlot(
                 title='Reduction Peak Integral (mC)',
-                show_input=False,
                 autorange=True,
-                scale='linear',
                 x=Axis(
                     search_quantity=f'data.cv_metrics[*].reduction_peak_integral#{schema}',
                     unit='mC',
@@ -164,9 +162,7 @@ amcc_reproducibility_app = App(
             ),
             WidgetScatterPlot(
                 title='Tafel slope (mV/dec)',
-                show_input=False,
                 autorange=True,
-                scale='linear',
                 x=Axis(
                     search_quantity=f'data.cv_metrics[*].tafel_slope#{schema}',
                     unit='mV/dec',
