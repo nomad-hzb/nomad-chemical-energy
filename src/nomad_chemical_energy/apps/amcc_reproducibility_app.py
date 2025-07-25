@@ -12,10 +12,6 @@ from nomad.config.models.ui import (
     WidgetScatterPlot,
     WidgetTerms,
 )
-from nomad.units import ureg
-
-ureg.define('decade = 1 = dec')
-ureg.define('millivolt_per_decade = millivolt / decade = mV/dec')
 
 schema = (
     'nomad_chemical_energy.schema_packages.ce_amcc_package.CE_AMCC_ReproducibilityStudy'
@@ -165,7 +161,7 @@ amcc_reproducibility_app = App(
                 autorange=True,
                 x=Axis(
                     search_quantity=f'data.cv_metrics[*].tafel_slope#{schema}',
-                    unit='mV/dec',
+                    unit='dimensionless',
                     scale='linear',
                 ),
                 y=Axis(
