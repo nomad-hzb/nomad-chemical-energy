@@ -34,7 +34,6 @@ from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.basesections import AnalysisResult
 from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
-from nomad.units import ureg
 
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
     make_bode_plot,
@@ -763,12 +762,9 @@ class CE_AMCC_CVMetrics(AnalysisResult):
         description='Reduction Peak Integral (mC).',
     )
 
-    ureg.define('decade = 1 = dec')
-    ureg.define('millivolt_per_decade = millivolt / decade = mV/dec')
     tafel_slope = Quantity(
         type=np.dtype(np.float64),
-        unit='mV/dec',
-        description='Tafel slope (mV/dec).',
+        description='Tafel slope (mV/dec) within potential range 1.5-1.53V and logarithmic scaling of current density.',
     )
 
     cycle_number = Quantity(
