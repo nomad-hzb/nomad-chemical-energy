@@ -112,7 +112,7 @@ def test_nome_ocp_parser(monkeypatch):
     file = 'ref_calibration.DTA'
     archive = get_archive(file, monkeypatch)
     assert archive.data
-    assert 'Open' in archive.data.m_def
+    assert 'Open' in str(archive.data.m_def)
 
 
 def test_normalize_all(parsed_archive, monkeypatch):
