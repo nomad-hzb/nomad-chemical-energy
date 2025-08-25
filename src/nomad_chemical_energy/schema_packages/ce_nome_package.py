@@ -1095,8 +1095,8 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
 
     def normalize(self, archive, logger):
         if self.data_file:
-            with archive.m_context.raw_file(self.data_file, 'rt') as f:
-                if os.path.splitext(self.data_file)[-1] == '.DTA':
+            if os.path.splitext(self.data_file)[-1] == '.DTA':
+                with archive.m_context.raw_file(self.data_file, 'rt') as f:
                     from baseclasses.helper.archive_builder.gamry_archive import (
                         get_ca_properties,
                         get_voltammetry_archive,
@@ -1111,8 +1111,8 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
                     get_voltammetry_archive(data, metadata, curve_key, self)
                     if not self.properties:
                         self.properties = get_ca_properties(metadata)
-            with archive.m_context.raw_file(self.data_file, 'rb') as f:
-                if os.path.splitext(self.data_file)[-1] == '.mpr':
+            elif os.path.splitext(self.data_file)[-1] == '.mpr':
+                with archive.m_context.raw_file(self.data_file, 'rb') as f:
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
                         get_ca_properties,
