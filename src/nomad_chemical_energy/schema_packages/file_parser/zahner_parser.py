@@ -126,7 +126,8 @@ def set_zahner_data_isw(entry, d):
     entry.current = d['current']
     entry.time = d['time']
     entry.voltage = d['voltage']
-    entry.datetime = convert_datetime(d['datetime'], '%b,%d.%Y %H:%M:%S')
+    if d['datetime']:
+        entry.datetime = convert_datetime(d['datetime'], '%b,%d.%Y %H:%M:%S')
 
 
 def set_zahner_data_isc(entry, d):
