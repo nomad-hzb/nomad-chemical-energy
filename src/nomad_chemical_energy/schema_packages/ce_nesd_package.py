@@ -177,10 +177,13 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
                         set_zahner_data_isw,
                     )
 
-                    with archive.m_context.raw_file(
-                        self.data_file.replace('.isw', '_c.txt'), 'tr'
-                    ) as f_m:
-                        metadata = f_m.read()
+                    try:
+                        with archive.m_context.raw_file(
+                            self.data_file.replace('.isw', '_c.txt'), 'tr'
+                        ) as f_m:
+                            metadata = f_m.read()
+                    except Exception:
+                        metadata = None
                     d = get_data_from_isw_file(f.read(), metadata)
                     set_zahner_data_isw(self, d)
 
@@ -259,10 +262,14 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
                         set_zahner_data_isw,
                     )
 
-                    with archive.m_context.raw_file(
-                        self.data_file.replace('.isw', '_c.txt'), 'tr'
-                    ) as f_m:
-                        metadata = f_m.read()
+                    try:
+                        with archive.m_context.raw_file(
+                            self.data_file.replace('.isw', '_c.txt'), 'tr'
+                        ) as f_m:
+                            metadata = f_m.read()
+                    except Exception:
+                        metadata = None
+
                     d = get_data_from_isw_file(f.read(), metadata)
                     set_zahner_data_isw(self, d)
 
@@ -690,10 +697,13 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                         set_zahner_data_isw,
                     )
 
-                    with archive.m_context.raw_file(
-                        self.data_file.replace('.isw', '_c.txt'), 'tr'
-                    ) as f_m:
-                        metadata = f_m.read()
+                    try:
+                        with archive.m_context.raw_file(
+                            self.data_file.replace('.isw', '_c.txt'), 'tr'
+                        ) as f_m:
+                            metadata = f_m.read()
+                    except Exception:
+                        metadata = None
                     d = get_data_from_isw_file(f.read(), metadata)
                     set_zahner_data_isw(self, d)
 
@@ -778,10 +788,14 @@ class CE_NESD_GalvanodynamicSweep(GalvanodynamicSweep, EntryData, PlotSection):
                         set_zahner_data_isw,
                     )
 
-                    with archive.m_context.raw_file(
-                        self.data_file.replace('.isw', '_c.txt'), 'tr'
-                    ) as f_m:
-                        metadata = f_m.read()
+                    try:
+                        with archive.m_context.raw_file(
+                            self.data_file.replace('.isw', '_c.txt'), 'tr'
+                        ) as f_m:
+                            metadata = f_m.read()
+                    except Exception:
+                        metadata = None
+
                     d = get_data_from_isw_file(f.read(), metadata)
                     set_zahner_data_isw(self, d)
         if not self.samples:
