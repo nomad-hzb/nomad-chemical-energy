@@ -20,4 +20,80 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import json
 
+import numpy as np
+from baseclasses.chemical_energy.voltammetry import VoltammetryCycle
+from nomad.units import ureg
+
+
+def get_data_from_pssession_file(filedata):
+    d = json.loads(filedata[:-1])
+    return d
+
+
+def map_voltammetry_curve_data(entry, dataset):
+    if dataset['DataValueType'] == 'PalmSens.Data.VoltageReading':
+        entry.voltage = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
+            dataset['Unit']['Type'].split('.')[-1].lower()
+        )
+    if dataset['DataValueType'] == 'PalmSens.Data.CurrentReading':
+        entry.current = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
+            dataset['Unit']['Type'].split('.')[-1].lower()
+        )
+    if dataset['Type'] == 'PalmSens.Data.DataArrayTime':
+        entry.time = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
+            dataset['Unit']['S']
+        )
+    if dataset['Type'] == 'PalmSens.Data.DataArrayCharge':
+        entry.charge = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
+            dataset['Unit']['Type'].split('.')[-1].lower()
+        )
+
+
+def map_voltammetry_curve(entry, datasets):
+    # for dataset in d["Measurements"][0]["DataSet"]["Values"]:
+    for dataset in datasets:
+        map_voltammetry_curve_data(entry, dataset)
+
+
+def map_voltammetry_data(entry, data):
+    datasets = data['Measurements'][0]['DataSet']['Values']
+    multiple_measurements = any(['scan' in s['Description'] for s in datasets])
+    if not multiple_measurements:
+        map_voltammetry_curve(entry, datasets)
+    else:
+        cycles_sorted = {}
+        time = None
+        for dataset in datasets:
+            if 'time' in dataset['Description']:
+                time = dataset
+        for dataset in datasets:
+            if 'scan' not in dataset['Description']:
+                continue
+            if dataset['Description'] not in cycles_sorted:
+                cycles_sorted[dataset['Description']] = [time]
+            cycles_sorted[dataset['Description']].append(dataset)
+
+        cycles = []
+        for dataset in cycles_sorted.values():
+            cycle_entry = VoltammetryCycle()
+            map_voltammetry_curve(cycle_entry, dataset)
+            cycles.append(cycle_entry)
+        entry.cycles = cycles
+
+
+# def get_encoding(file_obj):
+#     return chardet.detect(file_obj.read())['encoding']
+
+
+# file = "/home/a2853/Downloads/palmense_data/03_IR Drop N2.pssession"
+
+
+# with open(file, "br") as f:
+#     encoding = get_encoding(f)
+
+# with open(file, "r", encoding=encoding) as f:
+#     fd = f.read()
+#     d = get_data_from_pssession_file(fd)
+#     print(d["Measurements"][0]["Title"],d["Measurements"][0]["Type"])

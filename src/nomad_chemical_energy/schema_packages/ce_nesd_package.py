@@ -50,6 +50,10 @@ from nomad.metainfo import Quantity, SchemaPackage, Section
 from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import (
     get_info_and_data,
 )
+from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
+    get_data_from_pssession_file,
+    map_voltammetry_data,
+)
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
     make_bode_plot,
     make_current_density_over_voltage_rhe_cv_plot,
@@ -464,6 +468,12 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
 
     def normalize(self, archive, logger):
         if self.data_file:
+            if os.path.splitext(self.data_file)[-1] == '.pssession':
+                with archive.m_context.raw_file(
+                    self.data_file, 'rt', encoding='utf-16'
+                ) as f:
+                    d = get_data_from_pssession_file(f.read())
+                map_voltammetry_data(self, d)
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.isc':
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
@@ -690,6 +700,12 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
 
     def normalize(self, archive, logger):
         if self.data_file:
+            if os.path.splitext(self.data_file)[-1] == '.pssession':
+                with archive.m_context.raw_file(
+                    self.data_file, 'rt', encoding='utf-16'
+                ) as f:
+                    d = get_data_from_pssession_file(f.read())
+                map_voltammetry_data(self, d)
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.isw':
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
@@ -851,6 +867,12 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
 
     def normalize(self, archive, logger):
         if self.data_file:
+            if os.path.splitext(self.data_file)[-1] == '.pssession':
+                with archive.m_context.raw_file(
+                    self.data_file, 'rt', encoding='utf-16'
+                ) as f:
+                    d = get_data_from_pssession_file(f.read())
+                map_voltammetry_data(self, d)
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
