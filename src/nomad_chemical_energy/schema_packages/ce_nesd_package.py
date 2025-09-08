@@ -52,6 +52,7 @@ from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser 
 )
 from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
     get_data_from_pssession_file,
+    map_eis_data,
     map_voltammetry_data,
 )
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
@@ -938,6 +939,12 @@ class CE_NESD_PEIS(
 
     def normalize(self, archive, logger):
         if self.data_file:
+            if os.path.splitext(self.data_file)[-1] == '.pssession':
+                with archive.m_context.raw_file(
+                    self.data_file, 'rt', encoding='utf-16'
+                ) as f:
+                    d = get_data_from_pssession_file(f.read())
+                map_eis_data(self, d)
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.ism':
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (

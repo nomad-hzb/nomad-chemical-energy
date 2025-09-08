@@ -23,6 +23,10 @@
 import json
 
 import numpy as np
+from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import (
+    EISCycle,
+    EISPropertiesWithData,
+)
 from baseclasses.chemical_energy.voltammetry import VoltammetryCycle
 from nomad.units import ureg
 
@@ -83,6 +87,39 @@ def map_voltammetry_data(entry, data):
         entry.cycles = cycles
 
 
+def map_eis_data(entry, data):
+    datasets = data['Measurements'][0]['DataSet']['Values']
+    eis_cycle = EISCycle()
+
+    for dataset in datasets:
+        # if dataset['Type'] == 'PalmSens.Data.DataArrayTime':
+        #     eis_cycle.time = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
+        #         dataset['Unit']['S']
+        #     )
+        if dataset['Description'] == 'Frequency':
+            eis_cycle.frequency = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg(dataset['Unit']['S'])
+        if dataset['Description'] == 'ZRe':
+            eis_cycle.z_real = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg('ohm')
+        if dataset['Description'] == 'ZIm':
+            eis_cycle.z_imaginary = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg('ohm')
+        if dataset['Description'] == 'Z':
+            eis_cycle.z_modulus = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg('ohm')
+        if dataset['Description'] == 'Phase':
+            eis_cycle.z_angle = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg(dataset['Unit']['S'])
+
+    entry.measurements = [EISPropertiesWithData(data=eis_cycle)]
+
+
 # def get_encoding(file_obj):
 #     return chardet.detect(file_obj.read())['encoding']
 
@@ -96,4 +133,4 @@ def map_voltammetry_data(entry, data):
 # with open(file, "r", encoding=encoding) as f:
 #     fd = f.read()
 #     d = get_data_from_pssession_file(fd)
-#     print(d["Measurements"][0]["Title"],d["Measurements"][0]["Type"])
+#     print(d["Measurements"][0]["Title"], d['Measurements'][0]['DataSet']['Values'])
