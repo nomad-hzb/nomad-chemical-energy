@@ -717,6 +717,8 @@ class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
                 get_xas_archive,
             )
             get_xas_archive(data, dateline, self)
+        if self.method is None:
+            self.method = 'XAS Fluorescence'  # for backward compatibility to reprocess old entries
 
         super().normalize(archive, logger)
 
