@@ -308,6 +308,46 @@ def test_zahner_isc_nesd_parser(monkeypatch):
     assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.6
 
 
+def test_palmense_lsv_nesd_parser(monkeypatch):
+    file = '05_N2_LSV_10mV_1600rpm.pssession'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'linear' in str(archive.data.m_def).lower()
+    assert round(archive.data.datetime.timestamp(), 0) == 1752740575
+    assert len(archive.data.current) == 121
+    assert round(archive.data.voltage[0].magnitude, 5) == -0.09996
+
+
+def test_palmense_ocp_nesd_parser(monkeypatch):
+    file = '01_N2_OCP.pssession'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'open' in str(archive.data.m_def).lower()
+    assert round(archive.data.datetime.timestamp(), 0) == 1752739293
+    assert len(archive.data.voltage) == 61
+    assert round(archive.data.voltage[0].magnitude, 5) == 0.96293
+
+
+def test_palmense_cv_nesd_parser(monkeypatch):
+    file = '04_N2_CV_50mV.pssession'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'cyclic' in str(archive.data.m_def).lower()
+    assert round(archive.data.datetime.timestamp(), 0) == 1752739815
+    assert len(archive.data.cycles) == 3
+    assert round(archive.data.cycles[0].voltage[0].magnitude, 5) == 0.02496
+
+
+def test_palmense_peis_nesd_parser(monkeypatch):
+    file = '11_PEIS_700mV.pssession'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'peis' in str(archive.data.m_def).lower()
+    assert round(archive.data.datetime.timestamp(), 0) == 1752741445
+    assert len(archive.data.measurements[0].data.frequency) == 64
+    assert round(archive.data.measurements[0].data.frequency[0].magnitude, 5) == 200000
+
+
 def test_tfc_sputtering_parser(monkeypatch):
     file = 'tfc_sputtering.xlsx'
     archive = get_archive(file, monkeypatch)
