@@ -38,6 +38,12 @@ def get_data_from_pssession_file(filedata):
     return d
 
 
+def get_utc_time(data):
+    if len(data['Measurements']) == 0:
+        return None
+    return dt.min + td(seconds=data['Measurements'][0]['UTCTimeStamp'] * 1e-7)
+
+
 def map_voltammetry_curve_data(entry, dataset):
     if dataset['DataValueType'] == 'PalmSens.Data.VoltageReading':
         entry.voltage = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
@@ -87,7 +93,7 @@ def map_voltammetry_data(entry, data):
             map_voltammetry_curve(cycle_entry, dataset)
             cycles.append(cycle_entry)
         entry.cycles = cycles
-    entry.datetime = dt.min + td(seconds=data['Measurements'][0]['UTCTimeStamp'] * 1e-7)
+    entry.datetime = get_utc_time(data)
 
 
 def map_eis_data(entry, data):
@@ -121,7 +127,7 @@ def map_eis_data(entry, data):
             ) * ureg(dataset['Unit']['S'])
 
     entry.measurements = [EISPropertiesWithData(data=eis_cycle)]
-    entry.datetime = dt.min + td(seconds=data['Measurements'][0]['UTCTimeStamp'] * 1e-7)
+    entry.datetime = get_utc_time(data)
 
 
 # def get_encoding(file_obj):
