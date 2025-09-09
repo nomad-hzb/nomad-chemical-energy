@@ -21,6 +21,8 @@
 # SOFTWARE.
 
 import json
+from datetime import datetime as dt
+from datetime import timedelta as td
 
 import numpy as np
 from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import (
@@ -85,6 +87,7 @@ def map_voltammetry_data(entry, data):
             map_voltammetry_curve(cycle_entry, dataset)
             cycles.append(cycle_entry)
         entry.cycles = cycles
+    entry.datetime = dt.min + td(seconds=data['Measurements'][0]['UTCTimeStamp'] * 1e-7)
 
 
 def map_eis_data(entry, data):
@@ -118,6 +121,7 @@ def map_eis_data(entry, data):
             ) * ureg(dataset['Unit']['S'])
 
     entry.measurements = [EISPropertiesWithData(data=eis_cycle)]
+    entry.datetime = dt.min + td(seconds=data['Measurements'][0]['UTCTimeStamp'] * 1e-7)
 
 
 # def get_encoding(file_obj):
