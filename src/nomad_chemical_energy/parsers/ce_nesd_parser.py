@@ -210,8 +210,8 @@ class CENESDZahnerParser(MatchingParser):
             case 'cp':
                 entry = CE_NESD_Chronopotentiometry(data_file=file)
 
-        # electrolyser_id = file.split('/')[-1][:8]
-        # set_sample_reference(archive, entry, electrolyser_id)
+        electrolyser_id = file.split('/')[-1][:8]
+        set_sample_reference(archive, entry, electrolyser_id)
         entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)
@@ -269,11 +269,11 @@ class CENESDPalmSensParser(MatchingParser):
             #     entry = CE_NESD_GalvanodynamicSweep(data_file=file)
             case 'Impedance Spectroscopy':
                 entry = CE_NESD_PEIS(data_file=file)
-            # case 'cp':
-            #     entry = CE_NESD_Chronopotentiometry(data_file=file)
+            case 'Chronopotentiometry':
+                entry = CE_NESD_Chronopotentiometry(data_file=file)
 
-        # electrolyser_id = file.split('/')[-1][:8]
-        # set_sample_reference(archive, entry, electrolyser_id)
+        electrolyser_id = file.split('/')[-1][:8]
+        set_sample_reference(archive, entry, electrolyser_id)
         entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)

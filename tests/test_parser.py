@@ -348,6 +348,16 @@ def test_palmense_peis_nesd_parser(monkeypatch):
     assert round(archive.data.measurements[0].data.frequency[0].magnitude, 5) == 200000
 
 
+def test_palmense_cp_nesd_parser(monkeypatch):
+    file = '05_N2_CP_10mAcm2_24h.pssession'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'chronopotentiometry' in str(archive.data.m_def).lower()
+    assert round(archive.data.datetime.timestamp(), 0) == 1752495542
+    assert len(archive.data.voltage) == 1441
+    assert round(archive.data.voltage[0].magnitude, 5) == 0.65457
+
+
 def test_tfc_sputtering_parser(monkeypatch):
     file = 'tfc_sputtering.xlsx'
     archive = get_archive(file, monkeypatch)

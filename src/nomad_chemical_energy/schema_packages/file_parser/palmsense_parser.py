@@ -64,7 +64,6 @@ def map_voltammetry_curve_data(entry, dataset):
 
 
 def map_voltammetry_curve(entry, datasets):
-    # for dataset in d["Measurements"][0]["DataSet"]["Values"]:
     for dataset in datasets:
         map_voltammetry_curve_data(entry, dataset)
 
@@ -101,10 +100,6 @@ def map_eis_data(entry, data):
     eis_cycle = EISCycle()
 
     for dataset in datasets:
-        # if dataset['Type'] == 'PalmSens.Data.DataArrayTime':
-        #     eis_cycle.time = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
-        #         dataset['Unit']['S']
-        #     )
         if dataset['Description'] == 'Frequency':
             eis_cycle.frequency = np.array(
                 [dv['V'] for dv in dataset['DataValues']]
@@ -128,19 +123,3 @@ def map_eis_data(entry, data):
 
     entry.measurements = [EISPropertiesWithData(data=eis_cycle)]
     entry.datetime = get_utc_time(data)
-
-
-# def get_encoding(file_obj):
-#     return chardet.detect(file_obj.read())['encoding']
-
-
-# file = "/home/a2853/Downloads/palmense_data/03_IR Drop N2.pssession"
-
-
-# with open(file, "br") as f:
-#     encoding = get_encoding(f)
-
-# with open(file, "r", encoding=encoding) as f:
-#     fd = f.read()
-#     d = get_data_from_pssession_file(fd)
-#     print(d["Measurements"][0]["Title"], d['Measurements'][0]['DataSet']['Values'])
