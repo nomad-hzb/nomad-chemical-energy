@@ -20,4 +20,106 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import json
+from datetime import datetime as dt
+from datetime import timedelta as td
 
+import numpy as np
+from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import (
+    EISCycle,
+    EISPropertiesWithData,
+)
+from baseclasses.chemical_energy.voltammetry import VoltammetryCycle
+from nomad.units import ureg
+
+
+def get_data_from_pssession_file(filedata):
+    d = json.loads(filedata[:-1])
+    return d
+
+
+def get_utc_time(data):
+    if len(data['Measurements']) == 0:
+        return None
+    return dt.min + td(seconds=data['Measurements'][0]['UTCTimeStamp'] * 1e-7)
+
+
+def map_voltammetry_curve_data(entry, dataset):
+    if dataset['DataValueType'] == 'PalmSens.Data.VoltageReading':
+        entry.voltage = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
+            dataset['Unit']['Type'].split('.')[-1].lower()
+        )
+    if dataset['DataValueType'] == 'PalmSens.Data.CurrentReading':
+        entry.current = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
+            dataset['Unit']['Type'].split('.')[-1].lower()
+        )
+    if dataset['Type'] == 'PalmSens.Data.DataArrayTime':
+        entry.time = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
+            dataset['Unit']['S']
+        )
+    if dataset['Type'] == 'PalmSens.Data.DataArrayCharge':
+        entry.charge = np.array([dv['V'] for dv in dataset['DataValues']]) * ureg(
+            dataset['Unit']['Type'].split('.')[-1].lower()
+        )
+
+
+def map_voltammetry_curve(entry, datasets):
+    for dataset in datasets:
+        map_voltammetry_curve_data(entry, dataset)
+
+
+def map_voltammetry_data(entry, data):
+    datasets = data['Measurements'][0]['DataSet']['Values']
+    multiple_measurements = any(['scan' in s['Description'] for s in datasets])
+    if not multiple_measurements:
+        map_voltammetry_curve(entry, datasets)
+    else:
+        cycles_sorted = {}
+        time = None
+        for dataset in datasets:
+            if 'time' in dataset['Description']:
+                time = dataset
+        for dataset in datasets:
+            if 'scan' not in dataset['Description']:
+                continue
+            if dataset['Description'] not in cycles_sorted:
+                cycles_sorted[dataset['Description']] = [time]
+            cycles_sorted[dataset['Description']].append(dataset)
+
+        cycles = []
+        for dataset in cycles_sorted.values():
+            cycle_entry = VoltammetryCycle()
+            map_voltammetry_curve(cycle_entry, dataset)
+            cycles.append(cycle_entry)
+        entry.cycles = cycles
+    entry.datetime = get_utc_time(data)
+
+
+def map_eis_data(entry, data):
+    datasets = data['Measurements'][0]['DataSet']['Values']
+    eis_cycle = EISCycle()
+
+    for dataset in datasets:
+        if dataset['Description'] == 'Frequency':
+            eis_cycle.frequency = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg(dataset['Unit']['S'])
+        if dataset['Description'] == 'ZRe':
+            eis_cycle.z_real = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg('ohm')
+        if dataset['Description'] == 'ZIm':
+            eis_cycle.z_imaginary = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg('ohm')
+        if dataset['Description'] == 'Z':
+            eis_cycle.z_modulus = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg('ohm')
+        if dataset['Description'] == 'Phase':
+            eis_cycle.z_angle = np.array(
+                [dv['V'] for dv in dataset['DataValues']]
+            ) * ureg(dataset['Unit']['S'])
+
+    entry.measurements = [EISPropertiesWithData(data=eis_cycle)]
+    entry.datetime = get_utc_time(data)

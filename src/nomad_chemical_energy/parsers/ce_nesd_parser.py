@@ -56,6 +56,9 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
+from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
+    get_data_from_pssession_file,
+)
 from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
     get_data_from_ism_file,
     get_data_from_isw_file,
@@ -207,8 +210,8 @@ class CENESDZahnerParser(MatchingParser):
             case 'cp':
                 entry = CE_NESD_Chronopotentiometry(data_file=file)
 
-        # electrolyser_id = file.split('/')[-1][:8]
-        # set_sample_reference(archive, entry, electrolyser_id)
+        electrolyser_id = file.split('/')[-1][:8]
+        set_sample_reference(archive, entry, electrolyser_id)
         entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
         create_archive(entry, archive, file_name)
@@ -244,4 +247,39 @@ class CENESDLabviewParser(MatchingParser):
 
 class CENESDPalmSensParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        pass
+        if not mainfile.endswith('.pssession'):
+            return
+        file = mainfile.split('raw/')[-1]
+        with archive.m_context.raw_file(file, 'rt', encoding='utf-16') as f:
+            data = get_data_from_pssession_file(f.read())
+
+        if len(data['Measurements']) != 1:
+            return
+        technique = data['Measurements'][0]['Title']
+        match technique:
+            case 'Open Circuit Potentiometry':
+                entry = CE_NESD_OpenCircuitVoltage(data_file=file)
+            # case 'ca':
+            #     entry = CE_NESD_Chronoamperometry(data_file=file)
+            case 'Cyclic Voltammetry':
+                entry = CE_NESD_CyclicVoltammetry(data_file=file)
+            case 'Linear Sweep Voltammetry':
+                entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
+            # case 'gds':
+            #     entry = CE_NESD_GalvanodynamicSweep(data_file=file)
+            case 'Impedance Spectroscopy':
+                entry = CE_NESD_PEIS(data_file=file)
+            case 'Chronopotentiometry':
+                entry = CE_NESD_Chronopotentiometry(data_file=file)
+
+        electrolyser_id = file.split('/')[-1][:8]
+        set_sample_reference(archive, entry, electrolyser_id)
+        entry.name = file.split('.')[0]
+        file_name = f'{file}.archive.json'
+        create_archive(entry, archive, file_name)
+
+        entry_id = get_entry_id_from_file_name(file_name, archive)
+        archive.data = ParsedPalmSensFile(
+            activity=[get_reference(archive.metadata.upload_id, entry_id)]
+        )
+        archive.metadata.entry_name = file

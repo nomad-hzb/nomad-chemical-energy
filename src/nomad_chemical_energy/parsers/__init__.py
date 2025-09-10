@@ -235,7 +235,7 @@ ce_nesd_palmsens_parser = CENESDPalmSensParserEntryPoint(
     name='CENESDPalmSensParser',
     description='Parser for CENESD csv files of PalmSens potentiostats',
     # mainfile_name_re=r'^.*\.csv',
-    mainfile_name_re=r'somefilename.csv',
+    mainfile_name_re=r'^.*\.pssession',
 )
 
 ce_nome_gamry_parser = CENOMEGamryParserEntryPoint(
