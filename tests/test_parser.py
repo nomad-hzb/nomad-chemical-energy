@@ -79,6 +79,11 @@ def set_monkey_patch(monkeypatch):
         '25-currentscan3.isw',
         'geis-100ma.ism',
         '02_peis_ocv.ism',
+        'palmsens_ca.pssession',
+        '04_N2_CV_50mV.pssession',
+        '05_N2_CP_10mAcm2_24h.pssession',
+        '05_N2_LSV_10mV_1600rpm.pssession',
+        '11_PEIS_700mV.pssession',
     ]
 )
 def parsed_archive(request, monkeypatch):
@@ -356,6 +361,16 @@ def test_palmense_cp_nesd_parser(monkeypatch):
     assert round(archive.data.datetime.timestamp(), 0) == 1752495542
     assert len(archive.data.voltage) == 1441
     assert round(archive.data.voltage[0].magnitude, 5) == 0.65457
+
+
+def test_palmense_ca_nesd_parser(monkeypatch):
+    file = 'palmsens_ca.pssession'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'chronoamperometry' in str(archive.data.m_def).lower()
+    assert round(archive.data.datetime.timestamp(), 0) == 1738771707
+    assert len(archive.data.voltage) == 101
+    assert round(archive.data.current[0].magnitude, 5) == 0.00179
 
 
 def test_tfc_sputtering_parser(monkeypatch):
