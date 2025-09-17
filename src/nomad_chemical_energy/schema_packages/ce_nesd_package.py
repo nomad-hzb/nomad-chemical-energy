@@ -175,6 +175,12 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
 
     def normalize(self, archive, logger):
         if self.data_file:
+            if os.path.splitext(self.data_file)[-1] == '.pssession':
+                with archive.m_context.raw_file(
+                    self.data_file, 'rt', encoding='utf-16'
+                ) as f:
+                    d = get_data_from_pssession_file(f.read())
+                map_voltammetry_data(self, d)
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.isw':
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (

@@ -259,8 +259,8 @@ class CENESDPalmSensParser(MatchingParser):
         match technique:
             case 'Open Circuit Potentiometry':
                 entry = CE_NESD_OpenCircuitVoltage(data_file=file)
-            # case 'ca':
-            #     entry = CE_NESD_Chronoamperometry(data_file=file)
+            case 'Chronoamperometry':
+                entry = CE_NESD_Chronoamperometry(data_file=file)
             case 'Cyclic Voltammetry':
                 entry = CE_NESD_CyclicVoltammetry(data_file=file)
             case 'Linear Sweep Voltammetry':
