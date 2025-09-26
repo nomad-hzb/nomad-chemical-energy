@@ -22,16 +22,21 @@ import os
 import numpy as np
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
+    CESample,
     Chronoamperometry,
     Chronopotentiometry,
     CyclicVoltammetry,
     ElectrochemicalImpedanceSpectroscopyMultiple,
+    ElectroChemicalSetup,
     ElectrolyserPerformanceEvaluation,
     ElectrolyserProperties,
+    Environment,
     GalvanodynamicSweep,
     LinearSweepVoltammetry,
     NESDElectrode,
     OpenCircuitVoltage,
+    ReferenceElectrode,
+    SampleIDCENESD,
 )
 from baseclasses.helper.archive_builder.labview_archive import (
     get_electrolyser_properties,
@@ -45,7 +50,7 @@ from baseclasses.helper.utilities import (
 from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.basesections import CompositeSystemReference
 from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
-from nomad.metainfo import Quantity, SchemaPackage, Section
+from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 
 from nomad_chemical_energy.schema_packages.file_parser.electrolyser_tdms_parser import (
     get_info_and_data,
@@ -54,6 +59,9 @@ from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
     get_data_from_pssession_file,
     map_eis_data,
     map_voltammetry_data,
+)
+from nomad_chemical_energy.schema_packages.utilities.ce_nesd_oer_analysis import (
+    NESD_OERAnalysis,
 )
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
     make_bode_plot,
@@ -72,7 +80,39 @@ m_package = SchemaPackage()
 # %% ####################### Entities
 
 
+class CE_NESD_Sample(CESample, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['users', 'elemental_composition', 'components'],
+            properties=dict(
+                order=[
+                    'name',
+                    'lab_id',
+                    'chemical_composition_or_formulas',
+                    'id_of_preparation_protocol',
+                ]
+            ),
+        ),
+        label_quantity='sample_id',
+    )
+
+    active_area = Quantity(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0007258'],
+        type=np.dtype(np.float64),
+        unit=('cm^2'),
+        a_eln=dict(component='NumberEditQuantity', defaultDisplayUnit='cm^2'),
+    )
+
+
 class CE_NESD_Electrode(NESDElectrode, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['components', 'elemental_composition'],
+        ),
+    )
+
+
+class CE_NESD_ReferenceElectrode(ReferenceElectrode, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['components', 'elemental_composition'],
@@ -93,6 +133,65 @@ class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
                 ]
             ),
         ),
+    )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+
+
+class CE_NESD_Electrolyte(Environment, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            overview=True,
+            hide=[
+                'name',
+                'origin',
+                'datetime',
+                'lab_id',
+                'elemental_composition',
+                'components',
+            ],
+        ),
+    )
+
+
+class CE_NESD_Setup(ElectroChemicalSetup, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'users',
+                'elemental_composition',
+                'components',
+                'substrate',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'lab_id',
+                    'origin',
+                    'chemical_composition_or_formulas',
+                    'setup',
+                    'reference_electrode',
+                    'counter_electrode',
+                    'equipment',
+                ]
+            ),
+        ),
+    )
+
+    # TODO what should ID look like?
+    setup_id = SubSection(section_def=SampleIDCENESD)
+
+    environment = SubSection(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0007223'],
+        section_def=CE_NESD_Electrolyte,
+        label='Electrolyte',
+    )
+
+    ir_compensation = Quantity(
+        type=np.dtype(np.float64),
+        a_eln=dict(component='NumberEditQuantity'),
+        label='iR compensation',
     )
 
     def normalize(self, archive, logger):
@@ -120,8 +219,6 @@ class CE_NESD_Measurement(BaseMeasurement, EntryData):
 
 # %% ####################### Measurements
 
-nesd_sample_label = 'electrolyser'
-
 
 def find_electrolyser_in_folder(archive, datafile):
     folder = os.path.dirname(datafile)
@@ -143,6 +240,46 @@ def find_electrolyser_in_folder(archive, datafile):
         ]
 
 
+def find_setup_in_folder(archive, datafile):
+    # this function only finds setups that are created via the NESD metadata excel file (xlsx_setup ending)
+    folder = os.path.dirname(datafile)
+    setup_files = []
+    for item in archive.m_context.upload_files.raw_directory_list(folder):
+        if not item.path.endswith('.xlsx_setup.archive.json'):
+            continue
+        setup_files.append(item.path)
+    if len(setup_files) == 1:
+        setup_entry_id = get_entry_id_from_file_name(setup_files[0], archive)
+        return get_reference(archive.metadata.upload_id, setup_entry_id)
+
+
+def find_sample_in_folder(archive, datafile):
+    # this function only finds samples that are created via the NESD metadata excel file (xlsx_sample ending)
+    folder = os.path.dirname(datafile)
+    sample_files = []
+    for item in archive.m_context.upload_files.raw_directory_list(folder):
+        if not item.path.endswith('.xlsx_sample.archive.json'):
+            continue
+        sample_files.append(item.path)
+    if len(sample_files) == 1:
+        sample_entry_id = get_entry_id_from_file_name(sample_files[0], archive)
+        return [
+            CompositeSystemReference(
+                reference=get_reference(archive.metadata.upload_id, sample_entry_id)
+            )
+        ]
+
+
+def set_sample(archive, entry):
+    if not entry.samples:
+        entry.samples = find_electrolyser_in_folder(archive, entry.data_file)
+        entry.samples.label = 'electrolyser'
+    if not entry.samples:
+        entry.samples = find_sample_in_folder(archive, entry.data_file)
+        if entry.samples is not None:
+            entry.samples.label = 'samples'
+
+
 class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
@@ -152,7 +289,6 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
                 'location',
                 'control',
                 'environment',
-                'setup',
                 'steps',
                 'cycles',
                 'instruments',
@@ -162,16 +298,18 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
                 order=[
                     'name',
                     'data_file',
-                    'samples',
+                    'setup',
                     'station',
                     'voltage_shift',
                     'resistance',
+                    'samples',
                 ],
             ),
         ),
     )
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -220,8 +358,14 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
-        if not self.samples:
-            self.samples = find_electrolyser_in_folder(archive, self.data_file)
+        set_sample(archive, self)
+        if not self.setup:
+            self.setup = find_setup_in_folder(archive, self.data_file)
+        if self.setup and self.voltage_shift == 0:
+            if self.setup.get('reference_electrode') is not None:
+                self.voltage_shift = self.setup.get('reference_electrode').get(
+                    'standard_potential'
+                )
         super().normalize(archive, logger)
         fig1 = make_current_plot(self.current, self.time)
         fig2 = make_current_density_plot(self.current_density, self.time)
@@ -243,7 +387,6 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
                 'control',
                 'charge_density',
                 'environment',
-                'setup',
                 'steps',
                 'cycles',
                 'instruments',
@@ -253,16 +396,18 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
                 order=[
                     'name',
                     'data_file',
-                    'samples',
+                    'setup',
                     'station',
                     'voltage_shift',
                     'resistance',
+                    'samples',
                 ]
             ),
         ),
     )
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -312,8 +457,14 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
-        if not self.samples:
-            self.samples = find_electrolyser_in_folder(archive, self.data_file)
+        set_sample(archive, self)
+        if not self.setup:
+            self.setup = find_setup_in_folder(archive, self.data_file)
+        if self.setup and self.voltage_shift == 0:
+            if self.setup.get('reference_electrode') is not None:
+                self.voltage_shift = self.setup.get('reference_electrode').get(
+                    'standard_potential'
+                )
         super().normalize(archive, logger)
         fig1 = make_voltage_plot(self.time, self.voltage)
         self.figures = [
@@ -331,7 +482,6 @@ class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData, PlotSection):
                 'control',
                 'charge_density',
                 'environment',
-                'setup',
                 'steps',
                 'cycles',
                 'instruments',
@@ -341,16 +491,18 @@ class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData, PlotSection):
                 order=[
                     'name',
                     'data_file',
-                    'samples',
+                    'setup',
                     'station',
                     'voltage_shift',
                     'resistance',
+                    'samples',
                 ]
             ),
         ),
     )
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         self.method = 'Constant Current'
@@ -393,7 +545,6 @@ class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData, PlotSection):
                 'control',
                 'charge_density',
                 'environment',
-                'setup',
                 'steps',
                 'cycles',
                 'instruments',
@@ -403,16 +554,18 @@ class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData, PlotSection):
                 order=[
                     'name',
                     'data_file',
-                    'samples',
+                    'setup',
                     'station',
                     'voltage_shift',
                     'resistance',
+                    'samples',
                 ]
             ),
         ),
     )
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         self.method = 'Constant Voltage'
@@ -476,8 +629,9 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
             ),
         ),
     )
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -487,6 +641,7 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
                 ) as f:
                     d = get_data_from_pssession_file(f.read())
                 map_voltammetry_data(self, d)
+                self.set_calculated_properties()
 
             if os.path.splitext(self.data_file)[-1] == '.txt':
                 from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
@@ -530,8 +685,14 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
-        if not self.samples:
-            self.samples = find_electrolyser_in_folder(archive, self.data_file)
+        set_sample(archive, self)
+        if not self.setup:
+            self.setup = find_setup_in_folder(archive, self.data_file)
+        if self.setup and self.voltage_shift == 0:
+            if self.setup.get('reference_electrode') is not None:
+                self.voltage_shift = self.setup.get('reference_electrode').get(
+                    'standard_potential'
+                )
         super().normalize(archive, logger)
         fig1 = make_current_density_over_voltage_rhe_cv_plot(self.cycles)
         fig2 = make_current_over_voltage_cv_plot(self.cycles)
@@ -564,8 +725,10 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
         ),
     )
 
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
+    samples.label = 'electrolyser'
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -614,7 +777,6 @@ class CE_NESD_GEIS(
         a_eln=dict(
             hide=[
                 'environment',
-                'setup',
                 'metadata_file',
                 'lab_id',
                 'location',
@@ -628,15 +790,17 @@ class CE_NESD_GEIS(
                 order=[
                     'name',
                     'data_file',
-                    'samples',
+                    'setup',
                     'station',
+                    'samples',
                 ]
             ),
         ),
     )
 
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -679,8 +843,9 @@ class CE_NESD_GEIS(
                         get_eis_data(data, self.measurements)
                     for cycle in self.measurements:
                         cycle.sample_area = self.setup_parameters.get('sample_area')
-        if not self.samples:
-            self.samples = find_electrolyser_in_folder(archive, self.data_file)
+        set_sample(archive, self)
+        if not self.setup:
+            self.setup = find_setup_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_nyquist_plot(self.measurements)
         fig2 = make_bode_plot(self.measurements)
@@ -700,7 +865,6 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                 'control',
                 'charge_density',
                 'environment',
-                'setup',
                 'steps',
                 'cycles',
                 'instruments',
@@ -710,17 +874,19 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                 order=[
                     'name',
                     'data_file',
-                    'samples',
+                    'setup',
                     'station',
                     'voltage_shift',
                     'resistance',
+                    'samples',
                 ]
             ),
         ),
     )
 
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -780,8 +946,14 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
-        if not self.samples:
-            self.samples = find_electrolyser_in_folder(archive, self.data_file)
+        set_sample(archive, self)
+        if not self.setup:
+            self.setup = find_setup_in_folder(archive, self.data_file)
+        if self.setup and self.voltage_shift == 0:
+            if self.setup.get('reference_electrode') is not None:
+                self.voltage_shift = self.setup.get('reference_electrode').get(
+                    'standard_potential'
+                )
         super().normalize(archive, logger)
         fig1 = make_current_density_over_voltage_rhe_plot(
             self.current_density, self.voltage_rhe_compensated
@@ -808,7 +980,6 @@ class CE_NESD_GalvanodynamicSweep(GalvanodynamicSweep, EntryData, PlotSection):
                 'control',
                 'charge_density',
                 'environment',
-                'setup',
                 'steps',
                 'cycles',
                 'instruments',
@@ -818,17 +989,19 @@ class CE_NESD_GalvanodynamicSweep(GalvanodynamicSweep, EntryData, PlotSection):
                 order=[
                     'name',
                     'data_file',
-                    'samples',
+                    'setup',
                     'station',
                     'voltage_shift',
                     'resistance',
+                    'samples',
                 ]
             ),
         ),
     )
 
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -849,8 +1022,14 @@ class CE_NESD_GalvanodynamicSweep(GalvanodynamicSweep, EntryData, PlotSection):
 
                     d = get_data_from_isw_file(f.read(), metadata)
                     set_zahner_data_isw(self, d)
-        if not self.samples:
-            self.samples = find_electrolyser_in_folder(archive, self.data_file)
+        set_sample(archive, self)
+        if not self.setup:
+            self.setup = find_setup_in_folder(archive, self.data_file)
+        if self.setup and self.voltage_shift == 0:
+            if self.setup.get('reference_electrode') is not None:
+                self.voltage_shift = self.setup.get('reference_electrode').get(
+                    'standard_potential'
+                )
         super().normalize(archive, logger)
         fig1 = make_current_density_over_voltage_rhe_plot(
             self.current_density, self.voltage_rhe_compensated
@@ -878,7 +1057,6 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
                 'charge',
                 'charge_density',
                 'environment',
-                'setup',
                 'steps',
                 'cycles',
                 'instruments',
@@ -888,17 +1066,19 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
                 order=[
                     'name',
                     'data_file',
-                    'samples',
+                    'setup',
                     'station',
                     'voltage_shift',
                     'resistance',
+                    'samples',
                 ]
             ),
         ),
     )
 
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -931,8 +1111,14 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
-        if not self.samples:
-            self.samples = find_electrolyser_in_folder(archive, self.data_file)
+        set_sample(archive, self)
+        if not self.setup:
+            self.setup = find_setup_in_folder(archive, self.data_file)
+        if self.setup and self.voltage_shift == 0:
+            if self.setup.get('reference_electrode') is not None:
+                self.voltage_shift = self.setup.get('reference_electrode').get(
+                    'standard_potential'
+                )
         super().normalize(archive, logger)
         fig1 = make_voltage_plot(self.time, self.voltage)
         self.figures = [
@@ -947,7 +1133,6 @@ class CE_NESD_PEIS(
         a_eln=dict(
             hide=[
                 'environment',
-                'setup',
                 'metadata_file',
                 'lab_id',
                 'location',
@@ -961,15 +1146,17 @@ class CE_NESD_PEIS(
                 order=[
                     'name',
                     'data_file',
-                    'samples',
+                    'setup',
                     'station',
+                    'samples',
                 ]
             ),
         ),
     )
 
-    samples = BaseMeasurement.samples.m_copy()
-    samples.label = nesd_sample_label
+    samples = (
+        BaseMeasurement.samples.m_copy()
+    )  # needed to link either electrolyser or sample
 
     def normalize(self, archive, logger):
         if self.data_file:
@@ -1027,8 +1214,9 @@ class CE_NESD_PEIS(
                         get_eis_data(data, self.measurements)
                     for cycle in self.measurements:
                         cycle.sample_area = self.setup_parameters.get('sample_area')
-        if not self.samples:
-            self.samples = find_electrolyser_in_folder(archive, self.data_file)
+        set_sample(archive, self)
+        if not self.setup:
+            self.setup = find_setup_in_folder(archive, self.data_file)
         super().normalize(archive, logger)
         fig1 = make_nyquist_plot(self.measurements)
         fig2 = make_bode_plot(self.measurements)
@@ -1037,6 +1225,18 @@ class CE_NESD_PEIS(
             PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
         ]
         super().normalize(archive, logger)
+
+
+# %%####################################### Analysis
+
+
+class CE_NESD_OERAnalysis(NESD_OERAnalysis, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['location', 'lab_id', 'description', 'method', 'steps'],
+            properties=dict(order=['name']),
+        )
+    )
 
 
 m_package.__init_metainfo__()

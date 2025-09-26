@@ -20,6 +20,7 @@ from nomad.config.models.ui import (
 from nomad_chemical_energy.apps.amcc_reproducibility_app import amcc_reproducibility_app
 from nomad_chemical_energy.apps.catlab_combinatorial_app import catlab_combinatorial_app
 from nomad_chemical_energy.apps.necc_find_app import necc_find_experiments_app
+from nomad_chemical_energy.apps.nesd_oer_app import nesd_oer_app
 from nomad_chemical_energy.apps.nome_oer_cp_app import nome_oer_cp_app
 
 schema_name = (
@@ -119,6 +120,12 @@ nome_oer_cp_analysis_app = AppEntryPoint(
     name='ExploreOERCP',
     description='Provides filters to explore OER CP entries of the NOME group.',
     app=nome_oer_cp_app,
+)
+
+nesd_oer_app = AppEntryPoint(
+    name='ExploreOER',
+    description='Provides filters to explore OER analysis entries of the NESD group.',
+    app=nesd_oer_app,
 )
 
 amcc_reproducibility_app = AppEntryPoint(
