@@ -269,7 +269,7 @@ class CENESDCHIParser(MatchingParser):
         create_archive(entry, archive, file_name)
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
-        archive.data = ParsedZahnerFile(
+        archive.data = ParsedCHIFile(
             activity=[get_reference(archive.metadata.upload_id, entry_id)]
         )
         archive.metadata.entry_name = file

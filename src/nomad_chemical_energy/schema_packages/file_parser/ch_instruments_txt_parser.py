@@ -11,13 +11,22 @@ import numpy as np
 import pandas as pd
 from baseclasses.chemical_energy import (
     CVProperties,
-    EISCycle,
     EISPropertiesWithData,
     LSVProperties,
     VoltammetryCycleWithPlot,
 )
+from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import EISCycle
 from baseclasses.helper.utilities import convert_datetime
 from nomad.units import ureg
+
+
+def try_convert_datetime(string_date):
+    formats = ['%B %d, %Y   %H:%M:%S%b. %d, %Y   %H:%M:%S']
+    for f in formats:
+        try:
+            return convert_datetime(string_date, f)
+        except Exception:
+            continue
 
 
 def parse_chi_txt_file(filedata):
@@ -101,12 +110,12 @@ def set_chi_data_lsv(entry, d):
         final_potential=d['p_end'],
     )
     if d['datetime']:
-        entry.datetime = convert_datetime(d['datetime'], '%B %d %Y   %H:%M:%S')
+        entry.datetime = try_convert_datetime(d['datetime'])
 
 
 def set_chi_data_cv(entry, d):
     if d['datetime']:
-        entry.datetime = convert_datetime(d['datetime'], '%B %d %Y   %H:%M:%S')
+        entry.datetime = try_convert_datetime(d['datetime'])
     entry.cycles = [
         VoltammetryCycleWithPlot(
             current=d['current'].tolist(),
@@ -134,4 +143,4 @@ def set_chi_data_eis(entry, d):
         )
     ]
     if d['datetime']:
-        entry.datetime = convert_datetime(d['datetime'], '%B %d %Y   %H:%M:%S')
+        entry.datetime = try_convert_datetime(d['datetime'])

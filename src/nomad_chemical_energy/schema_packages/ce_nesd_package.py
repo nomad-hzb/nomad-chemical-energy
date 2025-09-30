@@ -489,7 +489,7 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
                 map_voltammetry_data(self, d)
 
             if os.path.splitext(self.data_file)[-1] == '.txt':
-                from nomad_chemical_energy.schema_packages.file_parser.chi_parser import (
+                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
                     get_data_from_cv_txt_file,
                     set_chi_data_cv,
                 )
@@ -732,7 +732,7 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                 map_voltammetry_data(self, d)
 
             if os.path.splitext(self.data_file)[-1] == '.txt':
-                from nomad_chemical_energy.schema_packages.file_parser.chi_parser import (
+                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
                     get_data_from_lsv_txt_file,
                     set_chi_data_lsv,
                 )
@@ -981,7 +981,7 @@ class CE_NESD_PEIS(
                 map_eis_data(self, d)
 
             if os.path.splitext(self.data_file)[-1] == '.txt':
-                from nomad_chemical_energy.schema_packages.file_parser.chi_parser import (
+                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
                     get_data_from_eis_txt_file,
                     set_chi_data_eis,
                 )
