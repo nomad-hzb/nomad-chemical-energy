@@ -56,6 +56,9 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
+from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
+    parse_chi_txt_file,
+)
 from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
     get_data_from_pssession_file,
 )
@@ -76,6 +79,16 @@ class ParsedBioLogicFile(EntryData):
 
 
 class ParsedZahnerFile(EntryData):
+    activity = Quantity(
+        type=Activity,
+        shape=['*'],
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        ),
+    )
+
+
+class ParsedCHIFile(EntryData):
     activity = Quantity(
         type=Activity,
         shape=['*'],
@@ -209,6 +222,45 @@ class CENESDZahnerParser(MatchingParser):
                 entry = CE_NESD_PEIS(data_file=file)
             case 'cp':
                 entry = CE_NESD_Chronopotentiometry(data_file=file)
+
+        electrolyser_id = file.split('/')[-1][:8]
+        set_sample_reference(archive, entry, electrolyser_id)
+        entry.name = file.split('.')[0]
+        file_name = f'{file}.archive.json'
+        create_archive(entry, archive, file_name)
+
+        entry_id = get_entry_id_from_file_name(file_name, archive)
+        archive.data = ParsedZahnerFile(
+            activity=[get_reference(archive.metadata.upload_id, entry_id)]
+        )
+        archive.metadata.entry_name = file
+
+
+class CENESDCHIParser(MatchingParser):
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        if not mainfile.endswith('.txt'):
+            return
+        file = mainfile.split('raw/')[-1]
+
+        with archive.m_context.raw_file(file, 'tr') as f:
+            m, _ = parse_chi_txt_file(f.read())
+
+        technique = m.get('method')
+        match technique:
+            # case 'ca':
+            #     entry = CE_NESD_Chronoamperometry(data_file=file)
+            case 'Cyclic Voltammetry':
+                entry = CE_NESD_CyclicVoltammetry(data_file=file)
+            case 'Linear Sweep Voltammetry':
+                entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
+            # case 'gds':
+            #     entry = CE_NESD_GalvanodynamicSweep(data_file=file)
+            # case 'geis':
+            #     entry = CE_NESD_GEIS(data_file=file)
+            case 'A.C. Impedance':
+                entry = CE_NESD_PEIS(data_file=file)
+            # case 'cp':
+            #     entry = CE_NESD_Chronopotentiometry(data_file=file)
 
         electrolyser_id = file.split('/')[-1][:8]
         set_sample_reference(archive, entry, electrolyser_id)

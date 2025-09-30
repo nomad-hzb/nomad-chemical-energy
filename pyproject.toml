@@ -147,6 +147,7 @@ ce_amcc_biologic_parser = "nomad_chemical_energy.parsers:ce_amcc_biologic_parser
 
 ce_nesd_biologic_parser = "nomad_chemical_energy.parsers:ce_nesd_biologic_parser"
 ce_nesd_zahner_parser = "nomad_chemical_energy.parsers:ce_nesd_zahner_parser"
+ce_nesd_chi_parser = "nomad_chemical_energy.parsers:ce_nesd_chi_parser"
 ce_nesd_labview_parser = "nomad_chemical_energy.parsers:ce_nesd_labview_parser"
 ce_nesd_palmsens_parser = "nomad_chemical_energy.parsers:ce_nesd_palmsens_parser"
 

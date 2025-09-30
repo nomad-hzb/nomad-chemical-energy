@@ -487,6 +487,17 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
                 ) as f:
                     d = get_data_from_pssession_file(f.read())
                 map_voltammetry_data(self, d)
+
+            if os.path.splitext(self.data_file)[-1] == '.txt':
+                from nomad_chemical_energy.schema_packages.file_parser.chi_parser import (
+                    get_data_from_cv_txt_file,
+                    set_chi_data_cv,
+                )
+
+                with archive.m_context.raw_file(self.data_file, 'r') as f:
+                    d = get_data_from_cv_txt_file(f.read())
+                set_chi_data_cv(self, d)
+
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.isc':
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
@@ -719,6 +730,17 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                 ) as f:
                     d = get_data_from_pssession_file(f.read())
                 map_voltammetry_data(self, d)
+
+            if os.path.splitext(self.data_file)[-1] == '.txt':
+                from nomad_chemical_energy.schema_packages.file_parser.chi_parser import (
+                    get_data_from_lsv_txt_file,
+                    set_chi_data_lsv,
+                )
+
+                with archive.m_context.raw_file(self.data_file, 'r') as f:
+                    d = get_data_from_lsv_txt_file(f.read())
+                set_chi_data_lsv(self, d)
+
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.isw':
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
@@ -957,6 +979,16 @@ class CE_NESD_PEIS(
                 ) as f:
                     d = get_data_from_pssession_file(f.read())
                 map_eis_data(self, d)
+
+            if os.path.splitext(self.data_file)[-1] == '.txt':
+                from nomad_chemical_energy.schema_packages.file_parser.chi_parser import (
+                    get_data_from_eis_txt_file,
+                    set_chi_data_eis,
+                )
+
+                with archive.m_context.raw_file(self.data_file, 'r') as f:
+                    d = get_data_from_eis_txt_file(f.read())
+                set_chi_data_eis(self, d)
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.ism':
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
