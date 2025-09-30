@@ -423,7 +423,7 @@ class NESD_OERAnalysis(Analysis):
             overpotential_at_10mA_cm2=overpotential_at_10,
             samples=cv.samples,
         )
-
+        result_entry.samples[0].name = result_entry.samples[0].reference.name
         result_entry.set_charge_density_plot(
             last_cv_cycle.voltage_rhe_compensated,
             last_cv_cycle.current_density,

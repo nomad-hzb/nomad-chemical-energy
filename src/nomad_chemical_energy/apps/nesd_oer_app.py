@@ -45,8 +45,8 @@ nesd_oer_app = App(
             selected=True,
         ),
         Column(
-            quantity=f'data.outputs[0].samples[0].lab_id#{schema}',
-            label='Sample ID',
+            quantity=f'data.outputs[0].samples[0].name#{schema}',
+            label='Working Electrode',
             align='left',
             selected=True,
         ),

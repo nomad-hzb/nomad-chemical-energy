@@ -26,7 +26,6 @@ from baseclasses.chemical_energy import Purging, SubstanceWithConcentration
 from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_NESD_Electrolyte,
     CE_NESD_ReferenceElectrode,
-    SampleIDCENESD,
 )
 
 
@@ -92,9 +91,9 @@ def map_setup(entry, data_dict):
     # entry.reference_electrode_subsection = get_reference_electrode(data_dict)
     # data_dict.get('Counter electrode')
 
-    entry.setup_id = SampleIDCENESD(owner=data_dict.get('Experimentalist: Name'))
+    # entry.setup_id = SampleIDCENESD(owner=data_dict.get('Experimentalist: Name'))
 
 
 def map_sample(entry, data_dict):
-    entry.description = data_dict.get('Working electrode')
+    entry.name = data_dict.get('Working electrode')
     entry.active_area = data_dict.get('Geometric area')
