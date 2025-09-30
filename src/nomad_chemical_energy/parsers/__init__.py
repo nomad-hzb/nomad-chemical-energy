@@ -235,7 +235,7 @@ ce_nesd_chi_parser = CENESDCHIParserEntryPoint(
     name='CENESDCHIParser',
     description='Parser for CENESD txt files of CHI potentiostats',
     mainfile_name_re=r'^.*\.(txt)',
-    mainfile_contents_re=r'^.*Instrument Model:  CHI760E',
+    mainfile_contents_re=r'Instrument Model:  CHI760E',
 )
 
 ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
