@@ -129,7 +129,7 @@ def set_chi_data_cv(entry, d):
                 np.abs(np.array(d['voltage']) * ureg('V') - d['p_start']), np.less
             )[0]
         )
-        + [-1]
+        + [None]
     )
     cycles = []
     for i in range(len(cycle_indices) - 1):
