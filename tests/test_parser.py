@@ -313,6 +313,32 @@ def test_zahner_isc_nesd_parser(monkeypatch):
     assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.6
 
 
+def test_chi_txt_lsv_nesd_parser(monkeypatch):
+    file = 'LSV.txt'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert archive.data.properties.scan_rate.magnitude == 5
+    assert 'linear' in str(archive.data.m_def).lower()
+    assert round(archive.data.voltage[0].magnitude, 5) == -0.2
+
+
+def test_chi_txt_eis_nesd_parser(monkeypatch):
+    file = 'EIS -0,48 V.txt'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'peis' in str(archive.data.m_def).lower()
+    assert len(archive.data.measurements[0].data.frequency) == 73
+
+
+def test_chi_txt_cv_nesd_parser(monkeypatch):
+    file = 'CV-1T.txt'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+    assert 'cyclicvolt' in str(archive.data.m_def).lower()
+    assert len(archive.data.cycles[0].current) == 1400
+    assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.2
+
+
 def test_palmense_lsv_nesd_parser(monkeypatch):
     file = '05_N2_LSV_10mV_1600rpm.pssession'
     archive = get_archive(file, monkeypatch)

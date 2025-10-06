@@ -36,6 +36,13 @@ class CENESDZahnerParserEntryPoint(ParserEntryPoint):
         return CENESDZahnerParser(**self.dict())
 
 
+class CENESDCHIParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDCHIParser
+
+        return CENESDCHIParser(**self.dict())
+
+
 class CENESDLabviewParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDLabviewParser
@@ -222,6 +229,13 @@ ce_nesd_zahner_parser = CENESDZahnerParserEntryPoint(
     name='CENESDZahnerParser',
     description='Parser for CENESD isw,ism files of Zahner potentiostats',
     mainfile_name_re=r'^.*\.(isw|ism|isc)',
+)
+
+ce_nesd_chi_parser = CENESDCHIParserEntryPoint(
+    name='CENESDCHIParser',
+    description='Parser for CENESD txt files of CHI potentiostats',
+    mainfile_name_re=r'^.*\.(txt)',
+    mainfile_contents_re=r'Instrument Model:  CHI760E',
 )
 
 ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
