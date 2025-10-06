@@ -317,6 +317,7 @@ def test_chi_txt_lsv_nesd_parser(monkeypatch):
     file = 'LSV.txt'
     archive = get_archive(file, monkeypatch)
     assert archive.data
+    assert archive.data.properties.scan_rate.magnitude == 5
     assert 'linear' in str(archive.data.m_def).lower()
     assert round(archive.data.voltage[0].magnitude, 5) == -0.2
 

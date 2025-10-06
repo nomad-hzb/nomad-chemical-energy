@@ -9,6 +9,7 @@ import io
 
 import numpy as np
 import pandas as pd
+import scipy as sc
 from baseclasses.chemical_energy import (
     CVProperties,
     EISPropertiesWithData,
@@ -46,7 +47,7 @@ def parse_chi_txt_file(filedata):
             break
     data = [lines[i]]
     data.extend(lines[i + 2 :])
-    df = pd.read_csv(io.StringIO('\n'.join(data)))
+    df = pd.read_csv(io.StringIO('\n'.join(data)), sep=None, engine='python')
     df.rename(columns=lambda x: x.strip(), inplace=True)
     return metadata, df
 
@@ -57,6 +58,7 @@ def get_data_from_lsv_txt_file(filedata):
     sample_rate = float(metadata['Sample Interval (V)'])
     voltage = data['Potential/V']
     return {
+        'station': metadata['instrument_model'],
         'datetime': metadata['datetime'],
         'method': metadata['method'],
         'time': np.linspace(
@@ -75,6 +77,7 @@ def get_data_from_eis_txt_file(filedata):
     metadata, data = parse_chi_txt_file(filedata)
 
     return {
+        'station': metadata['instrument_model'],
         'datetime': metadata['datetime'],
         'method': metadata['method'],
         'frequency': data['Freq/Hz'],
@@ -88,10 +91,11 @@ def get_data_from_eis_txt_file(filedata):
 def get_data_from_cv_txt_file(filedata):
     metadata, data = parse_chi_txt_file(filedata)
     return {
+        'station': metadata['instrument_model'],
         'datetime': metadata['datetime'],
         'method': metadata['method'],
         'current': data['Current/A'],
-        'voltage': data['Potential/V'],
+        'voltage': data['Potential/V'] * ureg('V'),
         'p_lower': float(metadata['Low E (V)']) * ureg('V'),
         'p_upper': float(metadata['High E (V)']) * ureg('V'),
         'p_start': float(metadata['Init E (V)']) * ureg('V'),
@@ -101,9 +105,10 @@ def get_data_from_cv_txt_file(filedata):
 
 def set_chi_data_lsv(entry, d):
     entry.current = d['current']
+    entry.station = d['station']
     entry.time = d['time']
     entry.voltage = d['voltage']
-    entry.propertie = LSVProperties(
+    entry.properties = LSVProperties(
         scan_rate=d['scan_rate'],
         step_size=d['step_size'],
         initial_potential=d['p_start'],
@@ -114,14 +119,29 @@ def set_chi_data_lsv(entry, d):
 
 
 def set_chi_data_cv(entry, d):
+    entry.station = d['station']
     if d['datetime']:
         entry.datetime = try_convert_datetime(d['datetime'])
-    entry.cycles = [
-        VoltammetryCycleWithPlot(
-            current=d['current'].tolist(),
-            voltage=d['voltage'].tolist(),
+    cycle_indices = (
+        [0]
+        + list(
+            sc.signal.argrelextrema(
+                np.abs(np.array(d['voltage']) * ureg('V') - d['p_start']), np.less
+            )[0]
         )
-    ]
+        + [-1]
+    )
+    cycles = []
+    for i in range(len(cycle_indices) - 1):
+        cycles.append(
+            VoltammetryCycleWithPlot(
+                name=f'Cycle {i}',
+                current=d['current'][cycle_indices[i] : cycle_indices[i + 1]].tolist(),
+                voltage=d['voltage'][cycle_indices[i] : cycle_indices[i + 1]].tolist(),
+            )
+        )
+
+    entry.cycles = cycles
     entry.properties = CVProperties(
         initial_potential=d['p_start'],
         limit_potential_1=d['p_upper'],
@@ -131,6 +151,7 @@ def set_chi_data_cv(entry, d):
 
 
 def set_chi_data_eis(entry, d):
+    entry.station = d['station']
     entry.measurements = [
         EISPropertiesWithData(
             data=EISCycle(
