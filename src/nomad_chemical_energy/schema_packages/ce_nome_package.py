@@ -716,6 +716,7 @@ class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
             from baseclasses.helper.archive_builder.xas_archive import (
                 get_xas_archive,
             )
+
             get_xas_archive(data, dateline, self)
         if self.method is None:
             self.method = 'XAS Fluorescence'  # for backward compatibility to reprocess old entries
@@ -756,6 +757,7 @@ class Bessy2_KMC3_XASTransmission(XASWithSDD, EntryData):
             from baseclasses.helper.archive_builder.xas_archive import (
                 get_xas_archive,
             )
+
             get_xas_archive(data, dateline, self)
 
         super().normalize(archive, logger)
