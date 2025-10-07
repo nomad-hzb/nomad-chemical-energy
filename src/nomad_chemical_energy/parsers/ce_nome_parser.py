@@ -48,6 +48,7 @@ from nomad_chemical_energy.schema_packages.ce_nome_package import (
     Bessy2_KMC2_XASFluorescence,
     Bessy2_KMC2_XASTransmission,
     Bessy2_KMC3_XASFluorescence,
+    Bessy2_KMC3_XASTransmission,
     CE_NOME_Chronoamperometry,
     CE_NOME_Chronocoulometry,
     CE_NOME_Chronopotentiometry,
@@ -408,10 +409,17 @@ class XASParser(MatchingParser):
 class KMC3XASParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         file = mainfile.split('raw/')[-1]
-
-        entry = Bessy2_KMC3_XASFluorescence(data_file=file)
-        entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         file_name_with_folders = file.split('.')[0]
+
+        keywords = ['foil', 'reference', 'trans', 'transmission', 'tm', 'calibration']
+        if any(word.lower() in file_name_with_folders.lower() for word in keywords):
+            entry = Bessy2_KMC3_XASTransmission(data_file=file)
+            entry.method = 'XAS Transmission'
+        else:
+            entry = Bessy2_KMC3_XASFluorescence(data_file=file)
+            entry.method = 'XAS Fluorescence'
+
+        entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         entry.name = file_name_with_folders
         sample_id = file_name_with_folders.split('/')[-1][:24]
         set_sample_reference(archive, entry, sample_id)

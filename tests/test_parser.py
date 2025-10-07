@@ -244,6 +244,7 @@ def test_kmc3_parser_new_header(monkeypatch):
     assert archive.data.energy[0].magnitude == 8.18551
     assert len(archive.data.sdd_parameters[0].fluo) == 483
     assert round(archive.data.sdd_parameters[1].slope, 5) == 1.00108
+    assert archive.data.quality_annotation == 'ICR within specified bounds'
 
 
 def test_kmc3_insitu_biologic_parser(monkeypatch):

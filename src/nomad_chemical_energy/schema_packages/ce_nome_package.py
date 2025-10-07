@@ -666,6 +666,23 @@ class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
         super().normalize(archive, logger)
 
 
+def get_kmc3_data(file):
+    from nomad_chemical_energy.schema_packages.file_parser.xas_parser import (
+        get_xas_data,
+    )
+
+    prefixes = ['fluo', 'ICR', 'OCR', 'TLT', 'LT', 'RT']
+    header = ['monoE_eV', 'K00', 'K0', 'K1', 'K3'] + [
+        f'{p}.{i}' for p in prefixes for i in range(0, 13)
+    ]
+    first_row = file.readline()
+    if first_row.startswith('#'):
+        header = None
+    file.seek(0)  # reset cursor to use complete file (including first line)
+    data, dateline = get_xas_data(file, header)
+    return data, dateline
+
+
 class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
     m_def = Section(
         a_eln=dict(
@@ -695,19 +712,48 @@ class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
     def normalize(self, archive, logger):
         if self.data_file:
             with archive.m_context.raw_file(self.data_file, 'rt') as f:
-                from nomad_chemical_energy.schema_packages.file_parser.xas_parser import (
-                    get_xas_data,
-                )
+                data, dateline = get_kmc3_data(f)
+            from baseclasses.helper.archive_builder.xas_archive import (
+                get_xas_archive,
+            )
 
-                prefixes = ['fluo', 'ICR', 'OCR', 'TLT', 'LT', 'RT']
-                header = ['monoE_eV', 'K00', 'K0', 'K1', 'K3'] + [
-                    f'{p}.{i}' for p in prefixes for i in range(0, 13)
+            get_xas_archive(data, dateline, self)
+        if self.method is None:
+            self.method = 'XAS Fluorescence'  # for backward compatibility to reprocess old entries
+
+        super().normalize(archive, logger)
+
+
+class Bessy2_KMC3_XASTransmission(XASWithSDD, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=[
+                'lab_id',
+                'users',
+                'location',
+                'end_time',
+                'steps',
+                'instruments',
+                'results',
+            ],
+            properties=dict(
+                order=[
+                    'name',
+                    'data_file',
+                    'energy',
+                    'k0',
+                    'k1',
+                    'k3',
+                    'samples',
                 ]
-                first_row = f.readline()
-                if first_row.startswith('#'):
-                    header = None
-                f.seek(0)  # reset cursor to use complete f (including first line)
-                data, dateline = get_xas_data(f, header)
+            ),
+        )
+    )
+
+    def normalize(self, archive, logger):
+        if self.data_file:
+            with archive.m_context.raw_file(self.data_file, 'rt') as f:
+                data, dateline = get_kmc3_data(f)
             from baseclasses.helper.archive_builder.xas_archive import (
                 get_xas_archive,
             )
