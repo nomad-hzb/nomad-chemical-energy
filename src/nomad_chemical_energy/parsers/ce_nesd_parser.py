@@ -61,13 +61,13 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
+from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
+    parse_chi_txt_file,
+)
 from nomad_chemical_energy.schema_packages.file_parser.nesd_metadata_excel_parser import (
     get_reference_electrode,
     map_sample,
     map_setup,
-)
-from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
-    parse_chi_txt_file,
 )
 from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
     get_data_from_pssession_file,
