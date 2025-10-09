@@ -22,7 +22,7 @@ import os
 import numpy as np
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
-    CESample,
+    CENESDSample,
     Chronoamperometry,
     Chronopotentiometry,
     CyclicVoltammetry,
@@ -80,27 +80,20 @@ m_package = SchemaPackage()
 # %% ####################### Entities
 
 
-class CE_NESD_Sample(CESample, EntryData):
+class CE_NESD_Sample(CENESDSample, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['users', 'elemental_composition', 'components'],
+            hide=['users', 'elemental_composition', 'chemical_composition_or_formulas'],
             properties=dict(
                 order=[
                     'name',
                     'lab_id',
-                    'chemical_composition_or_formulas',
+                    'components',
                     'id_of_preparation_protocol',
                 ]
             ),
         ),
         label_quantity='sample_id',
-    )
-
-    active_area = Quantity(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007258'],
-        type=np.dtype(np.float64),
-        unit=('cm^2'),
-        a_eln=dict(component='NumberEditQuantity', defaultDisplayUnit='cm^2'),
     )
 
 

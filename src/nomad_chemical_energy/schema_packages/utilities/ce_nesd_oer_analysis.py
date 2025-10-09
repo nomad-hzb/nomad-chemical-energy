@@ -457,7 +457,7 @@ class NESD_OERAnalysis(Analysis):
 
         if self.inputs is not None and len(self.inputs) > 0:
             for sample in self.inputs[0].reference.samples:
-                if sample.reference.chemical_composition_or_formulas is not None:
+                if sample.reference.components is not None:
                     if not archive.results:
                         archive.results = Results()
                     if not archive.results.material:
@@ -465,10 +465,11 @@ class NESD_OERAnalysis(Analysis):
                     try:
                         from nomad.atomutils import Formula
 
-                        formula = Formula(
-                            sample.reference.chemical_composition_or_formulas
+                        formulas = ''.join(
+                            component.pure_substance.molecular_formula
+                            for component in sample.reference.components
                         )
-                        formula.populate(section=archive.results.material)
+                        Formula(formulas).populate(section=archive.results.material)
                     except Exception as e:
                         logger.warn('Could not analyse material', exc_info=e)
 

@@ -388,7 +388,7 @@ class CENESDMetadataExcelParser(MatchingParser):
             excel_data['Value'] = excel_data['Value'].apply(self.to_float_if_possible)
             mapping = dict(zip(excel_data.loc[:, 'Field'], excel_data.loc[:, 'Value']))
             map_setup(setup_entry, mapping)
-            map_sample(sample_entry, mapping)
+            map_sample(sample_entry, mapping, logger)
 
         ref_electrode_file_name = f'{file}_reference_electrode.archive.json'
         reference_electrode_entry = get_reference_electrode(mapping)
