@@ -48,7 +48,7 @@ def split_catalyst_mxene_materials(material_str):
     # remove any empty strings
     parts = [p for p in parts if p]
     # keep only strings that contain at least one letter
-    materials = [p.replace('x', '') for p in parts if re.search(r'[A-Za-z]', p)]
+    materials = [p.replace('Tx', '') for p in parts if re.search(r'[A-Za-z]', p)]
     return materials
 
 
