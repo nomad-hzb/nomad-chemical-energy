@@ -344,7 +344,8 @@ class NESD_OERAnalysis(Analysis):
         try:
             eis_entry = eis_refs[0].reference
             z_real_values = eis_entry.measurements[0].data.z_real
-            eis_value = z_real_values[0].to(ureg.ohm)
+            max_idx = np.argmax(eis_entry.measurements[0].data.frequency)
+            eis_value = z_real_values[max_idx].to(ureg.ohm)
             ir_compensation = eis_entry.setup.ir_compensation
         except AttributeError:
             return None
