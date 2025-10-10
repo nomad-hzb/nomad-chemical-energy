@@ -655,6 +655,7 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
 
                     d = get_data_from_isc_file(f.read())
                     set_zahner_data_isc(self, d)
+                    self.set_calculated_properties()
 
                 if os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (

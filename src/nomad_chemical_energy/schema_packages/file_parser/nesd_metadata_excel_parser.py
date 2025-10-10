@@ -48,7 +48,7 @@ def split_catalyst_mxene_materials(material_str):
     # remove any empty strings
     parts = [p for p in parts if p]
     # keep only strings that contain at least one letter
-    materials = [p for p in parts if re.search(r'[A-Za-z]', p)]
+    materials = [p.replace('x', '') for p in parts if re.search(r'[A-Za-z]', p)]
     return materials
 
 
@@ -67,19 +67,25 @@ def map_sample(entry, data_dict, logger):
             'Could not split given material into catalyst and mxene. Please check your "Active Material Common Name" in the metadata excel.'
         )
     material_catalyst, material_mxene = (materials + [None, None])[:2]
-    mass_catalyst = data_dict.get('Mass Catalyst') * ureg('µg')
-    mass_mxene = data_dict.get('Mass Mxene') * ureg('µg')
+    components = []
+    if data_dict.get('Mass Catalyst'):
+        components.append(
+            PureSubstanceComponent(
+                pure_substance=PureSubstanceSection(
+                    molecular_formula=material_catalyst
+                ),
+                mass=data_dict.get('Mass Catalyst', 0) * ureg('µg'),
+            )
+        )
+    if data_dict.get('Mass Mxene'):
+        components.append(
+            PureSubstanceComponent(
+                pure_substance=PureSubstanceSection(molecular_formula=material_mxene),
+                mass=data_dict.get('Mass Mxene', 0) * ureg('µg'),
+            )
+        )
 
-    entry.components = [
-        PureSubstanceComponent(
-            pure_substance=PureSubstanceSection(molecular_formula=material_catalyst),
-            mass=mass_catalyst,
-        ),
-        PureSubstanceComponent(
-            pure_substance=PureSubstanceSection(molecular_formula=material_mxene),
-            mass=mass_mxene,
-        ),
-    ]
+    entry.components = components
 
     entry.drying_temperature = data_dict.get('Drying temperature')
     entry.description = data_dict.get('Notes')
@@ -97,7 +103,7 @@ def get_environment(data_dict):
     )
     entry.substances = [
         SubstanceWithConcentration(
-            name=data_dict.get('Electrolyte: substance name'),
+            name=data_dict.get('Electrolyte: substance'),
             concentration_mmol_per_l=data_dict.get(
                 'Electrolyte: substance molar concentration'
             ),
@@ -106,7 +112,7 @@ def get_environment(data_dict):
             ),
             amount_relative=data_dict.get('Electrolyte: substance amount relative'),
             substance=PubChemPureSubstanceSectionCustom(
-                name=data_dict.get('Electrolyte: substance name'), load_data=False
+                name=data_dict.get('Electrolyte: substance'), load_data=False
             ),
         )
     ]
