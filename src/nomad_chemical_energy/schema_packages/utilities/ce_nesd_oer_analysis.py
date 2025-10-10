@@ -409,13 +409,14 @@ class NESD_OERAnalysis(Analysis):
         if not cv_refs and not lsv_refs:
             return
         overpotential, charge_density, overpotential_at_10 = None, None, None
-        samples = []
+        samples = None
         cv = self.get_cv(cv_refs)
         if cv:
             last_cv_cycle = cv.cycles[-1]
             scan_rate = cv.get('properties').scan_rate
             charge_density = self.get_charge_density(last_cv_cycle, scan_rate)
-            samples = cv.samples
+            if not samples:
+                samples = cv.samples
 
         lsv = self.get_lsv(lsv_refs)
         if lsv:
@@ -425,7 +426,8 @@ class NESD_OERAnalysis(Analysis):
                 lsv.current_density.to('mA/cm²').magnitude,
                 overpotential.to(ureg.V).magnitude,
             )
-            samples = lsv.samples
+            if not samples:
+                samples = lsv.samples
 
         result_entry = NESD_OERAnalysisResult(
             name=f'{("/" + cv.name).rsplit("/", 1)[0]}/OER_analysis'[1:],
