@@ -6,6 +6,7 @@ Created on Thu Jul 17 13:17:46 2025
 """
 
 import numpy as np
+import scipy as sc
 from baseclasses.chemical_energy.cyclicvoltammetry import CVProperties
 from baseclasses.chemical_energy.electrochemical_impedance_spectroscopy import (
     EISCycle,
@@ -132,13 +133,28 @@ def set_zahner_data_isw(entry, d):
 
 def set_zahner_data_isc(entry, d):
     entry.datetime = d['datetime']
-    entry.cycles = [
-        VoltammetryCycleWithPlot(
-            time=d['time'].tolist(),
-            current=d['current'].tolist(),
-            voltage=d['voltage'].tolist(),
+    cycle_indices = (
+        [0]
+        + list(
+            sc.signal.argrelextrema(
+                np.abs(np.array(d['voltage']) - d.get('p_start', 0)), np.less
+            )[0]
         )
-    ]
+        + [None]
+    )
+    cycles = []
+    for i in range(len(cycle_indices) - 1):
+        cycles.append(
+            VoltammetryCycleWithPlot(
+                name=f'Cycle {i}',
+                time=d['time'][cycle_indices[i] : cycle_indices[i + 1]].tolist(),
+                current=d['current'][cycle_indices[i] : cycle_indices[i + 1]].tolist(),
+                voltage=d['voltage'][cycle_indices[i] : cycle_indices[i + 1]].tolist(),
+            )
+        )
+
+    entry.cycles = cycles
+
     entry.properties = CVProperties(
         initial_potential=d['p_start'],
         final_potential=d['p_end'],
