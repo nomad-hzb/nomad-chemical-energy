@@ -18,6 +18,7 @@
 
 import datetime
 
+import pandas as pd
 from baseclasses.helper.utilities import (
     create_archive,
     get_entry_id_from_file_name,
@@ -33,6 +34,7 @@ from nomad.datamodel.metainfo.annotations import (
 )
 from nomad.datamodel.metainfo.basesections import (
     Activity,
+    Entity,
 )
 from nomad.metainfo import (
     Quantity,
@@ -51,13 +53,21 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_NESD_GalvanodynamicSweep,
     CE_NESD_LinearSweepVoltammetry,
     CE_NESD_Measurement,
+    CE_NESD_OERAnalysis,
     CE_NESD_OpenCircuitVoltage,
+    CE_NESD_Sample,
+    CE_NESD_Setup,
 )
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
 from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
     parse_chi_txt_file,
+)
+from nomad_chemical_energy.schema_packages.file_parser.nesd_metadata_excel_parser import (
+    get_reference_electrode,
+    map_sample,
+    map_setup,
 )
 from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
     get_data_from_pssession_file,
@@ -111,6 +121,16 @@ class ParsedPalmSensFile(EntryData):
 class ParsedLabVIEWFile(EntryData):
     activity = Quantity(
         type=Activity,
+        shape=['*'],
+        a_eln=ELNAnnotation(
+            component='ReferenceEditQuantity',
+        ),
+    )
+
+
+class ParsedMetadataExcelFile(EntryData):
+    entity = Quantity(
+        type=Entity,
         shape=['*'],
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
@@ -335,3 +355,70 @@ class CENESDPalmSensParser(MatchingParser):
             activity=[get_reference(archive.metadata.upload_id, entry_id)]
         )
         archive.metadata.entry_name = file
+
+
+class CENESDMetadataExcelParser(MatchingParser):
+    def to_float_if_possible(self, value):
+        if pd.isna(value):
+            return None
+        value_str = str(value).replace(',', '.')
+        try:
+            return float(value_str)
+        except ValueError:
+            return value_str
+
+    def parse(self, mainfile: str, archive: EntryArchive, logger):
+        file = mainfile.split('raw/')[-1]
+
+        if not file.endswith('.xlsx'):
+            return
+
+        setup_entry = CE_NESD_Setup()
+        setup_entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        folder_path = ('/' + file).rsplit('/', 1)[0]
+        setup_entry.name = f'{folder_path}/electrochemical_setup_and_electrolyte'[1:]
+
+        sample_entry = CE_NESD_Sample()
+        sample_entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+        sample_entry.name = f'{folder_path}/sample'[1:]
+
+        with archive.m_context.raw_file(file, 'rb') as f:
+            xls_file = pd.ExcelFile(f)
+            excel_data = pd.read_excel(xls_file, sheet_name='NESD Metadata')
+            excel_data['Value'] = excel_data['Value'].apply(self.to_float_if_possible)
+            mapping = dict(zip(excel_data.loc[:, 'Field'], excel_data.loc[:, 'Value']))
+            map_setup(setup_entry, mapping)
+            map_sample(sample_entry, mapping, logger)
+
+        ref_electrode_file_name = f'{file}_reference_electrode.archive.json'
+        reference_electrode_entry = get_reference_electrode(mapping)
+        create_archive(reference_electrode_entry, archive, ref_electrode_file_name)
+        ref_electrode_entry_id = get_entry_id_from_file_name(
+            ref_electrode_file_name, archive
+        )
+        setup_entry.reference_electrode = get_reference(
+            archive.metadata.upload_id, ref_electrode_entry_id
+        )
+
+        setup_file_name = f'{file}_setup.archive.json'
+        create_archive(setup_entry, archive, setup_file_name)
+        setup_entry_id = get_entry_id_from_file_name(setup_file_name, archive)
+
+        sample_file_name = f'{file}_sample.archive.json'
+        create_archive(sample_entry, archive, sample_file_name)
+        sample_entry_id = get_entry_id_from_file_name(sample_file_name, archive)
+
+        archive.data = ParsedMetadataExcelFile(
+            entity=[
+                get_reference(archive.metadata.upload_id, sample_entry_id),
+                get_reference(archive.metadata.upload_id, setup_entry_id),
+            ]
+        )
+        archive.metadata.entry_name = file
+
+        if mapping.get('Reaction type') == 'OER':
+            analysis_name = f'{folder_path}/oer_analysis'[1:]
+            analysis_file_name = f'{analysis_name}.archive.json'
+            create_archive(
+                CE_NESD_OERAnalysis(name=analysis_name), archive, analysis_file_name
+            )

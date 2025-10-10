@@ -257,6 +257,12 @@ def test_kmc3_insitu_biologic_parser(monkeypatch):
     assert round(archive.data.voltage[2].magnitude, 5) == -0.44958
 
 
+def test_nesd_metadata_excel_parser(monkeypatch):
+    file = 'nesd_metadata_example.xlsx'
+    archive = get_archive(file, monkeypatch)
+    assert archive.data
+
+
 def test_labview_nesd_parser(monkeypatch):
     file = 'labview_metadata_nesd.tdms'
     archive = get_archive(file, monkeypatch)

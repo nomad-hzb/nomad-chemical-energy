@@ -57,6 +57,15 @@ class CENESDPalmSensParserEntryPoint(ParserEntryPoint):
         return CENESDPalmSensParser(**self.dict())
 
 
+class CENESDMetadataExcelParserEntryPoint(ParserEntryPoint):
+    def load(self):
+        from nomad_chemical_energy.parsers.ce_nesd_parser import (
+            CENESDMetadataExcelParser,
+        )
+
+        return CENESDMetadataExcelParser(**self.dict())
+
+
 class CENOMEGamryParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import GamryParser
@@ -250,6 +259,16 @@ ce_nesd_palmsens_parser = CENESDPalmSensParserEntryPoint(
     description='Parser for CENESD csv files of PalmSens potentiostats',
     # mainfile_name_re=r'^.*\.csv',
     mainfile_name_re=r'^.*\.pssession',
+)
+
+ce_nesd_metadata_parser = CENESDMetadataExcelParserEntryPoint(
+    name='CENESDMetadataExcelParser',
+    description='Parser for CENESD xlsx files containing metadata about electrodes, electrolytes, sample information',
+    mainfile_name_re=r'.+\.xlsx',
+    mainfile_mime_re=r'^(application\/vnd\.(openxmlformats-officedocument\.spreadsheetml\.sheet|oasis\.opendocument\.spreadsheet))$',
+    mainfile_contents_dict={
+        'NESD Metadata': {'__has_all_keys': ['Field', 'Value', 'Unit']},
+    },
 )
 
 ce_nome_gamry_parser = CENOMEGamryParserEntryPoint(
