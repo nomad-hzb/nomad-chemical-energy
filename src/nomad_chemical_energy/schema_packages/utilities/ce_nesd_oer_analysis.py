@@ -458,8 +458,7 @@ class NESD_OERAnalysis(Analysis):
         ref_list = self.get_entries_from_folder(
             archive, archive.metadata.upload_id, folder, entry_type
         )
-        refs = [NESD_OERReference(name=name, reference=ref)
-                for [name, ref] in ref_list]
+        refs = [NESD_OERReference(name=name, reference=ref) for [name, ref] in ref_list]
         return refs
 
     def normalize(self, archive, logger):
