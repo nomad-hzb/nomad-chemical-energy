@@ -77,7 +77,11 @@ def map_sample(entry, data_dict, logger):
         component_catalyst.mass = (data_dict.get('Mass Catalyst', 0) * ureg('µg'),)
     if data_dict.get('Mass Mxene'):
         component_mxene.mass = data_dict.get('Mass Mxene', 0) * ureg('µg')
-    components = [component_catalyst, component_mxene]
+    components = []
+    if material_catalyst:
+        components.append(component_catalyst)
+    if material_mxene:
+        components.append(component_mxene)
     entry.components = components
 
     entry.drying_temperature = data_dict.get('Drying temperature')

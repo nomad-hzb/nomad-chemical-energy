@@ -494,7 +494,8 @@ class NESD_OERAnalysis(Analysis):
             if ir_drop_correction is not None:
                 self.set_resistance_in_inputs(ir_drop_correction, archive, logger)
                 output = self.get_oer_analysis_result(cv_refs, lsv_refs)
-                self.outputs = [output]
-                for oer_output in self.outputs:
-                    oer_output.normalize(archive, logger)
+                if output:
+                    self.outputs = [output]
+                    for oer_output in self.outputs:
+                        oer_output.normalize(archive, logger)
         super().normalize(archive, logger)
