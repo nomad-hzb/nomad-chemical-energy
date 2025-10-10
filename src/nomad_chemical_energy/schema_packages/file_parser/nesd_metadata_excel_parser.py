@@ -67,24 +67,17 @@ def map_sample(entry, data_dict, logger):
             'Could not split given material into catalyst and mxene. Please check your "Active Material Common Name" in the metadata excel.'
         )
     material_catalyst, material_mxene = (materials + [None, None])[:2]
-    components = []
+    component_catalyst = PureSubstanceComponent(
+        pure_substance=PureSubstanceSection(molecular_formula=material_catalyst)
+    )
+    component_mxene = PureSubstanceComponent(
+        pure_substance=PureSubstanceSection(molecular_formula=material_mxene)
+    )
     if data_dict.get('Mass Catalyst'):
-        components.append(
-            PureSubstanceComponent(
-                pure_substance=PureSubstanceSection(
-                    molecular_formula=material_catalyst
-                ),
-                mass=data_dict.get('Mass Catalyst', 0) * ureg('µg'),
-            )
-        )
+        component_catalyst.mass = (data_dict.get('Mass Catalyst', 0) * ureg('µg'),)
     if data_dict.get('Mass Mxene'):
-        components.append(
-            PureSubstanceComponent(
-                pure_substance=PureSubstanceSection(molecular_formula=material_mxene),
-                mass=data_dict.get('Mass Mxene', 0) * ureg('µg'),
-            )
-        )
-
+        component_mxene.mass = data_dict.get('Mass Mxene', 0) * ureg('µg')
+    components = [component_catalyst, component_mxene]
     entry.components = components
 
     entry.drying_temperature = data_dict.get('Drying temperature')

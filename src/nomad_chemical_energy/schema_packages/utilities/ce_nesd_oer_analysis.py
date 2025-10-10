@@ -352,11 +352,15 @@ class NESD_OERAnalysis(Analysis):
 
     def get_cv(self, cv_refs):
         # TODO maybe revisit and select not only first CV but also check for voltage range (>1.6V while ECSA is ~100mV in non-faradaic region)
+        if not cv_refs:
+            return None
         cv_entry = cv_refs[0].reference
         return cv_entry
 
     def get_lsv(self, lsv_refs):
         # TODO maybe revisit because in example only the one in 1mV is used
+        if not lsv_refs:
+            return None
         lsv_entry = lsv_refs[0].reference
         return lsv_entry
 
@@ -402,18 +406,26 @@ class NESD_OERAnalysis(Analysis):
         return overpotential
 
     def get_oer_analysis_result(self, cv_refs, lsv_refs):
+        if not cv_refs and not lsv_refs:
+            return
+        overpotential, charge_density, overpotential_at_10 = None, None, None
+        samples = []
         cv = self.get_cv(cv_refs)
-        last_cv_cycle = cv.cycles[-1]
-        scan_rate = cv.get('properties').scan_rate
-        charge_density = self.get_charge_density(last_cv_cycle, scan_rate)
+        if cv:
+            last_cv_cycle = cv.cycles[-1]
+            scan_rate = cv.get('properties').scan_rate
+            charge_density = self.get_charge_density(last_cv_cycle, scan_rate)
+            samples = cv.samples
 
         lsv = self.get_lsv(lsv_refs)
-        overpotential = self.get_overpotential(lsv)
-        overpotential_at_10 = np.interp(
-            10,
-            lsv.current_density.to('mA/cm²').magnitude,
-            overpotential.to(ureg.V).magnitude,
-        )
+        if lsv:
+            overpotential = self.get_overpotential(lsv)
+            overpotential_at_10 = np.interp(
+                10,
+                lsv.current_density.to('mA/cm²').magnitude,
+                overpotential.to(ureg.V).magnitude,
+            )
+            samples = lsv.samples
 
         result_entry = NESD_OERAnalysisResult(
             name=f'{("/" + cv.name).rsplit("/", 1)[0]}/OER_analysis'[1:],
@@ -421,19 +433,24 @@ class NESD_OERAnalysis(Analysis):
             charge_density=charge_density,
             overpotential=overpotential,
             overpotential_at_10mA_cm2=overpotential_at_10,
-            samples=cv.samples,
+            samples=samples,
         )
         result_entry.samples[0].name = result_entry.samples[0].reference.name
-        result_entry.set_charge_density_plot(
-            last_cv_cycle.voltage_rhe_compensated,
-            last_cv_cycle.current_density,
-            charge_density,
-        )
-        result_entry.set_overpotential_plot(
-            overpotential,
-            lsv.current_density,
-        )
-        result_entry.set_tafel_slopes(lsv.current_density, lsv.voltage_rhe_compensated)
+        if charge_density:
+            result_entry.set_charge_density_plot(
+                last_cv_cycle.voltage_rhe_compensated,
+                last_cv_cycle.current_density,
+                charge_density,
+            )
+        if overpotential:
+            result_entry.set_overpotential_plot(
+                overpotential,
+                lsv.current_density,
+            )
+        if lsv:
+            result_entry.set_tafel_slopes(
+                lsv.current_density, lsv.voltage_rhe_compensated
+            )
 
         return result_entry
 
