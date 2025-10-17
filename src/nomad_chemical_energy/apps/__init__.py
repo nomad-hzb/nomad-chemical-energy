@@ -19,6 +19,7 @@ from nomad.config.models.ui import (
 
 from nomad_chemical_energy.apps.amcc_reproducibility_app import amcc_reproducibility_app
 from nomad_chemical_energy.apps.catlab_combinatorial_app import catlab_combinatorial_app
+from nomad_chemical_energy.apps.catlab_pixel_app import catlab_pixel_app
 from nomad_chemical_energy.apps.necc_find_app import necc_find_experiments_app
 from nomad_chemical_energy.apps.nesd_oer_app import nesd_oer_app
 from nomad_chemical_energy.apps.nome_oer_cp_app import nome_oer_cp_app
@@ -138,6 +139,12 @@ catlab_combinatorial_library_app = AppEntryPoint(
     name='Combinatorial Samples',
     description='Provides filters to investigate combinatorial libraries.',
     app=catlab_combinatorial_app,
+)
+
+catlab_pixel_app = AppEntryPoint(
+    name='Combinatorial Catalysis Libraries composition',
+    description='Provides filters to investigate combinatorial library pixels.',
+    app=catlab_pixel_app,
 )
 
 necc_find_app = AppEntryPoint(
