@@ -52,10 +52,8 @@ catlab_pixel_app = App(
             'optimade': FilterMenu(label='Optimade', level=0, size='m'),
         }
     ),
-
     dashboard={
         'widgets': [
-
             # Element selector (periodic table)
             {
                 'type': 'periodictable',
@@ -69,8 +67,6 @@ catlab_pixel_app = App(
                     'sm': {'minH': 3, 'minW': 3, 'h': 9, 'w': 12, 'y': 0, 'x': 0},
                 },
             },
-
-
             # library selector (terms)
             {
                 'type': 'terms',
@@ -85,8 +81,6 @@ catlab_pixel_app = App(
                     'sm': {'minH': 3, 'minW': 3, 'h': 6, 'w': 6, 'y': 0, 'x': 6},
                 },
             },
-
-
             # thickness selector (histogram)
             {
                 'type': 'histogram',
@@ -111,8 +105,6 @@ catlab_pixel_app = App(
                     'sm': {'minH': 3, 'minW': 3, 'h': 3, 'w': 8, 'y': 0, 'x': 0},
                 },
             },
-
-
             # atomic fraction selector (histogram)
             {
                 'type': 'histogram',
@@ -136,8 +128,6 @@ catlab_pixel_app = App(
                     'sm': {'minH': 3, 'minW': 3, 'h': 3, 'w': 8, 'y': 0, 'x': 0},
                 },
             },
-
-
             # Atomic fraction Ti (scatterplot)
             {
                 'type': 'scatterplot',
@@ -169,10 +159,8 @@ catlab_pixel_app = App(
                     'lg': {'minH': 6, 'minW': 6, 'h': 6, 'w': 6, 'y': 6, 'x': 4},
                     'md': {'minH': 3, 'minW': 3, 'h': 6, 'w': 6, 'y': 42, 'x': 0},
                     'sm': {'minH': 3, 'minW': 3, 'h': 6, 'w': 6, 'y': 0, 'x': 10},
-
                 },
             },
-
             # Atomic fraction Co (scatterplot)
             {
                 'type': 'scatterplot',
@@ -204,11 +192,8 @@ catlab_pixel_app = App(
                     'lg': {'minH': 6, 'minW': 6, 'h': 6, 'w': 6, 'y': 6, 'x': 10},
                     'md': {'minH': 3, 'minW': 3, 'h': 6, 'w': 6, 'y': 36, 'x': 0},
                     'sm': {'minH': 3, 'minW': 3, 'h': 6, 'w': 6, 'y': 0, 'x': 10},
-
-
                 },
             },
-
             # thickness (scatterplot)
             {
                 'type': 'scatterplot',
@@ -219,7 +204,6 @@ catlab_pixel_app = App(
                         'title': 'Thickness',
                         'unit': 'nm',
                         'search_quantity': 'data.thickness.value#nomad_chemical_energy.schema_packages.hzb_catlab_package.CatLab_XYSample',
-
                         'scale': 'linear',
                     },
                 },
@@ -244,8 +228,6 @@ catlab_pixel_app = App(
                     'sm': {'minH': 3, 'minW': 3, 'h': 6, 'w': 6, 'y': 0, 'x': 10},
                 },
             },
-
-
             # Atomic fraction Pd (scatterplot)
             {
                 'type': 'scatterplot',
@@ -279,7 +261,6 @@ catlab_pixel_app = App(
                     'sm': {'minH': 3, 'minW': 3, 'h': 6, 'w': 6, 'y': 0, 'x': 10},
                 },
             },
-
             # Atomic fraction Ag (scatterplot)
             {
                 'type': 'scatterplot',
@@ -313,10 +294,6 @@ catlab_pixel_app = App(
                     'sm': {'minH': 3, 'minW': 3, 'h': 6, 'w': 6, 'y': 0, 'x': 10},
                 },
             },
-
-
-
-
         ]
     },
 )
