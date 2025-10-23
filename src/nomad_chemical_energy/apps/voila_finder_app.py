@@ -119,7 +119,7 @@ voila_finder_app = App(
                     'xl': Layout(minH=3, minW=3, h=6, w=6, y=0, x=0),
                     'xxl': Layout(minH=3, minW=3, h=6, w=6, y=0, x=0),
                 },
-                search_quantity=f'data.outputs.reaction_type#{schema_name}',
+                search_quantity='results.eln.tags',
                 showinput=True,
                 scale='linear',
             ),
