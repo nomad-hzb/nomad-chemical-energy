@@ -5,16 +5,7 @@ from nomad.config.models.ui import (
     Columns,
     FilterMenu,
     FilterMenus,
-    FilterMenuSizeEnum,
     Filters,
-    Format,
-    ModeEnum,
-    RowActionNorth,
-    RowActions,
-    RowActionURL,
-    RowDetails,
-    Rows,
-    RowSelection,
 )
 
 from nomad_chemical_energy.apps.amcc_reproducibility_app import amcc_reproducibility_app

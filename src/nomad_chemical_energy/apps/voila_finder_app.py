@@ -1,14 +1,11 @@
 from nomad.config.models.ui import (
     App,
-    Axis,
     Column,
     Dashboard,
     FilterMenu,
     FilterMenus,
-    Filters,
-    FilterMenu,
-    FilterMenus,
     FilterMenuSizeEnum,
+    Filters,
     Format,
     Layout,
     ModeEnum,
@@ -18,9 +15,6 @@ from nomad.config.models.ui import (
     RowDetails,
     Rows,
     RowSelection,
-    WidgetHistogram,
-    WidgetPeriodicTable,
-    WidgetScatterPlot,
     WidgetTerms,
 )
 
@@ -52,9 +46,7 @@ voila_finder_app = App(
     # results to the wanted subset. Any available search filter can be
     # targeted here. This example makes sure that only entries that use
     # MySchema are included.
-    filters_locked={
-        'section_defs.definition_qualified_name': f'{schema_name}'
-    },
+    filters_locked={'section_defs.definition_qualified_name': f'{schema_name}'},
     filter_menus=FilterMenus(
         options={
             'custom_quantities': FilterMenu(
@@ -67,7 +59,10 @@ voila_finder_app = App(
     columns=[
         Column(quantity=f'data.name#{schema_name}', selected=True),
         Column(
-            quantity='entry_type', label='Entry type', align='left', selected=False,
+            quantity='entry_type',
+            label='Entry type',
+            align='left',
+            selected=False,
         ),
         Column(
             quantity='entry_create_time',

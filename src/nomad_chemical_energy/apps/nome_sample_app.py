@@ -5,22 +5,13 @@ from nomad.config.models.ui import (
     Dashboard,
     FilterMenu,
     FilterMenus,
-    Filters,
-    FilterMenu,
-    FilterMenus,
     FilterMenuSizeEnum,
+    Filters,
     Format,
     Layout,
     ModeEnum,
-    RowActionNorth,
-    RowActions,
-    RowActionURL,
-    RowDetails,
-    Rows,
-    RowSelection,
     WidgetHistogram,
     WidgetPeriodicTable,
-    WidgetScatterPlot,
     WidgetTerms,
 )
 
@@ -86,20 +77,40 @@ nome_sample_app = App(
     # results to the wanted subset. Any available search filter can be
     # targeted here. This example makes sure that only entries that use
     # MySchema are included.
-    filters_locked={
-        'section_defs.definition_qualified_name': f'{schema}'
-    },
+    filters_locked={'section_defs.definition_qualified_name': f'{schema}'},
     filter_menus=FilterMenus(
         options={
-            'material': FilterMenu(label='Material', level=0,),
-            'elements': FilterMenu(label='Elements / Formula', level=1, size=FilterMenuSizeEnum.XL,),
-            'eln': FilterMenu(label='Electronic Lab Notebook', level=0,),
-            'custom_quantities': FilterMenu(
-                label='User Defined Quantities', level=0, size=FilterMenuSizeEnum.L,
+            'material': FilterMenu(
+                label='Material',
+                level=0,
             ),
-            'author': FilterMenu(label='Author', size=FilterMenuSizeEnum.M,),
-            'metadata': FilterMenu(label='Visibility / IDs', level=0,),
-            'optimade': FilterMenu(label='Optimade', level=0, size=FilterMenuSizeEnum.M,),
+            'elements': FilterMenu(
+                label='Elements / Formula',
+                level=1,
+                size=FilterMenuSizeEnum.XL,
+            ),
+            'eln': FilterMenu(
+                label='Electronic Lab Notebook',
+                level=0,
+            ),
+            'custom_quantities': FilterMenu(
+                label='User Defined Quantities',
+                level=0,
+                size=FilterMenuSizeEnum.L,
+            ),
+            'author': FilterMenu(
+                label='Author',
+                size=FilterMenuSizeEnum.M,
+            ),
+            'metadata': FilterMenu(
+                label='Visibility / IDs',
+                level=0,
+            ),
+            'optimade': FilterMenu(
+                label='Optimade',
+                level=0,
+                size=FilterMenuSizeEnum.M,
+            ),
         }
     ),
     # Controls the default dashboard shown in the search interface
