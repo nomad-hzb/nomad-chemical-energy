@@ -53,12 +53,16 @@ class ParsedGeneralProcessFile(EntryData):
 
 class GeneralProcessParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-        file_name = mainfile.split('/')[-1]
+        file_path = mainfile.split('/raw/')[-1]
+        file_name = file_path.split('/')[-1]
         sample_id = file_name.split('.')[0].split('-')[0]
 
         entry = HZB_GeneralProcess()
         entry.name = file_name
-        entry.data_file = file_name
+        entry.data_file = file_path
+        file_name_split = file_name.split('.')
+        if len(file_name_split) > 2:
+            entry.method = file_name_split[-2]
 
         archive.metadata.entry_name = file_name
         set_sample_reference(archive, entry, sample_id, archive.metadata.upload_id)
