@@ -34,9 +34,7 @@ necc_compare_app = App(
     # entire package, or just a single schema from a package.
     filters=Filters(
         include=[
-            '*#{schema}',
-            #'*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode',
-            #'*#nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe',
+            f'*#{schema}',
         ]
     ),
     # Controls which columns are shown in the results table
@@ -131,13 +129,15 @@ necc_compare_app = App(
                 scale='linear',
             ),
             WidgetHistogram(
-                title='Minimal FE per gas (in %)',
+                title='Maximal FE per gas (in %)',
                 show_input=True,
                 autorange=False,
                 nbins=30,
                 scale='1/4',
                 x=Axis(
-                    search_quantity=f'data.fe_results.gas_results.minimum_fe#{schema}'
+                    search_quantity=f'data.fe_results.gas_results.maximum_fe#{schema}',
+                    title='Faradaic Efficiency',
+                    unit='percent',
                 ),
                 layout={
                     'sm': Layout(minH=3, minW=3, h=6, w=12, y=18, x=0),
@@ -210,7 +210,7 @@ necc_compare_app = App(
                 ),
                 y=Axis(
                     title='CO FE',
-                    search_quantity=f'data.fe_results.gas_results[0].minimum_fe#{schema}',
+                    search_quantity=f'data.fe_results.gas_results[0].maximum_fe#{schema}',
                     unit='percent',
                     scale='linear',
                 ),
@@ -237,7 +237,7 @@ necc_compare_app = App(
                 ),
                 y=Axis(
                     title='CH4 FE',
-                    search_quantity=f'data.fe_results.gas_results[1].minimum_fe#{schema}',
+                    search_quantity=f'data.fe_results.gas_results[1].maximum_fe#{schema}',
                     unit='percent',
                     scale='linear',
                 ),
@@ -264,7 +264,7 @@ necc_compare_app = App(
                 ),
                 y=Axis(
                     title='C2H4 FE',
-                    search_quantity=f'data.fe_results.gas_results[2].minimum_fe#{schema}',
+                    search_quantity=f'data.fe_results.gas_results[2].maximum_fe#{schema}',
                     unit='percent',
                     scale='linear',
                 ),
@@ -291,7 +291,7 @@ necc_compare_app = App(
                 ),
                 y=Axis(
                     title='H2 FE',
-                    search_quantity=f'data.fe_results.gas_results[3].minimum_fe#{schema}',
+                    search_quantity=f'data.fe_results.gas_results[3].maximum_fe#{schema}',
                     unit='percent',
                     scale='linear',
                 ),
