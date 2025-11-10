@@ -148,6 +148,46 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         )
     )
 
+    def make_total_fe_figure(self):
+        fe_dict = {}
+        for obj in self.hplc:
+            for liquid in getattr(obj, 'liquid_fe', []):
+                compound = getattr(liquid, 'compound', None)
+                fe = getattr(liquid, 'faradaic_efficiency', 0)
+                if compound is not None:
+                    fe_dict[compound] = fe_dict.get(compound, 0) + fe
+        for gas in self.fe_results.gas_results:
+            compound = getattr(gas, 'gas_type', None)
+            fe = getattr(gas, 'faradaic_efficiency', 0)
+            fe_dict[compound] = np.mean(abs(fe))
+
+        fig = go.Figure()
+
+        for label, value in fe_dict.items():
+            fig.add_trace(
+                go.Bar(
+                    name=label,
+                    x=['Total FE'],
+                    y=[value],
+                    text=[round(value.magnitude, 1)],
+                    textposition='inside',
+                    hoverinfo='y+name',
+                )
+            )
+
+        fig.update_layout(
+            barmode='stack',
+            xaxis_title='',
+            yaxis_title='Faradaic Efficiency [%]',
+            title='Total Faradaic Efficiency',
+            showlegend=True,
+            hovermode='x unified',
+            dragmode='pan',
+            xaxis=dict(fixedrange=False),
+            yaxis=dict(fixedrange=False),
+        )
+        return fig
+
     def make_fe_figure(self, date_strings):
         fig = go.Figure(
             data=[
@@ -251,6 +291,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         fig.update_layout(
             title_text='Current and Voltage over Time',
             showlegend=True,
+            hovermode='x unified',
             xaxis={'fixedrange': False},
         )
         return fig
@@ -448,6 +489,11 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                 label='Current and Voltage Figure', figure=fig2.to_plotly_json()
             ),
         ]
+        if self.hplc:
+            fig3 = self.make_total_fe_figure()
+            self.figures.append(
+                PlotlyFigure(label='Total FE Figure', figure=fig3.to_plotly_json()),
+            )
         if self.thermocouple.datetime is not None:
             thermocouple_df = pd.DataFrame(
                 {
