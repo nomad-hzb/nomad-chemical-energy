@@ -8,6 +8,7 @@ from nomad.config.models.ui import (
     Filters,
     Format,
     Layout,
+    Markers,
     ModeEnum,
     WidgetHistogram,
     WidgetScatterPlot,
@@ -204,16 +205,18 @@ necc_compare_app = App(
                 x=Axis(
                     search_quantity=f'data.properties.anolyte_concentration#{schema}',
                     title='Anolyte Concentration',
-                    unit='mol / l',
+                    unit='mol/l',
                     scale='linear',
                 ),
                 y=Axis(
                     title='CO FE',
                     search_quantity=f'data.fe_results.gas_results[0].minimum_fe#{schema}',
-                    unit='%',
+                    unit='percent',
                     scale='linear',
                 ),
-                color=f'data.properties.anolyte_type#{schema}',
+                markers=Markers(
+                    color=Axis(search_quantity=f'data.properties.anolyte_type#{schema}')
+                ),
                 size=3000,  # maximum number of entries loaded
                 layout={
                     'sm': Layout(minH=3, minW=3, h=6, w=12, y=24, x=0),
@@ -229,16 +232,18 @@ necc_compare_app = App(
                 x=Axis(
                     search_quantity=f'data.properties.anolyte_concentration#{schema}',
                     title='Anolyte Concentration',
-                    unit='mol / l',
+                    unit='mol/l',
                     scale='linear',
                 ),
                 y=Axis(
                     title='CH4 FE',
                     search_quantity=f'data.fe_results.gas_results[1].minimum_fe#{schema}',
-                    unit='%',
+                    unit='percent',
                     scale='linear',
                 ),
-                color=f'data.properties.anolyte_type#{schema}',
+                markers=Markers(
+                    color=Axis(search_quantity=f'data.properties.anolyte_type#{schema}')
+                ),
                 size=3000,  # maximum number of entries loaded
                 layout={
                     'sm': Layout(minH=3, minW=3, h=6, w=12, y=30, x=0),
@@ -254,16 +259,18 @@ necc_compare_app = App(
                 x=Axis(
                     search_quantity=f'data.properties.anolyte_concentration#{schema}',
                     title='Anolyte Concentration',
-                    unit='mol / l',
+                    unit='mol/l',
                     scale='linear',
                 ),
                 y=Axis(
                     title='C2H4 FE',
                     search_quantity=f'data.fe_results.gas_results[2].minimum_fe#{schema}',
-                    unit='%',
+                    unit='percent',
                     scale='linear',
                 ),
-                color=f'data.properties.anolyte_type#{schema}',
+                markers=Markers(
+                    color=Axis(search_quantity=f'data.properties.anolyte_type#{schema}')
+                ),
                 size=3000,  # maximum number of entries loaded
                 layout={
                     'sm': Layout(minH=3, minW=3, h=6, w=12, y=36, x=0),
@@ -279,16 +286,18 @@ necc_compare_app = App(
                 x=Axis(
                     search_quantity=f'data.properties.anolyte_concentration#{schema}',
                     title='Anolyte Concentration',
-                    unit='mol / l',
+                    unit='mol/l',
                     scale='linear',
                 ),
                 y=Axis(
                     title='H2 FE',
                     search_quantity=f'data.fe_results.gas_results[3].minimum_fe#{schema}',
-                    unit='%',
+                    unit='percent',
                     scale='linear',
                 ),
-                color=f'data.properties.anolyte_type#{schema}',
+                markers=Markers(
+                    color=Axis(search_quantity=f'data.properties.anolyte_type#{schema}')
+                ),
                 size=3000,  # maximum number of entries loaded
                 layout={
                     'sm': Layout(minH=3, minW=3, h=6, w=12, y=42, x=0),
