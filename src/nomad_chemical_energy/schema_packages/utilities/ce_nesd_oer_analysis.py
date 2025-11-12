@@ -44,72 +44,6 @@ class NESD_OERReference(SectionReference):
     )
 
 
-class NESD_OERComparisonResult(AnalysisResult):
-    # TODO find logic for the analysis where we compare the repeated experiments and select the measurements
-    #  that are closest to the mean (regarding folder leves this would be one level above the NESD_OERAnalysisResult)
-    charge_densities = Quantity(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007253'],
-        type=np.dtype(np.float64),
-        shape=['*'],
-        unit=('mC/cm^2'),
-    )
-    overpotentials = Quantity(
-        type=np.dtype(np.float64),
-        description='overpotential at 10 mA/cm²',
-        shape=['*'],
-        unit=('mV'),
-    )
-    mean_charge_density = Quantity(
-        type=np.dtype(np.float64),
-        unit=('mC/cm^2'),
-    )
-    std_dev_charge_density = Quantity(
-        type=np.dtype(np.float64),
-        description='standard deviation of charge densities',
-        unit=('mC/cm^2'),
-    )
-    mean_overpotential = Quantity(
-        type=np.dtype(np.float64),
-        description='mean of overpotentials at 10 mA/cm²',
-        unit=('mV'),
-    )
-    std_dev_overpotential = Quantity(
-        type=np.dtype(np.float64),
-        description='standard deviation of overpotentials at 10 mA/cm²',
-        unit=('mV'),
-    )
-    reaction_type = Quantity(
-        type=str,
-        default='OER',
-    )
-    samples = SubSection(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0005013'],
-        section_def=CompositeSystemReference,
-        repeats=True,
-    )
-    selected_inputs = SubSection(
-        section_def=NESD_OERReference,
-        repeats=True,
-    )
-
-    def calculate_statistics(self, quantity, quantity_name):
-        supported_quantities = {
-            'charge_density',
-            'overpotential',
-        }
-        if quantity_name not in supported_quantities:
-            return
-        if quantity is None:
-            return
-        setattr(self, f'mean_{quantity_name}', np.mean(quantity))
-        setattr(self, f'std_dev_{quantity_name}', np.std(quantity))
-
-    def normalize(self, archive, logger):
-        self.calculate_statistics(self.charge_densities, 'charge_density')
-        self.calculate_statistics(self.overpotentials, 'overpotential')
-        super().normalize(archive, logger)
-
-
 class NESD_OERAnalysisResult(PlotSection, AnalysisResult):
     m_def = Section(a_eln=dict(overview=True))
     charge_density = Quantity(
@@ -502,3 +436,89 @@ class NESD_OERAnalysis(Analysis):
                     for oer_output in self.outputs:
                         oer_output.normalize(archive, logger)
         super().normalize(archive, logger)
+
+
+class NESD_OERAnalysisReference(SectionReference):
+    reference = Quantity(
+        type=Reference(NESD_OERAnalysis.m_def),
+        a_eln=dict(
+            component='ReferenceEditQuantity',
+            label='NESD OER Analysis',
+        ),
+    )
+
+
+class NESD_OERComparisonResult(AnalysisResult):
+    charge_densities = Quantity(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0007253'],
+        type=np.dtype(np.float64),
+        shape=['*'],
+        unit=('mC/cm^2'),
+    )
+    overpotentials = Quantity(
+        type=np.dtype(np.float64),
+        description='overpotential at 10 mA/cm²',
+        shape=['*'],
+        unit=('mV'),
+    )
+    mean_charge_density = Quantity(
+        type=np.dtype(np.float64),
+        unit=('mC/cm^2'),
+    )
+    std_dev_charge_density = Quantity(
+        type=np.dtype(np.float64),
+        description='standard deviation of charge densities',
+        unit=('mC/cm^2'),
+    )
+    mean_overpotential = Quantity(
+        type=np.dtype(np.float64),
+        description='mean of overpotentials at 10 mA/cm²',
+        unit=('mV'),
+    )
+    std_dev_overpotential = Quantity(
+        type=np.dtype(np.float64),
+        description='standard deviation of overpotentials at 10 mA/cm²',
+        unit=('mV'),
+    )
+    reaction_type = Quantity(
+        type=str,
+        default='OER',
+    )
+    samples = SubSection(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0005013'],
+        section_def=CompositeSystemReference,
+        repeats=True,
+    )
+    selected_electrode_charge_density = SubSection(
+        section_def=NESD_OERReference,
+    )
+    selected_electrode_overpotential = SubSection(
+        section_def=NESD_OERReference,
+    )
+
+    def calculate_statistics(self, quantity, quantity_name):
+        supported_quantities = {
+            'charge_density',
+            'overpotential',
+        }
+        if quantity_name not in supported_quantities:
+            return
+        if quantity is None:
+            return
+        setattr(self, f'mean_{quantity_name}', np.mean(quantity))
+        setattr(self, f'std_dev_{quantity_name}', np.std(quantity))
+
+    def normalize(self, archive, logger):
+        self.calculate_statistics(self.charge_densities, 'charge_density')
+        self.calculate_statistics(self.overpotentials, 'overpotential')
+        super().normalize(archive, logger)
+
+
+class NESD_OERCompareReplicates(Analysis):
+    m_def = Section(label_quantity='name')
+
+    inputs = Analysis.inputs.m_copy()
+    inputs.section_def = NESD_OERAnalysisReference
+
+    outputs = Analysis.outputs.m_copy()
+    outputs.section_def = NESD_OERComparisonResult
