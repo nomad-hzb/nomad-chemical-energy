@@ -62,6 +62,7 @@ from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
 )
 from nomad_chemical_energy.schema_packages.utilities.ce_nesd_oer_analysis import (
     NESD_OERAnalysis,
+    NESD_OERCompareReplicates,
 )
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
     make_bode_plot,
@@ -1225,6 +1226,15 @@ class CE_NESD_PEIS(
 
 
 class CE_NESD_OERAnalysis(NESD_OERAnalysis, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['location', 'lab_id', 'description', 'method', 'steps'],
+            properties=dict(order=['name']),
+        )
+    )
+
+
+class CE_NESD_OERCompareReplicates(NESD_OERCompareReplicates, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['location', 'lab_id', 'description', 'method', 'steps'],
