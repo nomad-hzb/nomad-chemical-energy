@@ -63,6 +63,7 @@ def set_monkey_patch(monkeypatch):
         'LSVCA.DTA',
         'LSV.DTA',
         'necc_test_no_properties.xlsx',
+        'NOME_RRDE_CVCA.DTA',
         'OCP.DTA',
         'P-O2D109.pump.csv',
         'test1234.test2.txt',
@@ -139,6 +140,23 @@ def get_archive(file_base, monkeypatch):
         break
     normalize_all(measurement_archive)
     return measurement_archive
+
+
+def get_multiple_archives(file_base, monkeypatch):
+    set_monkey_patch(monkeypatch)
+    file_name = os.path.join('tests', 'data', file_base)
+    parse(file_name)[0]
+    measurement_archive_list = []
+    for file in os.listdir(os.path.join('tests/data')):
+        if 'archive.json' not in file or file_base.replace('#', 'run') not in file:
+            continue
+        measurement = os.path.join('tests', 'data', file)
+        measurement_archive = parse(measurement)[0]
+        if os.path.exists(measurement):
+            os.remove(measurement)
+            measurement_archive_list.append(measurement_archive)
+            normalize_all(measurement_archive)
+    return measurement_archive_list
 
 
 def test_biologic_eclab_constC_parser(monkeypatch):
@@ -226,6 +244,23 @@ def test_gamry_CV_parser(monkeypatch):
     assert archive.data.properties.limit_potential_1.magnitude == 0.5
 
 
+def test_gamry_RRDE_parser(monkeypatch):
+    file = 'NOME_RRDE_CVCA.DTA'
+    cv_archive, ca_archive = get_multiple_archives(file, monkeypatch)
+    assert ca_archive.data
+    assert ca_archive.data.method == 'Chronoamperometry'
+    assert ca_archive.data.function == 'Generator'
+    assert round(ca_archive.data.current[-1].magnitude, 4) == -0.0028
+    assert cv_archive.data
+    assert cv_archive.data.properties
+    assert cv_archive.data.method == 'Cyclic Voltammetry'
+    assert cv_archive.data.function == 'Detector'
+    assert cv_archive.data.cycles[0].voltage[0]
+    assert cv_archive.data.cycles[-1].time[-1].magnitude == 59.4007
+    assert cv_archive.data.atmosphere[0].temperature.magnitude == 25
+    assert cv_archive.data.properties.limit_potential_1.magnitude == -1.0402
+
+
 def test_kmc3_parser(monkeypatch):
     file = 'xas_kmc3_example.001'
     archive = get_archive(file, monkeypatch)
@@ -259,8 +294,8 @@ def test_kmc3_insitu_biologic_parser(monkeypatch):
 
 def test_nesd_metadata_excel_parser(monkeypatch):
     file = 'nesd_metadata_example.xlsx'
-    archive = get_archive(file, monkeypatch)
-    assert archive.data
+    archive_list = get_multiple_archives(file, monkeypatch)
+    assert len(archive_list) == 3
 
 
 def test_labview_nesd_parser(monkeypatch):

@@ -55,6 +55,8 @@ def _read_curve_data(fid, curve_length) -> tuple:
         cur_line = fid.readline().strip()
         if fid.tell() == pos:
             break
+    if 'CURVE' in cur_line:
+        fid.seek(pos)  # jump back to CURVE line
     try:
         curve = pd.read_csv(StringIO(curve), delimiter='\t', header=0, index_col=0)
     except Exception:
@@ -126,7 +128,7 @@ def get_header_and_data(f):
     _curves = {}
 
     pos = 0
-    cur_line = f.readline().split('\t')
+    f.readline().split('\t')  # consumes first line ('EXPLAIN')
     while True:
         if f.tell() == pos:
             break
@@ -142,13 +144,28 @@ def get_header_and_data(f):
                     get_curve(f, _header, _curve_units, table_length)
                 ]
             elif 'CURVE' in cur_line[0]:
+                curve_method = ''.join(x for x in cur_line[0] if not x.isdigit())
                 curves = []
                 while True:
+                    curve_start_pos = f.tell()
+                    cur_line = f.readline().strip().split('\t')
+                    if 'CURVE' in cur_line[0]:
+                        if curve_method != ''.join(
+                            x for x in cur_line[0] if not x.isdigit()
+                        ):
+                            # new curve method should not be appended
+                            f.seek(curve_start_pos)
+                            break
+                    else:
+                        # if we consumed header of curve table we should jump back
+                        f.seek(curve_start_pos)
                     curve = get_curve(f, _header, _curve_units)
                     if curve is None:
                         break
                     curves.append(curve)
-                _curves[''.join(x for x in cur_line[0] if not x.isdigit())] = curves
+                _curves[curve_method] = curves
+            if len(cur_line) < 2:
+                break
             # data format: key, type, value
             if cur_line[0].strip() in ['METHOD']:
                 _header[cur_line[0]] = cur_line[1]
