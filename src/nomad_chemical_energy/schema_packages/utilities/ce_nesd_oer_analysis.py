@@ -448,7 +448,7 @@ class NESD_OERAnalysisReference(SectionReference):
     )
 
 
-class NESD_OERComparisonResult(AnalysisResult):
+class NESD_OERComparisonResult(PlotSection, AnalysisResult):
     charge_densities = Quantity(
         links=['https://w3id.org/nfdi4cat/voc4cat_0007253'],
         type=np.dtype(np.float64),
