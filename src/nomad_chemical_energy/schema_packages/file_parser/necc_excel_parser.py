@@ -22,11 +22,22 @@
 
 import pandas as pd
 from baseclasses.chemical_energy import (
+    CENECCElectrode,
+    CENECCElectrodeID,
+    CENECCElectrodeRecipe,
     GasFEResults,
+    NECCExperimentalProperties,
     NECCFeedGas,
     NECCPotentiostatMeasurement,
     PotentiometryGasChromatographyResults,
+    SubstrateProperties,
 )
+from baseclasses.chemical_energy.neccelectrode import (
+    CENECCElectrodeRecipeID,
+    Ionomer,
+    Solvent,
+)
+from baseclasses.helper.utilities import get_reference, search_entry_by_id
 from nomad.datamodel.metainfo.basesections import CompositeSystemReference
 
 
@@ -42,6 +53,14 @@ def _process_potentiostat_column(data, column_names):
         if column_name in data.columns:
             return data[column_name].dropna().apply(_round_not_zero)
     return None
+
+
+def _get_clean_dict(d):
+    return {
+        key: value
+        for key, value in d.items()
+        if value is not None and value not in ('', {}, []) and not pd.isna(value)
+    }
 
 
 def read_potentiostat_data(data):
@@ -154,72 +173,293 @@ def read_results_data(data, pH_start=None, ph_end=None):
     return results_data
 
 
-def read_properties(file):
+def extract_properties(file):
     table_name = (
         'Experimental details' if len(file.sheet_names) == 4 else 'Experimental Details'
     )
-    data = pd.read_excel(file, sheet_name=table_name, index_col=0, header=None)
+    data_sheet = pd.read_excel(file, sheet_name=table_name, index_col=0, header=None)
 
-    if len(data.columns) == 0:
+    if len(data_sheet.columns) == 0:
         return {}
 
+    data = data_sheet[1]
+    # normalize keys (different capitalization in different versions of excel template)
+    data.index = data.index.str.strip().str.lower()
+
+    experimental_properties = NECCExperimentalProperties()
+
+    humidifier_temperature = data.get('humidifier temperature') or data.get(
+        'humidifier temperature (°c)'
+    )
     experimental_properties_dict = {
-        'cell_type': data.loc['Cell type ', 1],
-        'has_reference_electrode': data.loc['Reference Electrode (y/n)', 1] == 'y',
-        'reference_electrode_type': data.loc['Reference electrode type', 1],
-        'cathode_geometric_area': data.loc['Cathode geometric area', 1],
-        'membrane_type': data.loc['Membrane type', 1],
-        'membrane_name': data.loc['Membrane Name', 1],
-        'membrane_thickness': data.loc['Membrane thickness', 1],
-        'gasket_thickness': data.loc['Gasket thickness', 1],
-        'anolyte_type': data.loc['Anolyte Type', 1],
-        'anolyte_concentration': data.loc['Anolyte Conc. (M)', 1],
-        'anolyte_flow_rate': data.loc['Anolyte flow rate (ml/min)', 1],
-        'anolyte_volume': data.loc['Anolyte Volume (ml)', 1],
-        'has_humidifier': data.loc['Humidifier (y/n)', 1] == 'y',
+        'cell_type': data.get('cell type'),
+        'has_reference_electrode': data.get('reference electrode (y/n)') == 'y',
+        'reference_electrode_type': data.get('reference electrode type'),
+        'cathode_geometric_area': data.get('cathode geometric area')
+        or data.get('cathode geometric area (cm²)'),
+        'membrane_type': data.get('membrane type'),
+        'membrane_name': data.get('membrane name'),
+        'membrane_thickness': data.get('membrane thickness')
+        or data.get('membrane thickness (µm)'),
+        'gasket_thickness': data.get('gasket thickness')
+        or data.get('gasket thickness (µm)'),
+        'anolyte_type': data.get('anolyte type'),
+        'anolyte_concentration': data.get('anolyte conc. (m)'),
+        'anolyte_flow_rate': data.get('anolyte flow rate (ml/min)'),
+        'anolyte_volume': data.get('anolyte volume (ml)'),
+        'has_humidifier': data.get('humidifier (y/n)') == 'y',
         'humidifier_temperature': 20
-        if data.loc['Humidifier Temperature', 1] == 'RT'
-        else data.loc['Humidifier Temperature', 1],
-        'water_trap_volume': data.loc['Water trap volume', 1],
-        'bleedline_flow_rate': data.loc['Bleedline flow rate', 1],
-        'nitrogen_start_value': data.loc['Nitrogen start value', 1],
-        'remarks': data.loc['Remarks', 1],
-        'chronoanalysis_method': data.loc['CP/CA', 1],
+        if humidifier_temperature == 'RT'
+        else humidifier_temperature,
+        'water_trap_volume': data.get('water trap volume')
+        or data.get('water trap volume (ml)'),
+        'bleedline_flow_rate': data.get('bleedline flow rate')
+        or data.get('bleedline flow rate (ml/min)'),
+        'nitrogen_start_value': data.get('nitrogen start value')
+        or data.get('nitrogen start value (ppm)'),
+        'remarks': data.get('remarks'),
+        'chronoanalysis_method': data.get('cp/ca'),
     }
 
-    experimental_properties_dict = {
-        key: value
-        for key, value in experimental_properties_dict.items()
-        if not pd.isna(value)
-    }
+    experimental_properties_dict = _get_clean_dict(experimental_properties_dict)
+    for attribute_name, value in experimental_properties_dict.items():
+        setattr(experimental_properties, attribute_name, value)
 
     feed_gases = []
-    if not pd.isna(
-        data.loc['Feed gas 1', 1] and data.loc['Feed gas flow rate (ml/min)', 1].iat[0]
-    ):
+    feed_flow_matches = data.index[
+        data.index.str.contains('feed gas flow rate', case=False, na=False)
+    ]
+    feed_gas_flows = data.loc[feed_flow_matches]
+    if not pd.isna(data.get('feed gas 1') and feed_gas_flows.iat[0]):
         feed_gases.append(
             NECCFeedGas(
-                name=data.loc['Feed gas 1', 1],
-                flow_rate=data.loc['Feed gas flow rate (ml/min)', 1].iat[0],
+                name=data.get('feed gas 1'),
+                flow_rate=feed_gas_flows.iat[0],
             )
         )
-    if not pd.isna(
-        data.loc['Feed gas 2', 1] and data.loc['Feed gas flow rate (ml/min)', 1].iat[1]
-    ):
+    if not pd.isna(data.get('feed gas 2') and feed_gas_flows.iat[1]):
         feed_gases.append(
             NECCFeedGas(
-                name=data.loc['Feed gas 2', 1],
-                flow_rate=data.loc['Feed gas flow rate (ml/min)', 1].iat[1],
+                name=data.get('feed gas 2'),
+                flow_rate=feed_gas_flows.iat[1],
             )
         )
-    experimental_properties_dict.update({'feed_gases': feed_gases})
+    experimental_properties.feed_gases = feed_gases
 
-    if not pd.isna(data.loc['Anode ID', 1]):
-        anode = CompositeSystemReference(lab_id=data.loc['Anode ID', 1].strip())
-        experimental_properties_dict.update({'anode': anode})
+    if not pd.isna(data.get('anode id')):
+        experimental_properties.anode = CompositeSystemReference(
+            lab_id=data.get('anode id').strip()
+        )
 
-    if not pd.isna(data.loc['Cathode ID', 1]):
-        cathode = CompositeSystemReference(lab_id=data.loc['Cathode ID', 1].strip())
-        experimental_properties_dict.update({'cathode': cathode})
+    if not pd.isna(data.get('cathode id')):
+        experimental_properties.cathode = CompositeSystemReference(
+            lab_id=data.get('cathode id').strip()
+        )
 
-    return experimental_properties_dict
+    return experimental_properties
+
+
+def _get_electrode_recipe(data_series, recipe_type):
+    electrode_recipe_id = CENECCElectrodeRecipeID()
+    electrode_recipe_id.element = data_series.get('element')
+    electrode_recipe_id.deposition_method = data_series.get('deposition method')
+    electrode_recipe_id.recipe_type = recipe_type
+    substrate = SubstrateProperties()
+    substrate.substrate_type = data_series.get('substrate')
+    solvents = [
+        _get_clean_dict(
+            {
+                'type': data_series.get('solvent 1 type'),
+                'volume': data_series.get('solvent 1 volume (ml)'),
+            }
+        ),
+        _get_clean_dict(
+            {
+                'type': data_series.get('solvent 2 type'),
+                'volume': data_series.get('solvent 2 volume (ml)'),
+            }
+        ),
+    ]
+    ionomers = [
+        _get_clean_dict(
+            {
+                'type': data_series.get('ionomer type'),
+                'mass': data_series.get('ionomer mass (mg)'),
+            }
+        ),
+        _get_clean_dict(
+            {
+                'type': data_series.get('ionomer 1 type'),
+                'mass': data_series.get('ionomer 1 mass (mg)'),
+            }
+        ),
+        _get_clean_dict(
+            {
+                'type': data_series.get('ionomer 2 type'),
+                'mass': data_series.get('ionomer 2 mass (mg)'),
+            }
+        ),
+    ]
+    solvents = [
+        Solvent(type=s.get('type'), volume=s.get('volume')) for s in solvents if s
+    ]  # only keep non-empty solvents
+    ionomers = [
+        Ionomer(type=i.get('type'), mass=i.get('mass')) for i in ionomers if i
+    ]  # only keep non-empty ionomers
+    recipe = CENECCElectrodeRecipe()
+    recipe.name = data_series.get('recipe name', 'new_recipe_default_name')
+    recipe.deposition_temperature = data_series.get('deposition temperature (°c)')
+    recipe.n2_deposition_pressure = data_series.get('n2 deposition pressure (bar)')
+    recipe.mass_loading = data_series.get('mass loading (mg/cm2)')
+    recipe.description = data_series.get('recipe remarks')
+    recipe.electrode_recipe_id = electrode_recipe_id
+    recipe.substrate = substrate
+    recipe.solvent = solvents
+    recipe.ionomer = ionomers
+    return recipe
+
+
+def _get_shared_upload_id(archive, entry_type, base_id=None):
+    from nomad.app.v1.models import MetadataPagination, MetadataRequired
+    from nomad.search import search
+
+    query = {'entry_type': entry_type}
+    pagination = MetadataPagination()
+    pagination.page_size = 1000
+    required = MetadataRequired()
+    required.include = (
+        ['upload_id', 'results.eln.lab_ids'] if base_id else ['upload_id']
+    )
+    search_result = search(
+        owner='all',
+        query=query,
+        user_id=archive.metadata.main_author.user_id,
+        pagination=pagination,
+        required=required,
+    )
+    if len(search_result.data) >= 1:
+        upload_counts = {}
+        for entry in search_result.data:
+            if (
+                base_id
+                and base_id
+                not in entry.get('results', {}).get('eln', {}).get('lab_ids', [''])[0]
+            ):
+                continue
+            upload_counts[entry.get('upload_id')] = (
+                upload_counts.get(entry.get('upload_id'), 0) + 1
+            )
+        if upload_counts:
+            return max(upload_counts, key=upload_counts.get)
+    return None
+
+
+def _write_entry_to_upload(entry, upload_id, file_name, overwrite=False):
+    import json
+
+    from nomad import files
+
+    if (
+        not files.UploadFiles.get(upload_id=upload_id).raw_path_exists(file_name)
+        or overwrite
+    ):
+        entry_dict = entry.m_to_dict(with_root_def=True)
+        with files.UploadFiles.get(upload_id=upload_id).raw_file(
+            file_name, 'w'
+        ) as outfile:
+            json.dump({'data': entry_dict}, outfile)
+    # TODO reprocess the upload
+
+
+def _get_electrode_recipe_reference(recipe_type, data_series, archive):
+    recipe_entry_id = None
+    recipe_upload_id = None
+    if data_series.get('recipe id'):
+        search_result = search_entry_by_id(archive, None, data_series.get('recipe id'))
+        if len(search_result.data) == 1:
+            recipe_entry_id = search_result.data[0]['entry_id']
+            recipe_upload_id = search_result.data[0]['upload_id']
+    else:
+        electrode_recipe_entry = _get_electrode_recipe(data_series, recipe_type)
+        # TODO check if recipe exists (e.g. with hash, what happens if name already exisits?
+        recipe_upload_id = _get_shared_upload_id(archive, 'CE_NECC_ElectrodeRecipe')
+        recipe_file_name = f'{electrode_recipe_entry.name}.archive.json'
+        _write_entry_to_upload(
+            electrode_recipe_entry, recipe_upload_id, recipe_file_name
+        )
+        from nomad.utils import hash
+
+        recipe_entry_id = hash(recipe_upload_id, recipe_file_name)
+    if recipe_entry_id and recipe_upload_id:
+        electrode_recipe_ref = get_reference(recipe_upload_id, recipe_entry_id)
+        return electrode_recipe_ref
+    return None
+
+
+def _get_electrode_comp_system_reference(archive, electrode_data, electrode_type):
+    reuse_existing = electrode_data.get('already used in other\nexperiment? (y/n)')
+    if reuse_existing == 'y':
+        # TODO find existing electrode
+        return None
+    if electrode_type == 'anode':
+        recipe_type = 'Anode Recipe (AR)'
+        base_id = '_AR_'
+    else:
+        recipe_type = 'Cathode Recipe (CR)'
+        base_id = '_CR_'
+    electrode_recipe_ref = _get_electrode_recipe_reference(
+        recipe_type, electrode_data, archive
+    )
+    electrode_entry = get_electrode(electrode_data, electrode_recipe_ref)
+    electrode_upload_id = _get_shared_upload_id(archive, 'CE_NECC_Electrode', base_id)
+    date_str = (
+        f'_{electrode_entry.electrode_id.datetime.strftime("%Y%m%d")}'
+        if electrode_entry.electrode_id.datetime
+        else ''
+    )
+    owner_str = (
+        f'_{electrode_entry.electrode_id.owner.replace(" ", "_")}'
+        if electrode_entry.electrode_id.owner
+        else ''
+    )
+    electrode_file_name = f'{electrode_type}{date_str}{owner_str}.archive.json'
+    _write_entry_to_upload(electrode_entry, electrode_upload_id, electrode_file_name)
+    # TODO set reference when uploads are reprocessed
+    # from nomad.utils import hash
+    # electrode_entry_id = hash(electrode_upload_id, electrode_file_name)
+    # return CompositeSystemReference(reference=get_reference(electrode_upload_id, electrode_entry_id))
+    return None
+
+
+def get_electrode(data_series, recipe_reference):
+    electrode_id = CENECCElectrodeID()
+    electrode_id.owner = data_series.get('owner name')
+    electrode_id.institute = data_series.get('group name')
+    electrode_id.datetime = pd.to_datetime(data_series.get('preparation date'))
+    electrode_id.recipe = recipe_reference
+    electrode = CENECCElectrode()
+    electrode.description = data_series.get('remarks')
+    electrode.electrode_id = electrode_id
+    return electrode
+
+
+def set_catalyst_details(archive, file):
+    data_sheet = pd.read_excel(
+        file, sheet_name='Catalyst details', index_col=0, header=None
+    )
+
+    if len(data_sheet.columns) == 0:
+        return {}
+
+    # normalize keys (different capitalization in different versions of excel template)
+    data_sheet.index = data_sheet.index.str.strip().str.lower()
+    if archive.data.properties.cathode is None:
+        cathode_data = data_sheet[1].dropna()
+        archive.data.properties.anode = _get_electrode_comp_system_reference(
+            archive, cathode_data, 'cathode'
+        )
+    if archive.data.properties.anode is None:
+        anode_data = data_sheet[4].dropna()
+        archive.data.properties.anode = _get_electrode_comp_system_reference(
+            archive, anode_data, 'anode'
+        )

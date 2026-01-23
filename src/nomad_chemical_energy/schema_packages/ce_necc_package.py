@@ -32,7 +32,6 @@ from baseclasses.chemical_energy import (
     ElectrochemicalImpedanceSpectroscopyMultiple,
     GasChromatographyMeasurement,
     LinearSweepVoltammetry,
-    NECCExperimentalProperties,
     OpenCircuitVoltage,
     PotentiometryGasChromatographyMeasurement,
     ThermocoupleMeasurement,
@@ -314,13 +313,17 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
                 if self.properties is None:
                     from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
-                        read_properties,
+                        extract_properties,
                     )
 
-                    experimental_properties_dict = read_properties(xls_file)
-                    self.properties = NECCExperimentalProperties()
-                    for attribute_name, value in experimental_properties_dict.items():
-                        setattr(self.properties, attribute_name, value)
+                    self.properties = extract_properties(xls_file)
+
+                if self.properties.cathode is None or self.properties.anode is None:
+                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
+                        set_catalyst_details,
+                    )
+
+                    set_catalyst_details(archive, xls_file)
 
                 if (
                     not self.thermocouple
