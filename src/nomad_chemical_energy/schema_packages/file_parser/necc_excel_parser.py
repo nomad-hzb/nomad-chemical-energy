@@ -59,7 +59,7 @@ def _get_clean_dict(d):
     return {
         key: value
         for key, value in d.items()
-        if value is not None and value not in ('', {}, []) and not pd.isna(value)
+        if value is not None and value not in (' ', '', {}, []) and not pd.isna(value)
     }
 
 
@@ -174,8 +174,13 @@ def read_results_data(data, pH_start=None, ph_end=None):
 
 
 def extract_properties(file):
-    table_name = (
-        'Experimental details' if len(file.sheet_names) == 4 else 'Experimental Details'
+    table_name = next(
+        (
+            name
+            for name in ['Experimental details', 'Experimental Details']
+            if name in file.sheet_names
+        ),
+        None,
     )
     data_sheet = pd.read_excel(file, sheet_name=table_name, index_col=0, header=None)
 
@@ -262,10 +267,14 @@ def extract_properties(file):
 def _get_electrode_recipe(data_series, recipe_type):
     electrode_recipe_id = CENECCElectrodeRecipeID()
     electrode_recipe_id.element = data_series.get('element')
+    electrode_recipe_id.element_mass = data_series.get('element mass (mg)')
     electrode_recipe_id.deposition_method = data_series.get('deposition method')
     electrode_recipe_id.recipe_type = recipe_type
     substrate = SubstrateProperties()
     substrate.substrate_type = data_series.get('substrate')
+    substrate.substrate_dimension = data_series.get('substrate dimension')
+    substrate.total_area = data_series.get('substrate total area (cm²)')
+    substrate.substrate_cleaning = data_series.get('substrate cleaning')
     solvents = [
         _get_clean_dict(
             {
@@ -354,21 +363,60 @@ def _get_shared_upload_id(archive, entry_type, base_id=None):
     return None
 
 
-def _write_entry_to_upload(entry, upload_id, file_name, overwrite=False):
+def _write_entry_to_upload(entry_def, entry, upload_id, file_name, overwrite=False):
     import json
 
     from nomad import files
+    from nomad.processing import Upload
 
     if (
         not files.UploadFiles.get(upload_id=upload_id).raw_path_exists(file_name)
         or overwrite
     ):
-        entry_dict = entry.m_to_dict(with_root_def=True)
+        entry_dict = entry.m_to_dict(with_root_def=False)
+        entry_dict['m_def'] = entry_def
         with files.UploadFiles.get(upload_id=upload_id).raw_file(
             file_name, 'w'
         ) as outfile:
             json.dump({'data': entry_dict}, outfile)
-    # TODO reprocess the upload
+        Upload.get(upload_id).process_updated_raw_file(
+            file_name, allow_modify=overwrite
+        )
+        return True
+    else:
+        return False
+
+
+def _get_id_for_entry_hash(archive, entry_type, entry_dict_hash):
+    from nomad.app.v1.models import MetadataPagination, MetadataRequired
+    from nomad.search import search
+
+    query = {
+        'entry_type': entry_type,
+        f'data.entry_dict_hash#nomad_chemical_energy.schema_packages.ce_necc_package.{entry_type}': entry_dict_hash,
+    }
+    pagination = MetadataPagination()
+    pagination.page_size = 10
+    pagination.order_by = 'entry_create_time'
+    pagination.order = 'desc'
+    required = MetadataRequired()
+    required.include = [
+        f'data.lab_id#nomad_chemical_energy.schema_packages.ce_necc_package.{entry_type}',
+        'upload_id',
+        'entry_id',
+    ]
+    search_result = search(
+        owner='all',
+        query=query,
+        user_id=archive.metadata.main_author.user_id,
+        pagination=pagination,
+        required=required,
+    )
+    if len(search_result.data) >= 1:
+        if entry_type == 'CE_NECC_Electrode':
+            return search_result.data[0].get('data', {}).get('lab_id')
+        return search_result.data[0]
+    return None
 
 
 def _get_electrode_recipe_reference(recipe_type, data_series, archive):
@@ -381,12 +429,24 @@ def _get_electrode_recipe_reference(recipe_type, data_series, archive):
             recipe_upload_id = search_result.data[0]['upload_id']
     else:
         electrode_recipe_entry = _get_electrode_recipe(data_series, recipe_type)
-        # TODO check if recipe exists (e.g. with hash, what happens if name already exisits?
+        # check if recipe already exists
+        electrode_recipe_entry.set_entry_dict_hash()
+        ref_id = _get_id_for_entry_hash(
+            archive, 'CE_NECC_ElectrodeRecipe', electrode_recipe_entry.entry_dict_hash
+        )
+        if ref_id:
+            return get_reference(
+                ref_id.get('upload_id', ''), ref_id.get('entry_id', '')
+            )
+        # create new recipe if no identical recipe exists yet
         recipe_upload_id = _get_shared_upload_id(archive, 'CE_NECC_ElectrodeRecipe')
         recipe_file_name = f'{electrode_recipe_entry.name}.archive.json'
-        _write_entry_to_upload(
-            electrode_recipe_entry, recipe_upload_id, recipe_file_name
+        entry_def = 'nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_ElectrodeRecipe'
+        new_recipe_written = _write_entry_to_upload(
+            entry_def, electrode_recipe_entry, recipe_upload_id, recipe_file_name
         )
+        if not new_recipe_written:
+            return None
         from nomad.utils import hash
 
         recipe_entry_id = hash(recipe_upload_id, recipe_file_name)
@@ -398,9 +458,6 @@ def _get_electrode_recipe_reference(recipe_type, data_series, archive):
 
 def _get_electrode_comp_system_reference(archive, electrode_data, electrode_type):
     reuse_existing = electrode_data.get('already used in other\nexperiment? (y/n)')
-    if reuse_existing == 'y':
-        # TODO find existing electrode
-        return None
     if electrode_type == 'anode':
         recipe_type = 'Anode Recipe (AR)'
         base_id = '_AR_'
@@ -411,24 +468,38 @@ def _get_electrode_comp_system_reference(archive, electrode_data, electrode_type
         recipe_type, electrode_data, archive
     )
     electrode_entry = get_electrode(electrode_data, electrode_recipe_ref)
+    if reuse_existing == 'y':
+        electrode_entry.set_entry_dict_hash()
+        ref_lab_id = _get_id_for_entry_hash(
+            archive, 'CE_NECC_Electrode', electrode_entry.entry_dict_hash
+        )
+        if ref_lab_id:
+            return CompositeSystemReference(lab_id=ref_lab_id)
+        return None
     electrode_upload_id = _get_shared_upload_id(archive, 'CE_NECC_Electrode', base_id)
     date_str = (
         f'_{electrode_entry.electrode_id.datetime.strftime("%Y%m%d")}'
         if electrode_entry.electrode_id.datetime
         else ''
     )
-    owner_str = (
-        f'_{electrode_entry.electrode_id.owner.replace(" ", "_")}'
-        if electrode_entry.electrode_id.owner
-        else ''
+    electrode_entry.name = (
+        f'{electrode_type}{date_str}_{archive.data.name.replace(".xlsx", "")}'
     )
-    electrode_file_name = f'{electrode_type}{date_str}{owner_str}.archive.json'
-    _write_entry_to_upload(electrode_entry, electrode_upload_id, electrode_file_name)
-    # TODO set reference when uploads are reprocessed
-    # from nomad.utils import hash
-    # electrode_entry_id = hash(electrode_upload_id, electrode_file_name)
-    # return CompositeSystemReference(reference=get_reference(electrode_upload_id, electrode_entry_id))
-    return None
+    electrode_file_name = f'{electrode_entry.name}.archive.json'
+    entry_def = (
+        'nomad_chemical_energy.schema_packages.ce_necc_package.CE_NECC_Electrode'
+    )
+    new_electrode_written = _write_entry_to_upload(
+        entry_def, electrode_entry, electrode_upload_id, electrode_file_name
+    )
+    if not new_electrode_written:
+        return None
+    from nomad.utils import hash
+
+    electrode_entry_id = hash(electrode_upload_id, electrode_file_name)
+    return CompositeSystemReference(
+        reference=get_reference(electrode_upload_id, electrode_entry_id)
+    )
 
 
 def get_electrode(data_series, recipe_reference):
@@ -439,13 +510,18 @@ def get_electrode(data_series, recipe_reference):
     electrode_id.recipe = recipe_reference
     electrode = CENECCElectrode()
     electrode.description = data_series.get('remarks')
+    electrode.measured_mass_loading = data_series.get('measured mass loading (mg/cm2)')
+    electrode.bottle_number = data_series.get('bottle n#')
     electrode.electrode_id = electrode_id
     return electrode
 
 
 def set_catalyst_details(archive, file):
     data_sheet = pd.read_excel(
-        file, sheet_name='Catalyst details', index_col=0, header=None
+        file,
+        sheet_name='Catalyst details',
+        index_col=0,
+        header=None,
     )
 
     if len(data_sheet.columns) == 0:
@@ -455,7 +531,7 @@ def set_catalyst_details(archive, file):
     data_sheet.index = data_sheet.index.str.strip().str.lower()
     if archive.data.properties.cathode is None:
         cathode_data = data_sheet[1].dropna()
-        archive.data.properties.anode = _get_electrode_comp_system_reference(
+        archive.data.properties.cathode = _get_electrode_comp_system_reference(
             archive, cathode_data, 'cathode'
         )
     if archive.data.properties.anode is None:
