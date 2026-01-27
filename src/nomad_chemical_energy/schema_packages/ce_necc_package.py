@@ -362,7 +362,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         'øC  cathode',
                         'øC  anode',
                     ]
-                    if len(xls_file.sheet_names) == 4:
+                    if len(xls_file.sheet_names) < 7:
                         data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
                         results_data = pd.read_excel(
                             xls_file, sheet_name='Results', header=0
