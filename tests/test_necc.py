@@ -1,13 +1,52 @@
 from nomad.client import normalize_all, parse
 
 
-def test_recipe_entry_hash():
+def set_monkey_patch(monkeypatch):
+    def mockreturn_search(*args):
+        return None
+
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_nome_parser.search_class', mockreturn_search
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_nome_parser.set_sample_reference',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_nome_parser.find_sample_by_id',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_necc_parser.set_sample_reference',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.hzb_general_parser.update_general_process_entries',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.schema_packages.tfc_package.set_sample_reference',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.parsers.ce_nesd_parser.set_sample_reference',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.schema_packages.ce_nesd_package.create_archive',
+        mockreturn_search,
+    )
+
+
+def test_recipe_entry_hash(monkeypatch):
     """
     Test for entry_dict_hash to be only equal for recipes with identical content data.
     """
-    recipe1_archive = parse('tests/data/necc_test_recipe.archive.json')[0]
-    recipe2_archive = parse('tests/data/necc_test_recipe.archive.json')[0]
-    recipe3_archive = parse('tests/data/necc_test_recipe.archive.json')[0]
+    set_monkey_patch(monkeypatch)
+    file = 'tests/data/archives/necc_test_recipe.archive.json'
+    recipe1_archive = parse(file)[0]
+    recipe2_archive = parse(file)[0]
+    recipe3_archive = parse(file)[0]
 
     # data only differently written with spaces
     recipe2_archive.data.substrate.substrate_dimension = '14 x 4'
