@@ -30,7 +30,6 @@ from baseclasses.chemical_energy import (
     Chronopotentiometry,
     CyclicVoltammetry,
     ElectrochemicalImpedanceSpectroscopyMultiple,
-    GasChromatographyMeasurement,
     LinearSweepVoltammetry,
     OpenCircuitVoltage,
     PotentiometryGasChromatographyMeasurement,
@@ -150,6 +149,8 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
     def make_total_fe_figure(self):
         fe_dict = {}
         for obj in self.hplc:
+            if getattr(obj, 'datetime', None) is not None:
+                continue
             for liquid in getattr(obj, 'liquid_fe', []):
                 compound = getattr(liquid, 'compound', None)
                 fe = getattr(liquid, 'faradaic_efficiency', 0)
@@ -325,6 +326,15 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
                     set_catalyst_details(archive, xls_file)
 
+                if not self.ph and len(xls_file.sheet_names) < 7:
+                    data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
+                    ph_data = self.get_cleaned_df(data, ['Date', 'pH Time', 'pH'])
+                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
+                        read_ph_data,
+                    )
+
+                    self.ph = read_ph_data(ph_data)
+
                 if (
                     not self.thermocouple
                     or not self.gaschromatographies
@@ -410,44 +420,16 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         read_gaschromatography_data,
                     )
 
-                    gaschromatography_measurements = []
-                    (
-                        instrument_file_names,
-                        datetimes,
-                        gas_types,
-                        retention_times,
-                        areas,
-                        ppms,
-                    ) = read_gaschromatography_data(gc_data)
-                    if datetimes.size > 0:
-                        start_time = datetimes.iat[0]
-                        end_time = datetimes.iat[-1]
-                    for gas_index in range(len(gas_types)):
-                        file_index = 0 if gas_index < 4 else 1
-                        gas_type = gas_types.iat[gas_index]
-                        if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
-                            gaschromatography_measurements.append(
-                                GasChromatographyMeasurement(
-                                    instrument_file_name=instrument_file_names.iloc[
-                                        :, file_index
-                                    ],
-                                    datetime=datetimes.to_list(),
-                                    gas_type=gas_type,
-                                    retention_time=retention_times.iloc[:, gas_index],
-                                    area=areas.iloc[:, gas_index],
-                                    ppm=ppms.iloc[:, gas_index],
-                                )
-                            )
-                    self.gaschromatographies = gaschromatography_measurements
+                    self.gaschromatographies, start_time, end_time = (
+                        read_gaschromatography_data(gc_data)
+                    )
 
                     from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
                         read_potentiostat_data,
                     )
 
                     self.potentiometry = read_potentiostat_data(pot_data)
-                    if start_time is None or end_time is None:
-                        start_time = datetimes[0]
-                        end_time = datetimes[-1]
+
                     from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
                         read_thermocouple_data,
                     )
