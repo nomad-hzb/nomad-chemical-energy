@@ -25,10 +25,12 @@ from baseclasses.chemical_energy import (
     CENECCElectrode,
     CENECCElectrodeID,
     CENECCElectrodeRecipe,
+    GasChromatographyMeasurement,
     GasFEResults,
     NECCExperimentalProperties,
     NECCFeedGas,
     NECCPotentiostatMeasurement,
+    PHMeasurement,
     PotentiometryGasChromatographyResults,
     SubstrateProperties,
 )
@@ -61,6 +63,19 @@ def _get_clean_dict(d):
         for key, value in d.items()
         if value is not None and value not in (' ', '', {}, []) and not pd.isna(value)
     }
+
+
+def read_ph_data(data):
+    measurement = PHMeasurement()
+    if {'pH', 'Date', 'pH Time'}.issubset(data.columns):
+        measurement.ph_value = data['pH']
+        date_only = pd.to_datetime(data['Date'], errors='coerce').dt.normalize()[0]
+        time_only = pd.to_datetime(
+            data['pH Time'].astype(str), format='mixed', errors='coerce'
+        )
+        data['DateTime'] = date_only + (time_only - time_only.dt.normalize())
+        measurement.datetime = data['DateTime'].dropna().to_list()
+    return measurement
 
 
 def read_potentiostat_data(data):
@@ -112,14 +127,16 @@ def read_thermocouple_data(data, start_time, end_time):
 
 
 def read_gaschromatography_data(data):
+    start_time, end_time = None, None
+
     instrument_file_names = data.loc[:, data.columns.str.startswith('Experiment name')]
     instrument_file_names.dropna(axis=0, how='all', inplace=True)
 
-    data['DateTime'] = pd.to_datetime(data['Time '].astype(str))
-    data['Date'] = pd.to_datetime(data['Date'].astype(str))
-    data['DateTime'] = data['Date'] + pd.to_timedelta(
-        data['DateTime'].dt.strftime('%H:%M:%S')
+    date_only = pd.to_datetime(data['Date'], errors='coerce').dt.normalize()
+    time_only = pd.to_datetime(
+        data['Time '].astype(str), format='mixed', errors='coerce'
     )
+    data['DateTime'] = date_only + (time_only - time_only.dt.normalize())
     datetimes = data['DateTime'].dropna()
 
     gas_types = data.loc[0, data.columns.str.startswith('Gas type')]
@@ -131,16 +148,36 @@ def read_gaschromatography_data(data):
     areas.dropna(axis=0, how='all', inplace=True)
     ppms.dropna(axis=0, how='all', inplace=True)
 
-    return instrument_file_names, datetimes, gas_types, retention_times, areas, ppms
+    if datetimes.size > 0:
+        start_time = datetimes.iat[0]
+        end_time = datetimes.iat[-1]
+
+    gaschromatography_measurements = []
+    for gas_index in range(len(gas_types)):
+        file_index = 0 if gas_index < 4 else 1
+        gas_type = gas_types.iat[gas_index]
+        if gas_type in {'CO', 'CH4', 'C2H4', 'C2H6', 'H2', 'N2'}:
+            gaschromatography_measurements.append(
+                GasChromatographyMeasurement(
+                    instrument_file_name=instrument_file_names.iloc[:, file_index],
+                    datetime=datetimes.to_list(),
+                    gas_type=gas_type,
+                    retention_time=retention_times.iloc[:, gas_index],
+                    area=areas.iloc[:, gas_index],
+                    ppm=ppms.iloc[:, gas_index],
+                )
+            )
+    return gaschromatography_measurements, start_time, end_time
 
 
 def read_results_data(data, pH_start=None, ph_end=None):
     results_data = PotentiometryGasChromatographyResults()
-    data['DateTime'] = pd.to_datetime(data['Time'].astype(str))
-    data['Date'] = pd.to_datetime(data['Date'].astype(str))
-    data['DateTime'] = data['Date'] + pd.to_timedelta(
-        data['DateTime'].dt.strftime('%H:%M:%S')
+
+    date_only = pd.to_datetime(data['Date'], errors='coerce').dt.normalize()
+    time_only = pd.to_datetime(
+        data['Time'].astype(str), format='mixed', errors='coerce'
     )
+    data['DateTime'] = date_only + (time_only - time_only.dt.normalize())
     results_data.datetime = data['DateTime'].dropna().to_list()
 
     results_data.total_flow_rate = data['Total flow rate (ml/min)'].dropna()
@@ -238,14 +275,18 @@ def extract_properties(file):
     if not pd.isna(data.get('feed gas 1') and feed_gas_flows.iat[0]):
         feed_gases.append(
             NECCFeedGas(
-                name=data.get('feed gas 1'),
+                name=str(data.get('feed gas 1'))
+                if pd.notna(data.get('feed gas 1'))
+                else '',
                 flow_rate=feed_gas_flows.iat[0],
             )
         )
     if not pd.isna(data.get('feed gas 2') and feed_gas_flows.iat[1]):
         feed_gases.append(
             NECCFeedGas(
-                name=data.get('feed gas 2'),
+                name=str(data.get('feed gas 2'))
+                if pd.notna(data.get('feed gas 2'))
+                else '',
                 flow_rate=feed_gas_flows.iat[1],
             )
         )
