@@ -408,7 +408,7 @@ class XASParser(MatchingParser):
 
 class KMC3XASParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
         file_name_with_folders = file.split('.')[0]
 
         keywords = ['foil', 'reference', 'trans', 'transmission', 'tm', 'calibration']
@@ -458,7 +458,7 @@ class CENOMEKMC3BioLogicParser(MatchingParser):
         if not mainfile.endswith('.mpr'):
             return
 
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
         with archive.m_context.raw_file(file, 'rb') as f:
             metadata, _ = get_header_and_data(f)
 
@@ -527,7 +527,7 @@ class CENOMETIFParser(MatchingParser):
 
 class GeneralNomeParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-        file_name = mainfile.split('/')[-1]
+        file_name = mainfile.rsplit('/', maxsplit=1)[-1]
         # environment ids have a length of 17 and sample ids a length of 24
         sample_id = None
         other_id = file_name[:17]

@@ -105,7 +105,7 @@ class NECCXlsxParser(MatchingParser):
         return is_v1_excel or is_v2_excel
 
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-        file = mainfile.split('/')[-1]
+        file = mainfile.rsplit('/', maxsplit=1)[-1]
         if not file.endswith('.xlsx'):
             return
 
@@ -154,7 +154,7 @@ class CENECCBioLogicParser(MatchingParser):
         if not mainfile.endswith('.mpr'):
             return
 
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
         with archive.m_context.raw_file(file, 'rb') as f:
             metadata, _ = get_header_and_data(f)
 

@@ -53,7 +53,7 @@ class ParsedGeneralProcessFile(EntryData):
 
 class GeneralProcessParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-        file_path = mainfile.split('/raw/')[-1]
+        file_path = mainfile.rsplit('/raw/', maxsplit=1)[-1]
         file_name = file_path.split('/')[-1]
         sample_id = file_name.split('.')[0].split('-')[0]
 

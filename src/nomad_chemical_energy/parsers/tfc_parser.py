@@ -59,7 +59,7 @@ class ParsedSputteringFile(EntryData):
 
 class TFCSputteringParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-        file_name = mainfile.split('/')[-1]
+        file_name = mainfile.rsplit('/', maxsplit=1)[-1]
 
         entry = TFC_Sputtering()
         entry.name = file_name
@@ -100,7 +100,7 @@ class ParsedXRFFile(EntryData):
 
 class TFCXRFParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-        file = mainfile.split('/')[-1]
+        file = mainfile.rsplit('/', maxsplit=1)[-1]
 
         entry = TFC_XRFLibrary(composition_file=file)
         entry.data_folder = mainfile.split('/')[-2]
@@ -126,7 +126,7 @@ class ParsedXRDFile(EntryData):
 
 class TFCXRDParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-        file = mainfile.split('/')[-1]
+        file = mainfile.rsplit('/', maxsplit=1)[-1]
 
         entry = TFC_XRDMetalJetLibrary(data_file=file)
         entry.data_folder = mainfile.split('/')[-2]
