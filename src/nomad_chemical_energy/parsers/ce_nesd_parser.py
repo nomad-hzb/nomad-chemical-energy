@@ -163,7 +163,7 @@ class CENESDBioLogicParser(MatchingParser):
         if not mainfile.endswith('.mpr'):
             return
 
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
         with archive.m_context.raw_file(file, 'rb') as f:
             metadata, _ = get_header_and_data(f)
 
@@ -208,7 +208,7 @@ class CENESDZahnerParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         if not mainfile.endswith(('.isw', '.ism', '.isc')):
             return
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
 
         if mainfile.endswith('.isw'):
             with archive.m_context.raw_file(file, 'rb') as f:
@@ -260,7 +260,7 @@ class CENESDCHIParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         if not mainfile.endswith('.txt'):
             return
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
 
         with archive.m_context.raw_file(file, 'tr') as f:
             m, _ = parse_chi_txt_file(f.read())
@@ -297,7 +297,7 @@ class CENESDCHIParser(MatchingParser):
 
 class CENESDLabviewParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
 
         if not file.endswith('.tdms'):
             return
@@ -321,7 +321,7 @@ class CENESDPalmSensParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         if not mainfile.endswith('.pssession'):
             return
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
         with archive.m_context.raw_file(file, 'rt', encoding='utf-16') as f:
             data = get_data_from_pssession_file(f.read())
 
@@ -368,7 +368,7 @@ class CENESDMetadataExcelParser(MatchingParser):
             return value_str
 
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
 
         if not file.endswith('.xlsx'):
             return

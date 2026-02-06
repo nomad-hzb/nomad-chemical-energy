@@ -92,7 +92,7 @@ class CEAMCCBioLogicParser(MatchingParser):
         if not mainfile.endswith('.mpr'):
             return
 
-        file = mainfile.split('raw/')[-1]
+        file = mainfile.rsplit('raw/', maxsplit=1)[-1]
         with archive.m_context.raw_file(file, 'rb') as f:
             metadata, _ = get_header_and_data(f)
 

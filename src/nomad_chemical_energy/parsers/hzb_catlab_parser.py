@@ -79,7 +79,7 @@ def search_samples_in_upload(archive):
 
 class CatlabParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger) -> None:
-        file = mainfile.split('/')[-1]
+        file = mainfile.rsplit('/', maxsplit=1)[-1]
 
         sample_id = file.split('#')[0]
         results = search_samples_in_upload(archive)
