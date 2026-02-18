@@ -246,7 +246,12 @@ def test_gamry_CV_parser(monkeypatch):
 
 def test_gamry_RRDE_parser(monkeypatch):
     file = 'NOME_RRDE_CVCA.DTA'
-    cv_archive, ca_archive = get_multiple_archives(file, monkeypatch)
+    rrde_archives = get_multiple_archives(file, monkeypatch)
+    assert len(rrde_archives) == 2
+    if rrde_archives[0].data.method == 'Chronoamperometry':
+        ca_archive, cv_archive = rrde_archives
+    else:
+        cv_archive, ca_archive = rrde_archives
     assert ca_archive.data
     assert ca_archive.data.method == 'Chronoamperometry'
     assert ca_archive.data.function == 'Generator'
