@@ -20,6 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import re
+from datetime import timedelta
+
 import pandas as pd
 from baseclasses.chemical_energy import (
     CENECCElectrode,
@@ -65,7 +68,7 @@ def _get_clean_dict(d):
     }
 
 
-def read_ph_data(data):
+def read_ph_data(data, ph_start_time):
     measurement = PHMeasurement()
     if {'pH', 'Date', 'pH Time'}.issubset(data.columns):
         measurement.ph_value = data['pH']
@@ -75,6 +78,18 @@ def read_ph_data(data):
         )
         data['DateTime'] = date_only + (time_only - time_only.dt.normalize())
         measurement.datetime = data['DateTime'].dropna().to_list()
+        if ph_start_time:
+            time_match = re.search(r'(\d{2}:\d{2}(?::\d{2,})?)$', ph_start_time)
+            if time_match:
+                start_time_string = time_match.group(1)
+                parts = start_time_string.split(':')
+                delta = timedelta(
+                    hours=int(parts[0]),
+                    minutes=int(parts[1]),
+                    seconds=int(parts[2]) if len(parts) > 2 else 0,
+                )
+                data['Time+Delta'] = data['DateTime'] + delta
+                measurement.datetime = data['Time+Delta'].dropna().to_list()
     return measurement
 
 
