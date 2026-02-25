@@ -39,6 +39,15 @@ from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 from nomad.metainfo import Quantity, SchemaPackage, Section
 
+from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
+    extract_properties,
+    read_gaschromatography_data,
+    read_ph_data,
+    read_potentiostat_data,
+    read_results_data,
+    read_thermocouple_data,
+    set_catalyst_details,
+)
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
     make_bode_plot,
     make_current_density_over_voltage_rhe_cv_plot,
@@ -147,34 +156,49 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
     )
 
     def make_total_fe_figure(self):
-        fe_dict = {}
-        for obj in self.hplc:
-            if getattr(obj, 'datetime', None) is not None:
-                continue
-            for liquid in getattr(obj, 'liquid_fe', []):
-                compound = getattr(liquid, 'compound', None)
-                fe = getattr(liquid, 'faradaic_efficiency', 0)
-                if compound is not None:
-                    fe_dict[compound] = fe_dict.get(compound, 0) + fe
-        for gas in self.fe_results.gas_results:
-            compound = getattr(gas, 'gas_type', None)
-            fe = getattr(gas, 'faradaic_efficiency', 0)
-            fe_dict[compound] = np.mean(abs(fe))
-
-        fig = go.Figure()
-
-        for label, value in fe_dict.items():
-            fig.add_trace(
+        def add_stacked_component(figure, label, x_list, y_list):
+            if len(y_list) == 0:
+                return
+            figure.add_trace(
                 go.Bar(
                     name=label,
-                    x=['Total FE'],
-                    y=[value],
-                    text=[round(value.magnitude, 1)],
+                    x=x_list,
+                    y=y_list,
+                    text=[round(fe_value, 1) for fe_value in y_list],
                     textposition='inside',
                     hoverinfo='y+name',
                 )
             )
 
+        fig = go.Figure()
+        fe_dict = {}
+        for hplc_obj in self.hplc:
+            timestamp = getattr(hplc_obj, 'datetime', 'Total FE') or 'Total FE'
+            injection_type = (
+                getattr(hplc_obj, 'injection_type', 'unclassified') or 'unclassified'
+            )
+
+            for liquid in getattr(hplc_obj, 'liquid_fe', []):
+                compound = getattr(liquid, 'compound', None)
+                fe = getattr(liquid, 'faradaic_efficiency', 0)
+                if compound is not None:
+                    compound_dict = fe_dict.get(f'{compound} {injection_type}', {})
+                    timestamp_group = compound_dict.get(timestamp, [])
+                    timestamp_group.append(fe.to('percent').magnitude)
+                    fe_dict.setdefault(f'{compound} {injection_type}', {})[
+                        timestamp
+                    ] = timestamp_group
+
+        for compound, fe_time_dict in fe_dict.items():
+            mean_fe = [np.mean(fe_list) for fe_list in fe_time_dict.values()]
+            add_stacked_component(fig, compound, list(fe_time_dict.keys()), mean_fe)
+
+        for gas in self.fe_results.gas_results:
+            compound = getattr(gas, 'gas_type', None)
+            fe = getattr(gas, 'faradaic_efficiency', 0)
+            add_stacked_component(
+                fig, compound, ['Total FE'], [np.mean(abs(fe.to('percent').magnitude))]
+            )
         fig.update_layout(
             barmode='stack',
             xaxis_title='',
@@ -183,8 +207,8 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
             showlegend=True,
             hovermode='x unified',
             dragmode='pan',
-            xaxis=dict(fixedrange=False),
-            yaxis=dict(fixedrange=False),
+            xaxis={'fixedrange': False, 'type': 'category'},
+            yaxis={'fixedrange': False},
         )
         return fig
 
@@ -200,7 +224,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         )
         for gas in self.fe_results.gas_results:
             date_strings = [date.strftime('%Y-%m-%d %H:%M:%S') for date in gas.datetime]
-            fig.add_traces(
+            fig.add_trace(
                 go.Bar(
                     name=gas.gas_type, x=date_strings, y=abs(gas.faradaic_efficiency)
                 )
@@ -219,12 +243,12 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                 )
             ]
         )
-        fig.add_traces(
+        fig.add_trace(
             go.Scatter(
                 name='Temperature Anode', x=date_strings, y=merged_df['temp_anode']
             )
         )
-        fig.add_traces(
+        fig.add_trace(
             go.Scatter(
                 name='Total Flow Rate',
                 x=date_strings,
@@ -254,46 +278,195 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
         return fig
 
     def make_current_voltage_figure(self, date_strings):
-        fig = go.Figure(
-            data=[
+        fig = go.Figure()
+        date_strings = [
+            date.strftime('%Y-%m-%d %H:%M:%S') for date in self.potentiometry.datetime
+        ]
+        if self.potentiometry.current is not None:
+            fig.add_trace(
+                go.Scatter(
+                    name='Current',
+                    x=date_strings,
+                    y=self.potentiometry.current,
+                    line=dict(color='red'),
+                )
+            )
+            fig.update_layout(
+                yaxis=dict(
+                    title=f'Current [{self.potentiometry.current[0].units:~P}]',
+                    titlefont=dict(color='red'),
+                    tickfont=dict(color='red'),
+                ),
+            )
+        if self.potentiometry.working_electrode_potential is not None:
+            fig.add_trace(
+                go.Scatter(
+                    name='Working electrode potential',
+                    x=date_strings,
+                    y=self.potentiometry.working_electrode_potential,
+                    yaxis='y2',
+                    line=dict(color='blue'),
+                )
+            )
+        if self.potentiometry.counter_electrode_potential is not None:
+            fig.add_trace(
+                go.Scatter(
+                    name='Counter electrode potential',
+                    x=date_strings,
+                    y=self.potentiometry.counter_electrode_potential,
+                    yaxis='y2',
+                    line=dict(color='dodgerblue'),
+                )
+            )
+        if (
+            self.potentiometry.working_electrode_potential is not None
+            or self.potentiometry.counter_electrode_potential is not None
+        ):
+            fig.update_layout(
+                yaxis2=dict(
+                    title=f'Voltage [{self.potentiometry.working_electrode_potential[0].units:~P}]',
+                    anchor='x',
+                    overlaying='y',
+                    side='right',
+                    titlefont=dict(color='blue'),
+                    tickfont=dict(color='blue'),
+                ),
+            )
+        if self.ph.ph_value is not None:
+            ph_date_strings = [
+                date.strftime('%Y-%m-%d %H:%M:%S') for date in self.ph.datetime
+            ]
+            fig.add_trace(
+                go.Scatter(
+                    name='pH',
+                    x=ph_date_strings,
+                    y=self.ph.ph_value,
+                    yaxis='y3',
+                    line=dict(color='green'),
+                )
+            )
+        elif self.fe_results.pH_start and self.fe_results.pH_end:
+            fig.add_trace(
+                go.Scatter(
+                    name='pH',
+                    x=[self.fe_results.datetime[0], self.fe_results.datetime[-1]],
+                    y=[self.fe_results.pH_start, self.fe_results.pH_end],
+                    yaxis='y3',
+                    line=dict(color='green'),
+                )
+            )
+        if self.ph.ph_value is not None or self.fe_results.pH_start:
+            fig.update_layout(
+                yaxis3=dict(
+                    title='pH',
+                    anchor='free',
+                    overlaying='y',
+                    side='right',
+                    position=1,
+                    titlefont=dict(color='green'),
+                    tickfont=dict(color='green'),
+                ),
+            )
+        fig.update_layout(
+            title_text='Current, Voltage, and pH over Time',
+            showlegend=True,
+            hovermode='x unified',
+            xaxis={'fixedrange': False, 'domain': [0, 0.85]},
+        )
+        return fig
+
+    def make_overview_fig(self):
+        fig = go.Figure()
+        fig.update_layout(
+            showlegend=True,
+            hovermode='x unified',
+            xaxis={'fixedrange': False, 'domain': [0.15, 0.85]},
+            title_text='EC GC Overview',
+        )
+        date_strings = [
+            date.strftime('%Y-%m-%d %H:%M:%S') for date in self.fe_results.datetime
+        ]
+        if self.fe_results.cell_voltage is not None:
+            fig.add_trace(
+                go.Scatter(
+                    name='Voltage',
+                    x=date_strings,
+                    y=self.fe_results.cell_voltage,
+                    line=dict(color='blue'),
+                )
+            )
+            fig.update_layout(
+                yaxis=dict(
+                    title=f'Voltage [{self.fe_results.cell_voltage[0].units:~P}]',
+                    titlefont=dict(color='blue'),
+                    tickfont=dict(color='blue'),
+                ),
+            )
+        if self.fe_results.cell_current is not None:
+            fig.add_trace(
                 go.Scatter(
                     name='Current',
                     x=date_strings,
                     y=self.fe_results.cell_current,
-                    line=dict(color='blue'),
+                    yaxis='y2',
+                    line=dict(color='red'),
                 )
-            ]
-        )
-        fig.add_traces(
-            go.Scatter(
-                name='Voltage',
-                x=date_strings,
-                y=self.fe_results.cell_voltage,
-                yaxis='y2',
-                line=dict(color='red'),
             )
-        )
-        fig.update_layout(
-            yaxis=dict(
-                title=f'Current [{self.fe_results.cell_current[0].units}]',
-                titlefont=dict(color='blue'),
-                tickfont=dict(color='blue'),
-            ),
-            yaxis2=dict(
-                title=f'Voltage [{self.fe_results.cell_voltage[0].units}]',
-                anchor='x',
-                overlaying='y',
-                side='right',
-                titlefont=dict(color='red'),
-                tickfont=dict(color='red'),
-            ),
-        )
-        fig.update_layout(
-            title_text='Current and Voltage over Time',
-            showlegend=True,
-            hovermode='x unified',
-            xaxis={'fixedrange': False},
-        )
+            fig.update_layout(
+                yaxis2=dict(
+                    title=f'Current [{self.fe_results.cell_current[0].units:~P}]',
+                    anchor='free',
+                    overlaying='y',
+                    side='left',
+                    position=0,
+                    titlefont=dict(color='red'),
+                    tickfont=dict(color='red'),
+                ),
+            )
+        if self.fe_results.gas_results is not None:
+            for gas in self.fe_results.gas_results:
+                fig.add_trace(
+                    go.Scatter(
+                        name=gas.gas_type,
+                        x=date_strings,
+                        y=abs(gas.faradaic_efficiency),
+                        yaxis='y3',
+                    )
+                )
+            fig.update_layout(
+                yaxis3=dict(
+                    title='FE [%]',
+                    anchor='x',
+                    overlaying='y',
+                    side='right',
+                    titlefont=dict(color='black'),
+                    tickfont=dict(color='black'),
+                ),
+            )
+        if self.ph.ph_value is not None:
+            ph_date_strings = [
+                date.strftime('%Y-%m-%d %H:%M:%S') for date in self.ph.datetime
+            ]
+            fig.add_trace(
+                go.Scatter(
+                    name='pH',
+                    x=ph_date_strings,
+                    y=self.ph.ph_value,
+                    yaxis='y4',
+                    line=dict(color='green'),
+                )
+            )
+            fig.update_layout(
+                yaxis4=dict(
+                    title='pH',
+                    anchor='free',
+                    overlaying='y',
+                    side='right',
+                    position=1.0,
+                    titlefont=dict(color='green'),
+                    tickfont=dict(color='green'),
+                ),
+            )
         return fig
 
     def get_cleaned_df(self, data, column_list):
@@ -313,27 +486,26 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                 xls_file = pd.ExcelFile(f)
 
                 if self.properties is None:
-                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
-                        extract_properties,
-                    )
-
                     self.properties = extract_properties(xls_file)
 
                 if self.properties.cathode is None or self.properties.anode is None:
-                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
-                        set_catalyst_details,
-                    )
-
                     set_catalyst_details(archive, xls_file)
 
                 if not self.ph and len(xls_file.sheet_names) < 7:
                     data = pd.read_excel(xls_file, sheet_name='Raw Data', header=1)
                     ph_data = self.get_cleaned_df(data, ['Date', 'pH Time', 'pH'])
-                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
-                        read_ph_data,
-                    )
+                    ph_start_time = None
+                    if data.columns.get_loc('pH') + 1 < len(data.columns):
+                        potential_start_time = data.columns[
+                            data.columns.get_loc('pH') + 1
+                        ]
+                        if (
+                            potential_start_time
+                            and str(potential_start_time)[-1].isdigit()
+                        ):
+                            ph_start_time = str(potential_start_time)
 
-                    self.ph = read_ph_data(ph_data)
+                    self.ph = read_ph_data(ph_data, ph_start_time)
 
                 if (
                     not self.thermocouple
@@ -416,23 +588,10 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         ],
                     )
 
-                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
-                        read_gaschromatography_data,
-                    )
-
                     self.gaschromatographies, start_time, end_time = (
                         read_gaschromatography_data(gc_data)
                     )
-
-                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
-                        read_potentiostat_data,
-                    )
-
                     self.potentiometry = read_potentiostat_data(pot_data)
-
-                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
-                        read_thermocouple_data,
-                    )
 
                     try:
                         datetimes, pressure, temperature_cathode, temperature_anode = (
@@ -449,10 +608,6 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
                         self.thermocouple = ThermocoupleMeasurement()
 
                 if self.fe_results is None:
-                    from nomad_chemical_energy.schema_packages.file_parser.necc_excel_parser import (
-                        read_results_data,
-                    )
-
                     self.fe_results = read_results_data(results_data, pH_start, pH_end)
 
         self.properties.normalize(archive, logger)
@@ -466,6 +621,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
 
         fig1 = self.make_fe_figure(date_strings)
         fig2 = self.make_current_voltage_figure(date_strings)
+        fig3 = self.make_overview_fig()
         self.figures = [
             PlotlyFigure(
                 label='Faradaic Efficiencies Figure', figure=fig1.to_plotly_json()
@@ -473,6 +629,7 @@ class CE_NECC_EC_GC(PotentiometryGasChromatographyMeasurement, PlotSection, Entr
             PlotlyFigure(
                 label='Current and Voltage Figure', figure=fig2.to_plotly_json()
             ),
+            PlotlyFigure(label='EC GC Overview Figure', figure=fig3.to_plotly_json()),
         ]
         if self.hplc:
             fig3 = self.make_total_fe_figure()
