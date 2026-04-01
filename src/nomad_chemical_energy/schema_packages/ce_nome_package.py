@@ -875,7 +875,6 @@ class CE_NOME_VoilaNotebook(VoilaNotebook, EntryData):
 
 class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000082'],
         a_eln=dict(
             hide=[
                 'lab_id',

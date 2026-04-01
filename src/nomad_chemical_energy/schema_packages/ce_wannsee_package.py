@@ -182,7 +182,6 @@ class Wannsee_XRD_XY(XRD, EntryData):
 
 class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000082'],
         a_eln=dict(
             hide=[
                 'lab_id',
@@ -252,7 +251,6 @@ class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
 
 class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000082'],
         a_eln=dict(
             hide=[
                 'lab_id',

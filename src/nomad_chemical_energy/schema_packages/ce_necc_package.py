@@ -920,7 +920,6 @@ class CE_NECC_ConstantVoltageMode(Chronoamperometry, EntryData, PlotSection):
 
 class CE_NECC_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000082'],
         a_eln=dict(
             hide=[
                 'users',
