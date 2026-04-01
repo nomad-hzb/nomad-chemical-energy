@@ -99,7 +99,6 @@ class CE_NOME_Sample(CENOMESample, EntryData):
 
 class CE_NOME_Electrode(Electrode, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007201'],
         a_eln=dict(
             hide=['users', 'origin', 'elemental_composition', 'components'],
             properties=dict(
