@@ -83,7 +83,6 @@ m_package = SchemaPackage()
 
 class CE_NESD_Sample(CENESDSample, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0005056'],
         a_eln=dict(
             hide=['users', 'elemental_composition', 'chemical_composition_or_formulas'],
             properties=dict(
