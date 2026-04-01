@@ -856,7 +856,6 @@ class CE_NESD_GEIS(
 
 class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSection):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007211'],
         a_eln=dict(
             hide=[
                 'metadata_file',
