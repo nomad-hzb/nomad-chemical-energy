@@ -553,7 +553,6 @@ class CE_AMCC_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
 
 class CE_AMCC_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007251'],
         a_eln=dict(
             hide=[
                 'metadata_file',

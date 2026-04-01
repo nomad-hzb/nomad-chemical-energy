@@ -468,7 +468,6 @@ class CE_NSLI_Chronoamperometry(Chronoamperometry, EntryData):
 
 class CE_NSLI_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007251'],
         a_eln=dict(
             hide=[
                 'lab_id',

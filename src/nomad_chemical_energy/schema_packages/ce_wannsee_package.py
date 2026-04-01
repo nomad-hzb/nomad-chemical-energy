@@ -388,7 +388,6 @@ class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
 
 class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007251'],
         a_eln=dict(
             hide=[
                 'lab_id',
