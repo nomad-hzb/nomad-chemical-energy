@@ -54,7 +54,6 @@ m_package = SchemaPackage()
 
 class CE_AMCC_Sample(CENOMESample, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0005056'],
         a_eln=dict(
             hide=['users', 'elemental_composition', 'components'],
             properties=dict(

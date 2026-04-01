@@ -82,7 +82,6 @@ class CE_NOME_Design(Design, EntryData):
 
 class CE_NOME_Sample(CENOMESample, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0005056'],
         a_eln=dict(
             hide=['users', 'elemental_composition', 'components'],
             properties=dict(
