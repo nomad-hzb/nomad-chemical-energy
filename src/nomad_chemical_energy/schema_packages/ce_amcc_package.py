@@ -93,7 +93,6 @@ class CE_AMCC_Measurement(BaseMeasurement, EntryData):
 
 class CE_AMCC_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007207'],
         a_eln=dict(
             hide=[
                 'metadata_file',

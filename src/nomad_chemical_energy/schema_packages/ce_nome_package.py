@@ -1116,7 +1116,6 @@ class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
 
 class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007207'],
         a_eln=dict(
             hide=[
                 'lab_id',
