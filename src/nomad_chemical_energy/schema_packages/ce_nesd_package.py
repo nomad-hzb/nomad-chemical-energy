@@ -100,7 +100,6 @@ class CE_NESD_Sample(CENESDSample, EntryData):
 
 class CE_NESD_Electrode(NESDElectrode, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007201'],
         a_eln=dict(
             hide=['components', 'elemental_composition'],
         ),
