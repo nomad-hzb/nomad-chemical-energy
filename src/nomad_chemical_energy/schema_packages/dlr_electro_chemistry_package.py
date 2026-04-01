@@ -197,7 +197,6 @@ class DLR_CyclicVoltammetry(CyclicVoltammetry, EntryData):
 
 class DLR_Chronopotentiometry(Chronopotentiometry, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007208'],
         a_eln=dict(
             hide=[
                 'lab_id',

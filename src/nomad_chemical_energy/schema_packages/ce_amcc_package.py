@@ -157,7 +157,6 @@ class CE_AMCC_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
 
 class CE_AMCC_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007208'],
         a_eln=dict(
             hide=[
                 'metadata_file',
