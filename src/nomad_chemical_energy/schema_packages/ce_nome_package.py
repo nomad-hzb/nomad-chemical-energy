@@ -1273,7 +1273,6 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
 
 class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007212'],
         a_eln=dict(
             hide=[
                 'lab_id',
