@@ -154,7 +154,6 @@ class CE_NESD_Electrolyte(Environment, EntryData):
 
 class CE_NESD_Setup(ElectroChemicalSetup, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007230'],
         a_eln=dict(
             hide=[
                 'users',

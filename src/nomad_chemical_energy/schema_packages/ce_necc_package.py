@@ -93,7 +93,6 @@ class CE_NECC_ElectrodeRecipe(CENECCElectrodeRecipe, EntryData):
 
 class CE_NECC_Electrode(CENECCElectrode, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007201'],
         a_eln=dict(
             hide=[
                 'chemical_composition_or_formulas',

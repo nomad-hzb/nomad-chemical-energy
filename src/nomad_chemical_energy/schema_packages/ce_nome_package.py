@@ -196,7 +196,6 @@ class CE_NOME_Chemical(Substance, EntryData):
 
 class CE_NOME_ElectroChemicalSetup(ElectroChemicalSetup, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007230'],
         a_eln=dict(
             hide=[
                 'users',
