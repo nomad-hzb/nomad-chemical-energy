@@ -292,7 +292,6 @@ class CE_NSLI_SpinCoating(SpinCoating, EntryData):
 
 class CE_NSLI_SEM(SEM_Microscope_Merlin, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000075'],
         a_eln=dict(
             hide=[
                 'lab_id',
@@ -326,7 +325,6 @@ class CE_NSLI_SEM(SEM_Microscope_Merlin, EntryData):
 
 class CE_NSLI_XRD_XY(XRD, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000077'],
         a_eln=dict(
             hide=[
                 'lab_id',
@@ -536,7 +534,6 @@ class CE_NSLI_InfraredSpectroscopy(InfraredSpectroscopy, EntryData):
 
 class CE_NSLI_XAS(XAS, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000286'],
         a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time'])
     )
 
@@ -549,7 +546,6 @@ class CE_NSLI_OpticalMicroscopy(OpticalMicorscopy, EntryData):
 
 class CE_NSLI_TEM(TEM, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000078'],
         a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time'])
     )
 
