@@ -415,7 +415,6 @@ class CE_AMCC_GEIS(
     ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection
 ):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007209'],
         a_eln=dict(
             hide=[
                 'environment',
@@ -617,7 +616,6 @@ class CE_AMCC_PEIS(
     ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection
 ):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007209'],
         a_eln=dict(
             hide=[
                 'environment',
@@ -686,7 +684,6 @@ class CE_AMCC_PEIS(
 
 class CE_AMCC_ZIR(ElectrochemicalImpedanceSpectroscopyMultiple, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007209'],
         a_eln=dict(
             hide=[
                 'environment',

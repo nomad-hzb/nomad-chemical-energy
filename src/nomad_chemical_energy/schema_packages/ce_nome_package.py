@@ -602,7 +602,6 @@ class CE_NOME_DocumentationTool(DocumentationTool, EntryData):
 
 class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0008082'],
         a_eln=dict(
             hide=[
                 'lab_id',
@@ -689,7 +688,6 @@ def get_kmc3_data(file):
 
 class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0008082'],
         a_eln=dict(
             hide=[
                 'lab_id',

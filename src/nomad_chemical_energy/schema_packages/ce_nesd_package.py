@@ -772,7 +772,6 @@ class CE_NESD_GEIS(
     ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection
 ):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007209'],
         a_eln=dict(
             hide=[
                 'environment',
@@ -1129,7 +1128,6 @@ class CE_NESD_PEIS(
     ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection
 ):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007209'],
         a_eln=dict(
             hide=[
                 'environment',
