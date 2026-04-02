@@ -1798,7 +1798,6 @@ class CE_NOME_Process(BaseProcess, EntryData):
 
 class CE_NOME_Measurement(BaseMeasurement, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000066'],
         a_eln=dict(
             hide=[
                 'lab_id',

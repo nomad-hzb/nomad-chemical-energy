@@ -74,7 +74,6 @@ class CE_AMCC_Sample(CENOMESample, EntryData):
 
 class CE_AMCC_Measurement(BaseMeasurement, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0000066'],
         a_eln=dict(
             hide=['lab_id', 'location', 'steps', 'instruments', 'results'],
             properties=dict(order=['name', 'data_file', 'samples']),
