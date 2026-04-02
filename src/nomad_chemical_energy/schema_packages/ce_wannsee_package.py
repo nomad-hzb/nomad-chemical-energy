@@ -323,7 +323,6 @@ class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
     ElectrochemicalImpedanceSpectroscopy, EntryData
 ):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0007209'],
         a_eln=dict(
             hide=[
                 'lab_id',
