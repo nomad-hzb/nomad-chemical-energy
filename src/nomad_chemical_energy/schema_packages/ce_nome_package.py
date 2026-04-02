@@ -636,7 +636,6 @@ class Bessy2_KMC2_XASFluorescence(XASFluorescence, EntryData):
 
 class Bessy2_KMC2_XASTransmission(XASTransmission, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0008081'],
         a_eln=dict(
             hide=[
                 'lab_id',
@@ -729,7 +728,6 @@ class Bessy2_KMC3_XASFluorescence(XASWithSDD, EntryData):
 
 class Bessy2_KMC3_XASTransmission(XASWithSDD, EntryData):
     m_def = Section(
-        links=['https://w3id.org/nfdi4cat/voc4cat_0008081'],
         a_eln=dict(
             hide=[
                 'lab_id',
