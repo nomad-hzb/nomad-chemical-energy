@@ -42,11 +42,14 @@ m_package = SchemaPackage()
 
 
 class TFC_Equipment(Equipment, EntryData):
+    """Custom metadata schema for equipment/instrument at HZB Thin-Film Catalysts and Reactors group."""
+
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000187'],
         a_eln=dict(
             hide=['users', 'origin', 'elemental_composition', 'components'],
             properties=dict(order=['name', 'lab_id', 'producer', 'location']),
-        )
+        ),
     )
 
 
@@ -54,7 +57,13 @@ class TFC_Equipment(Equipment, EntryData):
 
 
 class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
+    """Custom metadata schema for (multitarget) Sputtering deposition (thin-film) sample synthesis at HZB Thin-Film Catalysts and Reactors group."""
+
     m_def = Section(
+        links=[
+            'https://w3id.org/nfdi4cat/voc4cat_0000020',
+            'http://purl.obolibrary.org/obo/CHMO_0001364',
+        ],
         a_eln=dict(
             hide=[
                 'layer',
@@ -78,7 +87,7 @@ class TFC_Sputtering(MultiTargetSputtering, PlotSection, EntryData):
                     'sample_lab_label',
                 ]
             ),
-        )
+        ),
     )
 
     def make_targets_process_table(self):
@@ -282,8 +291,11 @@ def load_XRF_txt(input_file):
 
 
 class TFC_XRFLibrary(XRFLibrary, EntryData, PlotSection):
+    """Custom metadata schema for XRF characterization measurement of a (thin-film) sample at  HZB Thin-Film Catalysts and Reactors group."""
+
     m_def = Section(
         label='XRF Measurement Library',
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000067'],
         a_eln=dict(
             hide=['instruments', 'steps', 'results', 'lab_id'],
             properties=dict(
@@ -655,8 +667,11 @@ def xrd_read(file_object):
 
 
 class TFC_XRDMetalJetLibrary(XRDLibrary, EntryData):
+    """Custom metadata schema for XRD characterization measurement of a (thin-film) sample performed with the MetalJet source at  HZB Thin-Film Catalysts and Reactors group."""
+
     m_def = Section(
         label='XRD Measurement Library',
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000077'],
         a_eln=dict(
             hide=['instruments', 'steps', 'results', 'lab_id'],
             properties=dict(
