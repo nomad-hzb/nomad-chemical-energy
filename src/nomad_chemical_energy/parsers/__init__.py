@@ -409,14 +409,14 @@ tfc_xrf_parser = TFCXRFLibraryParserEntryPoint(
     name='TFCXRFParser',
     description='Parse txt files with xrf. Files are defined for the Thin Film Catalysis Group.',
     mainfile_name_re=r'.*(R|r)eport.txt',
-    mainfile_contents=r'.*Basis.*Grid_',
+    mainfile_contents_re=r'.*Basis.*Grid_',
 )
 
 tfc_xrd_parser = TFCXRDLibraryParserEntryPoint(
     name='TFCXRDParser',
     description='Parse txt files with xrd. Files are defined for the Thin Film Catalysis Group.',
     mainfile_name_re=r'.*log_all.txt',
-    mainfile_contents=r'########## start Header ##########.*# xlab 0.6.4 log all file',
+    mainfile_contents_re=r'########## start Header ##########.*# xlab 0.6.4 log all file',
 )
 
 public_showcase_parser = PublicShowcaseParserEntryPoint(
@@ -425,5 +425,5 @@ public_showcase_parser = PublicShowcaseParserEntryPoint(
     'Files are defined for simplified science communication experiments '
     'regarding the EMAR (Electrochemically-Mediated Amine Regeneration) setup.',
     mainfile_name_re=r'.*\.txt',
-    mainfile_contents=r'Time pH.*\nRun 1, started.*\nhh:mm:ss pH',
+    mainfile_contents_re=r'Time pH.*\nRun 1, started.*\nhh:mm:ss pH',
 )
