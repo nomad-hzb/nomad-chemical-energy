@@ -255,13 +255,17 @@ def find_sample_in_folder(archive, datafile):
         if not item.path.endswith('.xlsx_sample.archive.json'):
             continue
         sample_files.append(item.path)
-    if len(sample_files) == 1:
+    if len(sample_files) >= 1:
         sample_entry_id = get_entry_id_from_file_name(sample_files[0], archive)
         return [
             CompositeSystemReference(
                 reference=get_reference(archive.metadata.upload_id, sample_entry_id)
             )
         ]
+    parent = os.path.dirname(folder)
+    if len(sample_files) == 0 and parent != folder:
+        return find_sample_in_folder(archive, folder)
+    return []
 
 
 def set_sample(archive, entry):
