@@ -489,7 +489,7 @@ class CENOMETIFParser(MatchingParser):
         # Log a hello world, just to get us started. TODO remove from an actual
         # parser.
 
-        measurement_base, measurement_name = os.path.split(mainfile)
+        measurement_name = mainfile.rsplit('raw/', maxsplit=1)[-1]
         archive.metadata.entry_name = measurement_name
 
         tif_image = CE_NOME_TIF_Image()
