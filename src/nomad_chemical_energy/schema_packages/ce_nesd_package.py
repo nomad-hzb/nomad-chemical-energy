@@ -217,7 +217,7 @@ class CE_NESD_Measurement(BaseMeasurement, EntryData):
 def find_electrolyser_in_folder(archive, datafile):
     folder = os.path.dirname(datafile)
     tdms_files = []
-    for item in archive.m_context.upload_files.raw_directory_list(folder):
+    for item in archive.m_context.upload_files.raw_listdir(folder):
         if not item.path.endswith('.tdms'):
             continue
         tdms_files.append(item.path)
@@ -238,7 +238,7 @@ def find_setup_in_folder(archive, datafile):
     # this function only finds setups that are created via the NESD metadata excel file (xlsx_setup ending)
     folder = os.path.dirname(datafile)
     setup_files = []
-    for item in archive.m_context.upload_files.raw_directory_list(folder):
+    for item in archive.m_context.upload_files.raw_listdir(folder):
         if not item.path.endswith('.xlsx_setup.archive.json'):
             continue
         setup_files.append(item.path)
@@ -251,7 +251,7 @@ def find_sample_in_folder(archive, datafile):
     # this function only finds samples that are created via the NESD metadata excel file (xlsx_sample ending)
     folder = os.path.dirname(datafile)
     sample_files = []
-    for item in archive.m_context.upload_files.raw_directory_list(folder):
+    for item in archive.m_context.upload_files.raw_listdir(folder):
         if not item.path.endswith('.xlsx_sample.archive.json'):
             continue
         sample_files.append(item.path)
