@@ -317,6 +317,15 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
                 ) as f:
                     d = get_data_from_pssession_file(f.read())
                 map_voltammetry_data(self, d)
+            elif os.path.splitext(self.data_file)[-1] == '.txt':
+                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
+                    get_voltammetry_data_from_txt_file,
+                    set_chi_data_ca,
+                )
+
+                with archive.m_context.raw_file(self.data_file, 'r') as f:
+                    d = get_voltammetry_data_from_txt_file(f.read())
+                set_chi_data_ca(self, d)
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.isw':
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
@@ -356,6 +365,16 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
+
+                elif os.path.splitext(self.data_file)[-1] == '.bin':
+                    from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
+                        get_data_from_ca_bin_file,
+                        set_chi_data_ca,
+                    )
+
+                    d = get_data_from_ca_bin_file(f.read())
+                    set_chi_data_ca(self, d)
+
         set_sample(archive, self)
         if not self.setup:
             self.setup = find_setup_in_folder(archive, self.data_file)
@@ -415,6 +434,15 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
                 ) as f:
                     d = get_data_from_pssession_file(f.read())
                 map_voltammetry_data(self, d)
+            elif os.path.splitext(self.data_file)[-1] == '.txt':
+                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
+                    get_voltammetry_data_from_txt_file,
+                    set_chi_data_cp,
+                )
+
+                with archive.m_context.raw_file(self.data_file, 'r') as f:
+                    d = get_voltammetry_data_from_txt_file(f.read())
+                set_chi_data_cp(self, d)
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
                 if os.path.splitext(self.data_file)[-1] == '.isw':
                     from nomad_chemical_energy.schema_packages.file_parser.zahner_parser import (
@@ -455,6 +483,16 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
+
+                elif os.path.splitext(self.data_file)[-1] == '.bin':
+                    from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
+                        get_data_from_cp_bin_file,
+                        set_chi_data_cp,
+                    )
+
+                    d = get_data_from_cp_bin_file(f.read())
+                    set_chi_data_cp(self, d)
+
         set_sample(archive, self)
         if not self.setup:
             self.setup = find_setup_in_folder(archive, self.data_file)
@@ -642,13 +680,13 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
                 self.set_calculated_properties()
 
             if os.path.splitext(self.data_file)[-1] == '.txt':
-                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
-                    get_data_from_cv_txt_file,
+                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
+                    get_voltammetry_data_from_txt_file,
                     set_chi_data_cv,
                 )
 
                 with archive.m_context.raw_file(self.data_file, 'r') as f:
-                    d = get_data_from_cv_txt_file(f.read())
+                    d = get_voltammetry_data_from_txt_file(f.read())
                 set_chi_data_cv(self, d)
 
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
@@ -684,6 +722,16 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
+
+                elif os.path.splitext(self.data_file)[-1] == '.bin':
+                    from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
+                        get_data_from_cv_bin_file,
+                        set_chi_data_cv,
+                    )
+
+                    d = get_data_from_cv_bin_file(f.read())
+                    set_chi_data_cv(self, d)
+
         set_sample(archive, self)
         if not self.setup:
             self.setup = find_setup_in_folder(archive, self.data_file)
@@ -896,14 +944,14 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                     d = get_data_from_pssession_file(f.read())
                 map_voltammetry_data(self, d)
 
-            if os.path.splitext(self.data_file)[-1] == '.txt':
-                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
-                    get_data_from_lsv_txt_file,
+            elif os.path.splitext(self.data_file)[-1] == '.txt':
+                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
+                    get_voltammetry_data_from_txt_file,
                     set_chi_data_lsv,
                 )
 
                 with archive.m_context.raw_file(self.data_file, 'r') as f:
-                    d = get_data_from_lsv_txt_file(f.read())
+                    d = get_voltammetry_data_from_txt_file(f.read())
                 set_chi_data_lsv(self, d)
 
             with archive.m_context.raw_file(self.data_file, 'rb') as f:
@@ -923,7 +971,7 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                     d = get_data_from_isw_file(f.read(), metadata)
                     set_zahner_data_isw(self, d)
 
-                if os.path.splitext(self.data_file)[-1] == '.mpr':
+                elif os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
                         get_lsv_properties,
@@ -945,6 +993,15 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
                         self.properties.sample_area = self.setup_parameters.get(
                             'sample_area'
                         )
+
+                elif os.path.splitext(self.data_file)[-1] == '.bin':
+                    from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
+                        get_data_from_lsv_bin_file,
+                        set_chi_data_lsv,
+                    )
+
+                    d = get_data_from_lsv_bin_file(f.read())
+                    set_chi_data_lsv(self, d)
         set_sample(archive, self)
         if not self.setup:
             self.setup = find_setup_in_folder(archive, self.data_file)
@@ -1167,7 +1224,7 @@ class CE_NESD_PEIS(
                 map_eis_data(self, d)
 
             if os.path.splitext(self.data_file)[-1] == '.txt':
-                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
+                from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
                     get_data_from_eis_txt_file,
                     set_chi_data_eis,
                 )
@@ -1184,7 +1241,7 @@ class CE_NESD_PEIS(
 
                     d = get_data_from_ism_file(f.read())
                     set_zahner_data_ism(self, d)
-                if os.path.splitext(self.data_file)[-1] == '.mpr':
+                elif os.path.splitext(self.data_file)[-1] == '.mpr':
                     from baseclasses.helper.archive_builder.biologic_archive import (
                         get_biologic_properties,
                         get_eis_data,
@@ -1213,6 +1270,14 @@ class CE_NESD_PEIS(
                         get_eis_data(data, self.measurements)
                     for cycle in self.measurements:
                         cycle.sample_area = self.setup_parameters.get('sample_area')
+                elif os.path.splitext(self.data_file)[-1] == '.bin':
+                    from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
+                        get_data_from_eis_bin_file,
+                        set_chi_data_eis,
+                    )
+
+                    d = get_data_from_eis_bin_file(f.read())
+                    set_chi_data_eis(self, d)
         set_sample(archive, self)
         if not self.setup:
             self.setup = find_setup_in_folder(archive, self.data_file)

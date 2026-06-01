@@ -61,8 +61,9 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
 )
-from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_txt_parser import (
+from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
     parse_chi_txt_file,
+    parse_metadata_chi_bin_file,
 )
 from nomad_chemical_energy.schema_packages.file_parser.nesd_metadata_excel_parser import (
     get_reference_electrode,
@@ -258,17 +259,21 @@ class CENESDZahnerParser(MatchingParser):
 
 class CENESDCHIParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        if not mainfile.endswith('.txt'):
+        if not mainfile.endswith('.txt') and not mainfile.endswith('.bin'):
             return
         file = mainfile.rsplit('raw/', maxsplit=1)[-1]
 
-        with archive.m_context.raw_file(file, 'tr') as f:
-            m, _ = parse_chi_txt_file(f.read())
+        if mainfile.endswith('.txt'):
+            with archive.m_context.raw_file(file, 'tr') as f:
+                m, _ = parse_chi_txt_file(f.read())
+        else:
+            with archive.m_context.raw_file(file, 'rb') as f:
+                m, _ = parse_metadata_chi_bin_file(f.read())
 
         technique = m.get('method')
         match technique:
-            # case 'ca':
-            #     entry = CE_NESD_Chronoamperometry(data_file=file)
+            case 'Chronoamperometry':
+                entry = CE_NESD_Chronoamperometry(data_file=file)
             case 'Cyclic Voltammetry':
                 entry = CE_NESD_CyclicVoltammetry(data_file=file)
             case 'Linear Sweep Voltammetry':
@@ -279,8 +284,8 @@ class CENESDCHIParser(MatchingParser):
             #     entry = CE_NESD_GEIS(data_file=file)
             case 'A.C. Impedance':
                 entry = CE_NESD_PEIS(data_file=file)
-            # case 'cp':
-            #     entry = CE_NESD_Chronopotentiometry(data_file=file)
+            case 'Chronopotentiometry':
+                entry = CE_NESD_Chronopotentiometry(data_file=file)
 
         electrolyser_id = file.split('/')[-1][:8]
         set_sample_reference(archive, entry, electrolyser_id)
