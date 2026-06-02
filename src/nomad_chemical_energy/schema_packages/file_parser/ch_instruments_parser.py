@@ -97,8 +97,8 @@ def _read_u16(data: bytes, offset: int) -> int:
 
 def _bin_params_ca(data: bytes) -> dict:
     return {
-        'data_interval_s': _read_f32(data, 0x045C),
-        'step_1_time_s': _read_f32(data, 0x046C),
+        'sample_interval_s': _read_f32(data, 0x045C),
+        'pulse_width_s': _read_f32(data, 0x046C),
     }
 
 
@@ -291,7 +291,7 @@ def get_data_from_ca_bin_file(filedata):
     metadata, nrows = parse_metadata_chi_bin_file(filedata)
     data_start = len(filedata) - nrows * 4
     current = [_read_f32(filedata, data_start + i * 4) for i in range(nrows)]
-    interval = metadata['data_interval_s']
+    interval = metadata.get('sample_interval_s')
     time = interval * np.arange(1, nrows + 1)
     data = {
         'time_s': time,
@@ -410,7 +410,7 @@ def parse_chi_txt_file(filedata):
         if '=' in line:
             key, value = line.split('=', 1)
             metadata[key.strip()] = value.strip()
-        if 'Freq/Hz' in line or 'Potential/V' in line:
+        if 'Freq/Hz' in line or 'Potential/V' in line or 'Current/A' in line:
             break
     data = [lines[i]]
     data.extend(lines[i + 2 :])
@@ -454,6 +454,8 @@ def get_voltammetry_data_from_txt_file(filedata):
         'init_e_v': metadata.get('Init E (V)'),
         'final_e_v': metadata.get('Final E (V)'),
         'sample_interval_v': metadata.get('Sample Interval (V)'),
+        'sample_interval_s': metadata.get('Sample Interval (s)'),
+        'pulse_width_s': metadata.get('Pulse Width (sec)'),
         'scan_rate_vs': metadata.get('Scan Rate (V/s)'),
         'data_interval_s': metadata.get('Data Storage Interval (s)'),
         'comp_r_ohm': metadata.get('Comp R (ohm)'),
@@ -497,7 +499,12 @@ def set_voltammetry_data(entry, data):
 def set_chi_data_ca(entry, d):
     set_voltammetry_data(entry, d)
     entry.properties = CAProperties(
-        sample_period=_with_unit(d.get('data_interval_s'), ureg('s')),
+        sample_period=_with_unit(d.get('sample_interval_s'), ureg('s')),
+        pre_step_potential=_with_unit(d.get('init_e_v'), ureg('V')),
+        step_1_potential=_with_unit(d.get('high_e_v'), ureg('V')),
+        step_2_potential=_with_unit(d.get('low_e_v'), ureg('V')),
+        step_1_time=_with_unit(d.get('pulse_width_s'), ureg('s')),
+        step_2_time=_with_unit(d.get('quiet_time_s'), ureg('s')),
     )
     if d['datetime']:
         entry.datetime = _try_convert_datetime(d['datetime'])

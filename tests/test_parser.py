@@ -15,6 +15,7 @@ from nomad.client import normalize_all, parse
         'CE-NOME_FrJo_240815_0001.0 H2O Au000001.txt',
         'CE-NOME_MiGo_240429_0001.SA_5_MM.csv',
         'chi_chronoamperometry.bin',
+        'chi_chronoamperometry.txt',
         'chi_chronopotentiometry.bin',
         'chi_chronopotentiometry.txt',
         'chi_cyclic_voltammetry.bin',
@@ -374,6 +375,17 @@ def test_chi_bin_lsv_nesd_parser():
     assert round(archive.data.datetime.timestamp(), 0) == 1756232620
     assert len(archive.data.current) == 300
     assert round(archive.data.voltage[0].magnitude, 5) == 0.4
+
+
+def test_chi_txt_ca_nesd_parser():
+    file = 'chi_chronoamperometry.txt'
+    archive = get_archive(file)
+    assert archive.data
+    assert 'chronoamperometry' in str(archive.data.m_def).lower()
+    assert round(archive.data.datetime.timestamp(), 0) == 1761586027
+    assert len(archive.data.current) == 6000
+    assert len(archive.data.current) == len(archive.data.time)
+    assert round(archive.data.current[0].to('A').magnitude, 8) == -0.00001007
 
 
 def test_chi_txt_cp_nesd_parser():
