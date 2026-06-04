@@ -97,7 +97,15 @@ def _read_u16(data: bytes, offset: int) -> int:
 
 def _bin_params_ca(data: bytes) -> dict:
     return {
+        'init_e_v': _read_f32(data, 0x0440),
+        'high_e_v': _read_f32(data, 0x0444),
+        'low_e_v': _read_f32(data, 0x0448),
+        'init_scan_polarity': _read_f32(data, 0x0454),  # P=1, N=0?
+        'step': _read_f32(data, 0x0458),
         'sample_interval_s': _read_f32(data, 0x045C),
+        'sample_interval_dup': _read_f32(data, 0x0460),
+        'sensitivity_av': _read_f32(data, 0x0464),
+        'quiet_time_s': _read_f32(data, 0x0468),
         'pulse_width_s': _read_f32(data, 0x046C),
     }
 
@@ -106,19 +114,29 @@ def _bin_params_cp(data: bytes) -> dict:
     return {
         'high_e_limit_v': _read_f32(data, 0x0446),
         'low_e_limit_v': _read_f32(data, 0x044A),
+        'init_scan_polarity': _read_f32(data, 0x045A),  # P=1, N=0?
         'data_interval_s': _read_f32(data, 0x045E),
-        'step_1_time_s': _read_f32(data, 0x046A),
-        'step_2_time_s': _read_f32(data, 0x0502),
+        'data_interval_dup': _read_f32(data, 0x0462),
+        'sensitivity_av': _read_f32(data, 0x0466),
+        'cathodic_time_s': _read_f32(data, 0x046A),
+        'cathodic_current_a': _read_f32(data, 0x04EA),
+        'anodic_current_a': _read_f32(data, 0x04F2),
+        'anodic_time_s': _read_f32(data, 0x0502),
     }
 
 
 def _bin_params_cv(data: bytes) -> dict:
     return {
         'init_e_v': _read_f32(data, 0x043D),
+        'final_e_v': _read_f32(data, 0x0441),
         'high_e_v': _read_f32(data, 0x0445),
         'low_e_v': _read_f32(data, 0x0449),
         'scan_rate_vs': _read_f32(data, 0x044D),
+        'init_scan_polarity': _read_f32(data, 0x0455),  # P=1, N=0?
+        'segment': _read_f32(data, 0x0459),
         'sample_interval_v': _read_f32(data, 0x045D),
+        'sample_interval_dup': _read_f32(data, 0x0461),
+        'sensitivity_av': _read_f32(data, 0x0465),
         'quiet_time_s': _read_f32(data, 0x0469),
         'comp_r_ohm': _read_f32(data, 0x04B5),
     }
@@ -128,8 +146,12 @@ def _bin_params_lsv(data: bytes) -> dict:
     return {
         'init_e_v': _read_f32(data, 0x0444),
         'final_e_v': _read_f32(data, 0x0448),
+        'final_e_dup': _read_f32(data, 0x044C),
+        'init_e_dup': _read_f32(data, 0x0450),
         'scan_rate_vs': _read_f32(data, 0x0454),
         'sample_interval_v': _read_f32(data, 0x0464),
+        'sample_interval_dup': _read_f32(data, 0x0468),
+        'sensitivity_av': _read_f32(data, 0x046C),
         'quiet_time_s': _read_f32(data, 0x0470),
         'comp_r_ohm': _read_f32(data, 0x04BC),
     }
@@ -138,10 +160,12 @@ def _bin_params_lsv(data: bytes) -> dict:
 def _bin_params_eis(data: bytes) -> dict:
     return {
         'init_e_v': _read_f32(data, 0x043A),
-        'high_freq_hz': _read_f32(data, 0x0492),
+        'init_e_dup': _read_f32(data, 0x0442),
         'low_freq_hz': _read_f32(data, 0x0456),
-        'amplitude_v': _read_f32(data, 0x047A),
+        'sensitivity_av': _read_f32(data, 0x0462),
         'quiet_time_s': _read_f32(data, 0x0466),
+        'amplitude_v': _read_f32(data, 0x047A),
+        'high_freq_hz': _read_f32(data, 0x0492),
     }
 
 
@@ -206,6 +230,30 @@ def parse_metadata_chi_bin_file(filedata):
                 }
         return {}
 
+    def _read_instrument_model(data: bytes) -> str:
+        """
+        Reads the internal instrument product code from the header.
+        Pattern in 0x20–0x80: 4 null bytes, 1 byte length, 3 null bytes, ASCII string.
+        Returns the stored code (e.g., ‘E1205’) and if known the CHI model name (e.g., ‘CHI760E’) as ‘instrument_model’.
+        """
+        # internal product code → CHI model name
+        _MODEL_CODES = {
+            'E1205': 'CHI760E',
+            'E1208': 'CHI760E',
+        }
+
+        for i in range(0x20, 0x80):
+            if i + 8 > len(data):
+                break
+            if data[i : i + 4] == b'\x00\x00\x00\x00':
+                length = data[i + 4]
+                if 0 < length <= 20 and data[i + 5 : i + 8] == b'\x00\x00\x00':
+                    model_bytes = data[i + 8 : i + 8 + length]
+                    if all(0x20 <= b < 0x7F for b in model_bytes):
+                        internal_code = model_bytes.decode('ascii')
+                        return _MODEL_CODES.get(internal_code, internal_code)
+        return ''
+
     def _find_nrows_in_bin(data: bytes, row_size: int) -> int:
         """
         Find the number of data points by searching for the pattern
@@ -232,11 +280,12 @@ def parse_metadata_chi_bin_file(filedata):
         # If there are multiple matches, choose the smallest plausible one
         return min(candidates)
 
+    instrument_model = _read_instrument_model(filedata)
     technique_code, technique_name = _read_technique_from_bin(filedata)
     metadata = {
         'datetime': _read_timestamp_from_bin(filedata),
         'method': technique_name,
-        #'instrument_model': instrument_model,
+        'instrument_model': instrument_model,
     }
     params = {
         'IMP': lambda: _bin_params_eis(filedata),
@@ -459,10 +508,10 @@ def get_voltammetry_data_from_txt_file(filedata):
         'scan_rate_vs': metadata.get('Scan Rate (V/s)'),
         'data_interval_s': metadata.get('Data Storage Interval (s)'),
         'comp_r_ohm': metadata.get('Comp R (ohm)'),
-        'step_1_current_a': metadata.get('Cathodic Current (A)'),
-        'step_2_current_a': metadata.get('Anodic Current (A)'),
-        'step_1_time_s': metadata.get('Cathodic Time (s)'),
-        'step_2_time_s': metadata.get('Anodic Time (s)'),
+        'cathodic_current_a': metadata.get('Cathodic Current (A)'),
+        'anodic_current_a': metadata.get('Anodic Current (A)'),
+        'cathodic_time_s': metadata.get('Cathodic Time (s)'),
+        'anodic_time_s': metadata.get('Anodic Time (s)'),
         'high_e_limit_v': metadata.get('High E Limit (V)'),
         'low_e_limit_v': metadata.get('Low E Limit (V)'),
         'quiet_time_s': metadata.get('Quiet Time (sec)'),
@@ -513,10 +562,10 @@ def set_chi_data_ca(entry, d):
 def set_chi_data_cp(entry, d):
     set_voltammetry_data(entry, d)
     entry.properties = CPProperties(
-        step_1_current=_with_unit(d.get('step_1_current_a'), ureg('A')),
-        step_1_time=_with_unit(d.get('step_1_time_s'), ureg('s')),
-        step_2_current=_with_unit(d.get('step_2_current_a'), ureg('A')),
-        step_2_time=_with_unit(d.get('step_2_time_s'), ureg('s')),
+        step_1_current=_with_unit(d.get('cathodic_current_a'), ureg('A')),
+        step_1_time=_with_unit(d.get('cathodic_time_s'), ureg('s')),
+        step_2_current=_with_unit(d.get('anodic_current_a'), ureg('A')),
+        step_2_time=_with_unit(d.get('anodic_time_s'), ureg('s')),
         lower_limit_potential=_with_unit(d.get('low_e_limit_v'), ureg('V')),
         upper_limit_potential=_with_unit(d.get('high_e_limit_v'), ureg('V')),
         sample_period=_with_unit(d.get('data_interval_s'), ureg('s')),
@@ -582,7 +631,11 @@ def set_chi_data_eis(entry, d):
                 z_imaginary=_with_unit(d.get('z_imag_ohm'), ureg('ohm')),
                 z_modulus=_with_unit(d.get('z_mod_ohm'), ureg('ohm')),
                 z_angle=_with_unit(d.get('phase_deg'), ureg('deg')),
-            )
+            ),
+            dc_voltage=_with_unit(d.get('init_e_v'), ureg('V')),
+            initial_frequency=_with_unit(d.get('low_freq_hz'), ureg('Hz')),
+            final_frequency=_with_unit(d.get('high_freq_hz'), ureg('Hz')),
+            ac_voltage=_with_unit(d.get('amplitude_v'), ureg('V')),
         )
     ]
     if d['datetime']:
