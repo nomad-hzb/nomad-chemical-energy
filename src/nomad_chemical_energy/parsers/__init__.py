@@ -260,6 +260,7 @@ ce_nesd_chi_bin_parser = CENESDCHIBinParserEntryPoint(
     name='CENESDCHIBinParser',
     description='Parser for CENESD bin files of CHI potentiostats',
     mainfile_name_re=r'^.*\.(bin)',
+    mainfile_binary_header=b'\x80\xf2\x1d\x00',
 )
 
 ce_nesd_chi_txt_parser = CENESDCHITxtParserEntryPoint(
