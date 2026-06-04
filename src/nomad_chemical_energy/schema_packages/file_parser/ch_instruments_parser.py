@@ -285,7 +285,7 @@ def parse_metadata_chi_bin_file(filedata):
     metadata = {
         'datetime': _read_timestamp_from_bin(filedata),
         'method': technique_name,
-        'instrument_model': instrument_model,
+        'station': instrument_model,
     }
     params = {
         'IMP': lambda: _bin_params_eis(filedata),

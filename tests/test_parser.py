@@ -337,6 +337,7 @@ def test_chi_bin_ca_nesd_parser():
     assert len(archive.data.current) == len(archive.data.time)
     assert round(archive.data.current[0].to('A').magnitude, 8) == -0.00001007
     assert round(archive.data.properties.step_1_potential.magnitude, 3) == 0.001
+    assert archive.data.station == 'CHI760E'
 
 
 def test_chi_bin_cp_nesd_parser():
@@ -349,6 +350,7 @@ def test_chi_bin_cp_nesd_parser():
     assert len(archive.data.voltage) == len(archive.data.time)
     assert round(archive.data.voltage[0].magnitude, 4) == 0.3532
     assert round(archive.data.properties.step_2_current.magnitude, 4) == 0.0007
+    assert archive.data.station == 'CHI760E'
 
 
 def test_chi_bin_cv_nesd_parser():
@@ -358,6 +360,7 @@ def test_chi_bin_cv_nesd_parser():
     assert 'cyclicvolt' in str(archive.data.m_def).lower()
     assert len(archive.data.cycles[0].current) == 2100
     assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.65
+    assert archive.data.station == 'CHI760E'
 
 
 def test_chi_bin_eis_nesd_parser():
@@ -368,6 +371,7 @@ def test_chi_bin_eis_nesd_parser():
     assert len(archive.data.measurements[0].data.frequency) == 61
     assert round(archive.data.measurements[0].data.z_real[0].magnitude, 4) == 1.5701
     assert round(archive.data.measurements[0].ac_voltage.magnitude, 1) == 5.0
+    assert archive.data.station == 'CHI760E'
 
 
 def test_chi_bin_lsv_nesd_parser():
@@ -379,6 +383,7 @@ def test_chi_bin_lsv_nesd_parser():
     assert len(archive.data.current) == 300
     assert round(archive.data.voltage[0].magnitude, 5) == 0.4
     assert round(archive.data.properties.scan_rate.to('V/s').magnitude, 3) == 0.001
+    assert archive.data.station == 'CHI760E'
 
 
 def test_chi_txt_ca_nesd_parser():
@@ -391,6 +396,7 @@ def test_chi_txt_ca_nesd_parser():
     assert len(archive.data.current) == len(archive.data.time)
     assert round(archive.data.current[0].to('A').magnitude, 8) == -0.00001007
     assert round(archive.data.properties.step_1_potential.magnitude, 3) == 0.001
+    assert archive.data.station == 'CHI760E'
 
 
 def test_chi_txt_cp_nesd_parser():
@@ -400,6 +406,7 @@ def test_chi_txt_cp_nesd_parser():
     assert archive.data.properties.lower_limit_potential.magnitude == -1
     assert 'chronopotentiometry' in str(archive.data.m_def).lower()
     assert round(archive.data.voltage[0].magnitude, 4) == 0.3532
+    assert archive.data.station == 'CHI760E'
 
 
 def test_chi_txt_lsv_nesd_parser():
@@ -409,6 +416,7 @@ def test_chi_txt_lsv_nesd_parser():
     assert archive.data.properties.scan_rate.magnitude == 5
     assert 'linear' in str(archive.data.m_def).lower()
     assert round(archive.data.voltage[0].magnitude, 5) == -0.2
+    assert archive.data.station == 'CHI760E'
 
 
 def test_chi_txt_eis_nesd_parser():
@@ -418,6 +426,7 @@ def test_chi_txt_eis_nesd_parser():
     assert 'peis' in str(archive.data.m_def).lower()
     assert len(archive.data.measurements[0].data.frequency) == 73
     assert round(archive.data.measurements[0].ac_voltage.magnitude, 1) == 5.0
+    assert archive.data.station == 'CHI760E'
 
 
 def test_chi_txt_cv_nesd_parser():
@@ -427,6 +436,7 @@ def test_chi_txt_cv_nesd_parser():
     assert 'cyclicvolt' in str(archive.data.m_def).lower()
     assert len(archive.data.cycles[0].current) == 1400
     assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.2
+    assert archive.data.station == 'CHI760E'
 
 
 def test_palmense_lsv_nesd_parser():
