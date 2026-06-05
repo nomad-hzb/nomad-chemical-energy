@@ -176,6 +176,8 @@ kmc3_xas_parser_before2021 = "nomad_chemical_energy.parsers:kmc3_xas_parser_befo
 kmc3_xas_parser = "nomad_chemical_energy.parsers:kmc3_xas_parser"
 ce_nome_general_parser = "nomad_chemical_energy.parsers:ce_nome_general_parser"
 
+eln_app = "nomad_chemical_energy.apps:eln_app"
+documentation_tools_app = "nomad_chemical_energy.apps:documentation_tools_app"
 necc_find_app = "nomad_chemical_energy.apps:necc_find_app"
 necc_compare_app = "nomad_chemical_energy.apps:necc_compare_app"
 voila_finder_app = "nomad_chemical_energy.apps:voila_finder_app"
