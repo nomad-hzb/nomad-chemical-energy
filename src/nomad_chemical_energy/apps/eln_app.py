@@ -28,7 +28,7 @@ eln_app = App(
     description='Search your experimental data',
     # Longer description that can also use markdown
     readme='### Experiments search \n'
-           'This page allows you to search **your experimental data** within the HZB-NOMAD.',
+    'This page allows you to search **your experimental data** within the HZB-NOMAD.',
     # Dictionary of search filters that are always enabled for queries made
     # within this app. This is especially important to narrow down the
     # results to the wanted subset. Any available search filter can be
