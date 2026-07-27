@@ -346,7 +346,7 @@ class CENESDPalmSensParser(MatchingParser):
                 entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
             # case 'gds':
             #     entry = CE_NESD_GalvanodynamicSweep(data_file=file)
-            case 'Impedance Spectroscopy':
+            case 'Impedance Spectroscopy' | 'Impedance Spectroscopy [1]':
                 entry = CE_NESD_PEIS(data_file=file)
             case 'Chronopotentiometry':
                 entry = CE_NESD_Chronopotentiometry(data_file=file)
