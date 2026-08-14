@@ -163,7 +163,7 @@ eln_app = App(
                 scale='linear',
             ),
             WidgetTerms(
-                title='Sections',
+                title='Upload name',
                 layout={
                     'sm': Layout(minH=3, minW=3, h=6, w=6, y=6, x=6),
                     'md': Layout(minH=3, minW=3, h=6, w=6, y=6, x=0),
@@ -171,7 +171,7 @@ eln_app = App(
                     'xl': Layout(minH=3, minW=3, h=6, w=6, y=0, x=18),
                     'xxl': Layout(minH=3, minW=3, h=6, w=6, y=0, x=18),
                 },
-                search_quantity='results.eln.sections',
+                search_quantity='upload_name',
                 showinput=True,
                 scale='linear',
             ),
