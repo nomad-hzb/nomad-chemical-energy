@@ -116,6 +116,7 @@ class CE_NOME_Electrode(Electrode, EntryData):
 
 class CE_NOME_Equipment(Equipment, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000187'],
         a_eln=dict(
             hide=['users', 'origin', 'elemental_composition', 'components'],
             properties=dict(order=['name', 'lab_id', 'producer', 'location']),
@@ -142,6 +143,7 @@ class CE_NOME_Equipment(Equipment, EntryData):
 
 class CE_NOME_Environment(Environment, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0007223'],
         a_eln=dict(
             hide=[
                 'users',
@@ -1391,6 +1393,7 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
 
 class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000079'],
         a_eln=dict(
             hide=[
                 'lab_id',
@@ -1666,6 +1669,7 @@ class CE_NOME_TIF_Image(BaseMeasurement, EntryData):
 
 class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000137'],
         a_eln=dict(
             hide=[
                 'lab_id',
@@ -1744,6 +1748,7 @@ class CE_NOME_Massspectrometry(Massspectrometry, EntryData, PlotSection):
 
 class CE_NOME_Process(BaseProcess, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000185'],
         a_eln=dict(
             hide=[
                 'lab_id',

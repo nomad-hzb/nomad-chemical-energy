@@ -29,6 +29,7 @@ m_package = SchemaPackage()
 
 class HZB_GeneralProcess(GeneralProcess, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000185'],
         a_eln=dict(
             hide=[
                 'lab_id',

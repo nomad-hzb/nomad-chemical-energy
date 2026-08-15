@@ -71,6 +71,7 @@ def create_id(archive, lab_id_base):
 
 class CatLab_XYSample(CatalysisXYSample, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0005056'],
         a_eln=dict(
             hide=['users', 'components'],
             properties=dict(
@@ -96,6 +97,7 @@ class CatLab_XYSample(CatalysisXYSample, EntryData):
 
 class CatLab_Sample(CatalysisSample, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0005056'],
         a_eln=dict(
             hide=['users'],
             properties=dict(

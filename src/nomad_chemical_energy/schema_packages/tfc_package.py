@@ -43,6 +43,7 @@ m_package = SchemaPackage()
 
 class TFC_Equipment(Equipment, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000187'],
         a_eln=dict(
             hide=['users', 'origin', 'elemental_composition', 'components'],
             properties=dict(order=['name', 'lab_id', 'producer', 'location']),

@@ -136,6 +136,7 @@ class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
 
 class CE_NESD_Electrolyte(Environment, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0007224'],
         a_eln=dict(
             overview=True,
             hide=[
@@ -768,6 +769,7 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
     ElectrolyserPerformanceEvaluation, EntryData, PlotSection
 ):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000124'],
         a_eln=dict(
             hide=['location', 'steps', 'instruments', 'results', 'lab_id'],
             properties=dict(

@@ -252,6 +252,7 @@ class CE_NSLI_DropCasting(DropCasting, EntryData):
 
 class CE_NSLI_SpinCoating(SpinCoating, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000023'],
         a_eln=dict(
             hide=[
                 'users',
@@ -500,6 +501,7 @@ class CE_NSLI_ConstantPotential(ConstantPotential, EntryData):
 
 class CE_NSLI_RamanSpectroscopy(Raman, EntryData):
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0000069'],
         a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']),
         a_plot=[
             {

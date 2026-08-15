@@ -751,6 +751,7 @@ class CE_AMCC_CVMetrics(AnalysisResult):
     )
 
     current_density_at_1_5_RHE = Quantity(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0007221'],
         type=np.dtype(np.float64),
         unit='mA/cm^2',
         description='Current density at 1.5 V RHE. Data extracted from the first backscan of CV measurements.',
