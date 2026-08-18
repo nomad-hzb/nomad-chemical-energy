@@ -102,7 +102,7 @@ class CE_NESD_Sample(CENESDSample, EntryData):
 class CE_NESD_Electrode(NESDElectrode, EntryData):
     m_def = Section(
         a_eln=dict(
-            hide=['components', 'elemental_composition'],
+            hide=['elemental_composition'],
         ),
     )
 
