@@ -270,6 +270,405 @@ def test_nesd_metadata_excel_parser():
     assert len(archive_list) == 3
 
 
+def test_nesd_metadata_excel_3_electrode_parser():
+    file = 'nesd_metadata_3_electrode.xlsx'
+    archive_list = get_multiple_archives(file)
+    assert len(archive_list) == 3
+    reference_electrode_archive = archive_list[0]
+    assert reference_electrode_archive.data.name == 'Hg/HgO'
+    assert (
+        reference_electrode_archive.data.standard_potential.to('V').magnitude == 0.0983
+    )
+    assert reference_electrode_archive.data.temperature.to('°C').magnitude == 23
+    sample_archive = archive_list[1]
+    assert sample_archive.data.name == 'Nickel Cobaltite@10%V2C composite'
+    assert sample_archive.data.preparation_date == pd.Timestamp('2025-09-01', tz='UTC')
+    assert sample_archive.data.origin == 'Mehmet Turan Görüryilmaz'
+    assert sample_archive.data.active_area.to('cm²').magnitude == 1
+    assert sample_archive.data.drying_temperature.to('°C').magnitude == 95
+    assert len(sample_archive.data.components) == 2
+    assert sample_archive.data.components[0].name == 'NiCo2O4'
+    assert sample_archive.data.components[0].mass.to('mg').magnitude == 3
+    assert sample_archive.data.components[1].name == 'V2C'
+    assert sample_archive.data.substrate.substrate_type == 'Ni felt'
+    assert (
+        sample_archive.data.substrate.substrate_cleaning
+        == '15 min in ethanol, followed by 15 mins in DI water, in ultrasonic bath'
+    )
+    assert (
+        sample_archive.data.deposition.catalyst_layer_deposition_method
+        == 'spray coating'
+    )
+    assert sample_archive.data.deposition.deposition_volume.to('µL').magnitude == 1000
+    assert sample_archive.data.deposition.catalyst_loading.to('mg/cm²').magnitude == 1
+    assert sample_archive.data.deposition.binder == 'Nafion (5wt%)'
+    assert (
+        sample_archive.data.deposition.description
+        == 'Total mass of hybrid catalyst on electrode after drying: 1.0mg <br><br>Spray coating on 95 C hot plate'
+    )
+    assert len(sample_archive.data.deposition.ink_composition) == 3
+    assert sample_archive.data.deposition.ink_composition[0].type == 'ethanol'
+    assert (
+        sample_archive.data.deposition.ink_composition[0].volume.to('mL').magnitude
+        == 0.796
+    )
+    assert sample_archive.data.deposition.ink_composition[1].type == 'UP Water'
+    assert (
+        sample_archive.data.deposition.ink_composition[1].volume.to('mL').magnitude
+        == 0.2
+    )
+    assert sample_archive.data.deposition.ink_composition[2].type == 'Nafion'
+    assert (
+        sample_archive.data.deposition.ink_composition[2].volume.to('mL').magnitude
+        == 0.04
+    )
+    setup_electrolyte_archive = archive_list[2]
+    assert (
+        'electrochemical_setup_and_electrolyte' in setup_electrolyte_archive.data.name
+    )
+    assert setup_electrolyte_archive.data.origin == 'Mehmet Turan Görüryilmaz'
+    assert setup_electrolyte_archive.data.setup == '3electrode'
+    assert setup_electrolyte_archive.data.reference_electrode is not None
+    assert setup_electrolyte_archive.data.ir_compensation == 1
+    assert setup_electrolyte_archive.data.environment.ph_value == 14
+    assert setup_electrolyte_archive.data.environment.solvent.name == 'H2O'
+    assert (
+        setup_electrolyte_archive.data.environment.purging.temperature.to(
+            '°C'
+        ).magnitude
+        == 23
+    )
+    assert (
+        setup_electrolyte_archive.data.environment.purging.time.to('minute').magnitude
+        == 30
+    )
+    assert setup_electrolyte_archive.data.environment.purging.gas.name == 'N2'
+    assert len(setup_electrolyte_archive.data.environment.substances) == 1
+    assert setup_electrolyte_archive.data.environment.substances[0].name == 'KOH'
+    assert (
+        setup_electrolyte_archive.data.environment.substances[0]
+        .concentration_mmol_per_l.to('mol/L')
+        .magnitude
+        == 1
+    )
+
+
+def test_nesd_metadata_excel_RDE_parser():
+    file = 'nesd_metadata_RDE.xlsx'
+    archive_list = get_multiple_archives(file)
+    assert len(archive_list) == 3
+    reference_electrode_archive = archive_list[0]
+    assert reference_electrode_archive.data.name == 'RHE'
+    assert reference_electrode_archive.data.standard_potential.to('V').magnitude == 0
+    assert reference_electrode_archive.data.temperature.to('°C').magnitude == 23
+    sample_archive = archive_list[2]
+    assert sample_archive.data.name == 'Pt/75%C+25%Ti3C2'
+    assert sample_archive.data.preparation_date == pd.Timestamp('2025-09-01', tz='UTC')
+    assert sample_archive.data.origin == 'Mehmet Turan Görüryilmaz'
+    assert sample_archive.data.active_area.to('cm²').magnitude == 0.076
+    assert sample_archive.data.drying_temperature.to('°C').magnitude == 23
+    assert len(sample_archive.data.components) == 3
+    assert sample_archive.data.components[0].name == 'Pt'
+    assert sample_archive.data.components[0].mass.to('mg').magnitude == 5
+    assert sample_archive.data.components[-1].name == 'Ti3C2'
+    assert sample_archive.data.substrate.substrate_type == 'Glassy carbon'
+    assert (
+        sample_archive.data.substrate.substrate_cleaning
+        == '3 μm alumina slurry on polishing cloth'
+    )
+    assert (
+        sample_archive.data.deposition.catalyst_layer_deposition_method == 'drop cast'
+    )
+    assert sample_archive.data.deposition.deposition_volume.to('µL').magnitude == 1.5
+    assert (
+        sample_archive.data.deposition.catalyst_loading.to('mg/cm²').magnitude == 0.197
+    )
+    assert sample_archive.data.deposition.binder == 'Nafion (5wt%)'
+    assert (
+        sample_archive.data.deposition.description
+        == 'Samples are dried on RDE tips at room temperature while rotating at 700 rpm'
+    )
+    assert len(sample_archive.data.deposition.ink_composition) == 3
+    assert sample_archive.data.deposition.ink_composition[0].type == 'ethanol'
+    assert (
+        sample_archive.data.deposition.ink_composition[0].volume.to('mL').magnitude
+        == 0.2375
+    )
+    assert sample_archive.data.deposition.ink_composition[1].type == 'UP Water'
+    assert (
+        sample_archive.data.deposition.ink_composition[1].volume.to('mL').magnitude
+        == 0.2375
+    )
+    assert sample_archive.data.deposition.ink_composition[2].type == 'Nafion'
+    assert (
+        sample_archive.data.deposition.ink_composition[2].volume.to('mL').magnitude
+        == 0.025
+    )
+    setup_electrolyte_archive = archive_list[1]
+    assert (
+        'electrochemical_setup_and_electrolyte' in setup_electrolyte_archive.data.name
+    )
+    assert setup_electrolyte_archive.data.origin == 'Mehmet Turan Görüryilmaz'
+    assert setup_electrolyte_archive.data.setup == 'RDE'
+    assert setup_electrolyte_archive.data.reference_electrode is not None
+    assert setup_electrolyte_archive.data.ir_compensation == 1
+    assert setup_electrolyte_archive.data.environment.ph_value == 0
+    assert setup_electrolyte_archive.data.environment.solvent.name == 'H2O'
+    assert (
+        setup_electrolyte_archive.data.environment.purging.temperature.to(
+            '°C'
+        ).magnitude
+        == 23
+    )
+    assert (
+        setup_electrolyte_archive.data.environment.purging.time.to('minute').magnitude
+        == 30
+    )
+    assert (
+        setup_electrolyte_archive.data.environment.purging.gas.name
+        == 'N2 and O2 (measured in both, separate solutions for N2 and O2)'
+    )
+    assert len(setup_electrolyte_archive.data.environment.substances) == 1
+    assert setup_electrolyte_archive.data.environment.substances[0].name == 'HClO4'
+    assert (
+        setup_electrolyte_archive.data.environment.substances[0]
+        .concentration_mmol_per_l.to('mol/L')
+        .magnitude
+        == 0.1
+    )
+
+
+def test_nesd_metadata_excel_AEM_parser():
+    file = 'nesd_metadata_AEM.xlsx'
+    archive_list = get_multiple_archives(file)
+    assert len(archive_list) == 1
+    electrolyser_archive = archive_list[0]
+    assert electrolyser_archive.data.name == 'Nickel Cobaltite'
+    assert electrolyser_archive.data.cell_name == 'AEM_or_PEM'
+    assert electrolyser_archive.data.datetime == pd.Timestamp('2025-11-12', tz='UTC')
+    assert electrolyser_archive.data.torque.to('newton*m').magnitude == 5
+    assert electrolyser_archive.data.flow_rate.to('mL/minute').magnitude == 25
+    assert electrolyser_archive.data.membrane == 'PaperION™ A80'
+    assert electrolyser_archive.data.system_temperature.to('°C').magnitude == 60
+    assert electrolyser_archive.data.anode
+    assert electrolyser_archive.data.anode.ionomer == 'Nafion (5wt%)'
+    assert electrolyser_archive.data.anode.catalyst == 'Pt/C'
+    assert electrolyser_archive.data.anode.gasket_thickness.to('mm').magnitude == 0.5
+    assert electrolyser_archive.data.anode.gasket_material.name == 'EPDM'
+    assert electrolyser_archive.data.anode.electrolyte.solvent.name == 'H2O'
+    assert electrolyser_archive.data.anode.electrolyte.substances[0].name == 'KOH'
+    assert (
+        electrolyser_archive.data.anode.electrolyte.substances[0]
+        .concentration_mmol_per_l.to('mol/L')
+        .magnitude
+        == 1
+    )
+    assert (
+        electrolyser_archive.data.anode.substrate.substrate_type
+        == 'Ni fibre felt, , , 500µm, BEKAERT, 2Ni18-050, , double'
+    )
+    assert (
+        electrolyser_archive.data.anode.substrate.substrate_cleaning
+        == '15 mins in ethanol followed by 15 min in DI water, ultrasonic bath'
+    )
+    assert (
+        electrolyser_archive.data.anode.preparation_method.catalyst_layer_deposition_method
+        == 'spray coating'
+    )
+    assert (
+        electrolyser_archive.data.anode.preparation_method.catalyst_loading.to(
+            'mg/cm²'
+        ).magnitude
+        == 1
+    )
+    assert electrolyser_archive.data.anode.preparation_method.binder == 'Nafion (5wt%)'
+    assert (
+        electrolyser_archive.data.anode.preparation_method.deposition_tool
+        == 'Air brush'
+    )
+    assert len(electrolyser_archive.data.anode.preparation_method.ink_composition) == 3
+    assert (
+        electrolyser_archive.data.anode.preparation_method.ink_composition[0].type
+        == 'IPA'
+    )
+    assert (
+        electrolyser_archive.data.anode.preparation_method.ink_composition[0]
+        .volume.to('mL')
+        .magnitude
+        == 0.796
+    )
+    assert (
+        electrolyser_archive.data.anode.preparation_method.ink_composition[1].type
+        == 'UP Water'
+    )
+    assert (
+        electrolyser_archive.data.anode.preparation_method.ink_composition[1]
+        .volume.to('mL')
+        .magnitude
+        == 0.2
+    )
+    assert (
+        electrolyser_archive.data.anode.preparation_method.ink_composition[2].type
+        == 'Nafion'
+    )
+    assert (
+        electrolyser_archive.data.anode.preparation_method.ink_composition[2]
+        .volume.to('mL')
+        .magnitude
+        == 0.04
+    )
+    assert (
+        electrolyser_archive.data.anode.membrane == 'Nafion 115, 127µm, , , Nafion 115'
+    )
+    assert electrolyser_archive.data.cathode
+    assert electrolyser_archive.data.cathode.ionomer == 'Nafion (5wt%)'
+    assert electrolyser_archive.data.cathode.catalyst == 'NiCo2O4'
+    assert electrolyser_archive.data.cathode.gasket_thickness.to('mm').magnitude == 0.5
+    assert electrolyser_archive.data.cathode.gasket_material.name == 'EPDM'
+    assert electrolyser_archive.data.cathode.electrolyte.solvent.name == 'H2O'
+    assert electrolyser_archive.data.cathode.electrolyte.substances[0].name == 'KOH'
+    assert (
+        electrolyser_archive.data.cathode.electrolyte.substances[0]
+        .concentration_mmol_per_l.to('mol/L')
+        .magnitude
+        == 1
+    )
+    assert (
+        electrolyser_archive.data.cathode.substrate.substrate_type
+        == 'Ni fibre felt, , , 500µm, BEKAERT, 2Ni18-050, , double'
+    )
+    assert (
+        electrolyser_archive.data.cathode.substrate.substrate_cleaning
+        == '15 mins in ethanol followed by 15 min in DI water, ultrasonic bath'
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.catalyst_layer_deposition_method
+        == 'spray coating'
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.catalyst_loading.to(
+            'mg/cm²'
+        ).magnitude
+        == 1
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.binder == 'Nafion (5wt%)'
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.deposition_tool
+        == 'Air brush'
+    )
+    assert (
+        len(electrolyser_archive.data.cathode.preparation_method.ink_composition) == 3
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.ink_composition[0].type
+        == 'IPA'
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.ink_composition[0]
+        .volume.to('mL')
+        .magnitude
+        == 0.796
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.ink_composition[1].type
+        == 'UP Water'
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.ink_composition[1]
+        .volume.to('mL')
+        .magnitude
+        == 0.2
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.ink_composition[2].type
+        == 'Nafion'
+    )
+    assert (
+        electrolyser_archive.data.cathode.preparation_method.ink_composition[2]
+        .volume.to('mL')
+        .magnitude
+        == 0.04
+    )
+    assert (
+        electrolyser_archive.data.cathode.membrane
+        == ', 80µm, Piperion, Piperion-A80-HCO3'
+    )
+
+
+def test_nesd_metadata_excel_half_cell_parser():
+    file = 'nesd_metadata_GDE_half_cell.xlsx'
+    archive_list = get_multiple_archives(file)
+    assert len(archive_list) == 1
+    electrode_archive = archive_list[0]
+    assert 'half-cell' in electrode_archive.data.name
+    assert electrode_archive.data.datetime == pd.Timestamp('2025-09-01', tz='UTC')
+    assert electrode_archive.data.ionomer == 'Nafion (5wt%)'
+    assert (
+        electrode_archive.data.description
+        == 'Preparing Person: Mehmet Turan Görüryilmaz<br><br>Experimentalist: Mehmet Turan Görüryilmaz<br><br>iR compensation: 100.0%<br><br>Torque: None Nm <br><br>Gas flow O2: 200.0 ml/minute <br><br>'
+    )
+    assert len(electrode_archive.data.components) == 3
+    assert electrode_archive.data.components[0].name == 'Pt'
+    assert electrode_archive.data.components[0].mass.to('mg').magnitude == 2.75
+    assert electrode_archive.data.components[-1].name == 'Ti3C2'
+    assert electrode_archive.data.components[-1].mass_fraction == 0.25
+    assert electrode_archive.data.electrolyte.ph_value == 0
+    assert electrode_archive.data.electrolyte.solvent.name == 'H2O'
+    assert (
+        electrode_archive.data.electrolyte.purging.temperature.to('°C').magnitude == 23
+    )
+    assert electrode_archive.data.electrolyte.purging.time.to('minute').magnitude == 30
+    assert electrode_archive.data.electrolyte.purging.gas.name == 'N2'
+    assert len(electrode_archive.data.electrolyte.substances) == 1
+    assert electrode_archive.data.electrolyte.substances[0].name == 'HClO4'
+    assert (
+        electrode_archive.data.electrolyte.substances[0]
+        .concentration_mmol_per_l.to('mol/L')
+        .magnitude
+        == 1
+    )
+    assert (
+        electrode_archive.data.substrate.substrate_type
+        == 'Carbon Cloth, , , 410µm, Quintech, W1S1011, , '
+    )
+    assert electrode_archive.data.gasket_material.name == 'Silicon'
+    assert (
+        electrode_archive.data.preparation_method.catalyst_loading.to(
+            'mg/cm²'
+        ).magnitude
+        == 1.1
+    )
+    assert electrode_archive.data.preparation_method.binder == 'Nafion (5wt%)'
+    assert len(electrode_archive.data.preparation_method.ink_composition) == 3
+    assert (
+        electrode_archive.data.preparation_method.ink_composition[0].type == 'ethanol'
+    )
+    assert (
+        electrode_archive.data.preparation_method.ink_composition[0]
+        .volume.to('mL')
+        .magnitude
+        == 0.2375
+    )
+    assert (
+        electrode_archive.data.preparation_method.ink_composition[1].type == 'UP Water'
+    )
+    assert (
+        electrode_archive.data.preparation_method.ink_composition[1]
+        .volume.to('mL')
+        .magnitude
+        == 0.2375
+    )
+    assert electrode_archive.data.preparation_method.ink_composition[2].type == 'Nafion'
+    assert (
+        electrode_archive.data.preparation_method.ink_composition[2]
+        .volume.to('mL')
+        .magnitude
+        == 0.025
+    )
+
+
 def test_labview_nesd_parser():
     file = 'labview_metadata_nesd.tdms'
     archive = get_archive(file)
