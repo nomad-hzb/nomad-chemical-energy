@@ -5,63 +5,63 @@ class CEAMCCBioLogicParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_amcc_parser import CEAMCCBioLogicParser
 
-        return CEAMCCBioLogicParser(**self.dict())
+        return CEAMCCBioLogicParser(**self.model_dump())
 
 
 class CENECCxlsxParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_necc_parser import NECCXlsxParser
 
-        return NECCXlsxParser(**self.dict())
+        return NECCXlsxParser(**self.model_dump())
 
 
 class CENECCBioLogicParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_necc_parser import CENECCBioLogicParser
 
-        return CENECCBioLogicParser(**self.dict())
+        return CENECCBioLogicParser(**self.model_dump())
 
 
 class CENESDBioLogicParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDBioLogicParser
 
-        return CENESDBioLogicParser(**self.dict())
+        return CENESDBioLogicParser(**self.model_dump())
 
 
 class CENESDZahnerParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDZahnerParser
 
-        return CENESDZahnerParser(**self.dict())
+        return CENESDZahnerParser(**self.model_dump())
 
 
 class CENESDCHIBinParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDCHIParser
 
-        return CENESDCHIParser(**self.dict())
+        return CENESDCHIParser(**self.model_dump())
 
 
 class CENESDCHITxtParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDCHIParser
 
-        return CENESDCHIParser(**self.dict())
+        return CENESDCHIParser(**self.model_dump())
 
 
 class CENESDLabviewParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDLabviewParser
 
-        return CENESDLabviewParser(**self.dict())
+        return CENESDLabviewParser(**self.model_dump())
 
 
 class CENESDPalmSensParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDPalmSensParser
 
-        return CENESDPalmSensParser(**self.dict())
+        return CENESDPalmSensParser(**self.model_dump())
 
 
 class CENESDMetadataExcelParserEntryPoint(ParserEntryPoint):
@@ -70,42 +70,42 @@ class CENESDMetadataExcelParserEntryPoint(ParserEntryPoint):
             CENESDMetadataExcelParser,
         )
 
-        return CENESDMetadataExcelParser(**self.dict())
+        return CENESDMetadataExcelParser(**self.model_dump())
 
 
 class CENOMEGamryParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import GamryParser
 
-        return GamryParser(**self.dict())
+        return GamryParser(**self.model_dump())
 
 
 class CENOMEcsvParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import CENOMEcsvParser
 
-        return CENOMEcsvParser(**self.dict())
+        return CENOMEcsvParser(**self.model_dump())
 
 
 class CENOMEUVvisParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import UVvisParser
 
-        return UVvisParser(**self.dict())
+        return UVvisParser(**self.model_dump())
 
 
 class CENOMEKMC2XASParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import XASParser
 
-        return XASParser(**self.dict())
+        return XASParser(**self.model_dump())
 
 
 class CENOMEKMC3XASParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import KMC3XASParser
 
-        return KMC3XASParser(**self.dict())
+        return KMC3XASParser(**self.model_dump())
 
 
 class CENOMEKMC3BioLogicParserEntryPoint(ParserEntryPoint):
@@ -114,35 +114,35 @@ class CENOMEKMC3BioLogicParserEntryPoint(ParserEntryPoint):
             CENOMEKMC3BioLogicParser,
         )
 
-        return CENOMEKMC3BioLogicParser(**self.dict())
+        return CENOMEKMC3BioLogicParser(**self.model_dump())
 
 
 class CENOMETIFParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import CENOMETIFParser
 
-        return CENOMETIFParser(**self.dict())
+        return CENOMETIFParser(**self.model_dump())
 
 
 class CENOMEMassspectrometryParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import MassspectrometryParser
 
-        return MassspectrometryParser(**self.dict())
+        return MassspectrometryParser(**self.model_dump())
 
 
 class CEWannseeCORParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_wannsee_parser import CORParser
 
-        return CORParser(**self.dict())
+        return CORParser(**self.model_dump())
 
 
 class CEWannseeXRDParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_wannsee_parser import XRDParser
 
-        return XRDParser(**self.dict())
+        return XRDParser(**self.model_dump())
 
 
 class DLRECCPParserEntryPoint(ParserEntryPoint):
@@ -151,7 +151,7 @@ class DLRECCPParserEntryPoint(ParserEntryPoint):
             DLRECCPParser,
         )
 
-        return DLRECCPParser(**self.dict())
+        return DLRECCPParser(**self.model_dump())
 
 
 class DLRECCVParserEntryPoint(ParserEntryPoint):
@@ -160,7 +160,7 @@ class DLRECCVParserEntryPoint(ParserEntryPoint):
             DLRECCVParser,
         )
 
-        return DLRECCVParser(**self.dict())
+        return DLRECCVParser(**self.model_dump())
 
 
 class DLRECEISParserEntryPoint(ParserEntryPoint):
@@ -169,14 +169,14 @@ class DLRECEISParserEntryPoint(ParserEntryPoint):
             DLRECEISParser,
         )
 
-        return DLRECEISParser(**self.dict())
+        return DLRECEISParser(**self.model_dump())
 
 
 class CatlabParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.hzb_catlab_parser import CatlabParser
 
-        return CatlabParser(**self.dict())
+        return CatlabParser(**self.model_dump())
 
 
 class GeneralProcessParserEntryPoint(ParserEntryPoint):
@@ -185,35 +185,35 @@ class GeneralProcessParserEntryPoint(ParserEntryPoint):
             GeneralProcessParser,
         )
 
-        return GeneralProcessParser(**self.dict())
+        return GeneralProcessParser(**self.model_dump())
 
 
 class GeneralNomeParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.ce_nome_parser import GeneralNomeParser
 
-        return GeneralNomeParser(**self.dict())
+        return GeneralNomeParser(**self.model_dump())
 
 
 class TFCSputteringParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.tfc_parser import TFCSputteringParser
 
-        return TFCSputteringParser(**self.dict())
+        return TFCSputteringParser(**self.model_dump())
 
 
 class TFCXRFLibraryParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.tfc_parser import TFCXRFParser
 
-        return TFCXRFParser(**self.dict())
+        return TFCXRFParser(**self.model_dump())
 
 
 class TFCXRDLibraryParserEntryPoint(ParserEntryPoint):
     def load(self):
         from nomad_chemical_energy.parsers.tfc_parser import TFCXRDParser
 
-        return TFCXRDParser(**self.dict())
+        return TFCXRDParser(**self.model_dump())
 
 
 class PublicShowcaseParserEntryPoint(ParserEntryPoint):
@@ -222,7 +222,7 @@ class PublicShowcaseParserEntryPoint(ParserEntryPoint):
             PublicShowcaseParser,
         )
 
-        return PublicShowcaseParser(**self.dict())
+        return PublicShowcaseParser(**self.model_dump())
 
 
 ce_amcc_biologic_parser = CEAMCCBioLogicParserEntryPoint(
