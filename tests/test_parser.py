@@ -270,17 +270,40 @@ def test_nesd_metadata_excel_parser():
     assert len(archive_list) == 3
 
 
-def test_nesd_metadata_excel_3_electrode_parser():
+@pytest.fixture
+def get_archives():
+    def _get_archives(file):
+        archive_list = get_multiple_archives(file)
+        suffix_map = {
+            '_reference_electrode.archive.json': 'reference_electrode',
+            '_sample.archive.json': 'sample',
+            '_setup.archive.json': 'setup_electrolyte',
+        }
+        result = {}
+        for archive in archive_list:
+            for suffix, key in suffix_map.items():
+                if archive.metadata.mainfile.endswith(suffix):
+                    result[key] = archive
+                    break
+            else:
+                pytest.fail(f'Unexpected archive: {archive.metadata.mainfile}')
+        return result
+
+    return _get_archives
+
+
+def test_nesd_metadata_excel_3_electrode_parser(get_archives):
     file = 'nesd_metadata_3_electrode.xlsx'
-    archive_list = get_multiple_archives(file)
-    assert len(archive_list) == 3
-    reference_electrode_archive = archive_list[0]
+    archives = get_archives(file)
+    assert len(archives) == 3
+    reference_electrode_archive = archives['reference_electrode']
+    sample_archive = archives['sample']
+    setup_electrolyte_archive = archives['setup_electrolyte']
     assert reference_electrode_archive.data.name == 'Hg/HgO'
     assert (
         reference_electrode_archive.data.standard_potential.to('V').magnitude == 0.0983
     )
     assert reference_electrode_archive.data.temperature.to('°C').magnitude == 23
-    sample_archive = archive_list[1]
     assert sample_archive.data.name == 'Nickel Cobaltite@10%V2C composite'
     assert sample_archive.data.preparation_date == pd.Timestamp('2025-09-01', tz='UTC')
     assert sample_archive.data.origin == 'Mehmet Turan Görüryilmaz'
@@ -322,7 +345,6 @@ def test_nesd_metadata_excel_3_electrode_parser():
         sample_archive.data.deposition.ink_composition[2].volume.to('mL').magnitude
         == 0.04
     )
-    setup_electrolyte_archive = archive_list[2]
     assert (
         'electrochemical_setup_and_electrolyte' in setup_electrolyte_archive.data.name
     )
@@ -353,15 +375,16 @@ def test_nesd_metadata_excel_3_electrode_parser():
     )
 
 
-def test_nesd_metadata_excel_RDE_parser():
+def test_nesd_metadata_excel_RDE_parser(get_archives):
     file = 'nesd_metadata_RDE.xlsx'
-    archive_list = get_multiple_archives(file)
-    assert len(archive_list) == 3
-    reference_electrode_archive = archive_list[0]
+    archives = get_archives(file)
+    assert len(archives) == 3
+    reference_electrode_archive = archives['reference_electrode']
+    sample_archive = archives['sample']
+    setup_electrolyte_archive = archives['setup_electrolyte']
     assert reference_electrode_archive.data.name == 'RHE'
     assert reference_electrode_archive.data.standard_potential.to('V').magnitude == 0
     assert reference_electrode_archive.data.temperature.to('°C').magnitude == 23
-    sample_archive = archive_list[2]
     assert sample_archive.data.name == 'Pt/75%C+25%Ti3C2'
     assert sample_archive.data.preparation_date == pd.Timestamp('2025-09-01', tz='UTC')
     assert sample_archive.data.origin == 'Mehmet Turan Görüryilmaz'
@@ -404,7 +427,6 @@ def test_nesd_metadata_excel_RDE_parser():
         sample_archive.data.deposition.ink_composition[2].volume.to('mL').magnitude
         == 0.025
     )
-    setup_electrolyte_archive = archive_list[1]
     assert (
         'electrochemical_setup_and_electrolyte' in setup_electrolyte_archive.data.name
     )
