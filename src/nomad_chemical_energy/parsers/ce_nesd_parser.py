@@ -49,6 +49,7 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_NESD_ConstantCurrentMode,
     CE_NESD_ConstantVoltageMode,
     CE_NESD_CyclicVoltammetry,
+    CE_NESD_Electrolyser,
     CE_NESD_ElectrolyserPerformanceEvaluation,
     CE_NESD_GalvanodynamicSweep,
     CE_NESD_LinearSweepVoltammetry,
@@ -66,7 +67,9 @@ from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser imp
     parse_metadata_chi_bin_file,
 )
 from nomad_chemical_energy.schema_packages.file_parser.nesd_metadata_excel_parser import (
+    get_electrode,
     get_reference_electrode,
+    map_electrolyser,
     map_sample,
     map_setup,
 )
@@ -344,7 +347,7 @@ class CENESDPalmSensParser(MatchingParser):
                 entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
             # case 'gds':
             #     entry = CE_NESD_GalvanodynamicSweep(data_file=file)
-            case 'Impedance Spectroscopy':
+            case 'Impedance Spectroscopy' | 'Impedance Spectroscopy [1]':
                 entry = CE_NESD_PEIS(data_file=file)
             case 'Chronopotentiometry':
                 entry = CE_NESD_Chronopotentiometry(data_file=file)
@@ -443,15 +446,6 @@ class CENESDMetadataExcelParser(MatchingParser):
         if not file.endswith('.xlsx'):
             return
 
-        setup_entry = CE_NESD_Setup()
-        setup_entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        folder_path = ('/' + file).rsplit('/', 1)[0]
-        setup_entry.name = f'{folder_path}/electrochemical_setup_and_electrolyte'[1:]
-
-        sample_entry = CE_NESD_Sample()
-        sample_entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
-        sample_entry.name = f'{folder_path}/sample'[1:]
-
         with archive.m_context.raw_file(file, 'rb') as f:
             xls_file = pd.ExcelFile(f)
             excel_data = pd.read_excel(xls_file, sheet_name='NESD Metadata')
@@ -471,10 +465,41 @@ class CENESDMetadataExcelParser(MatchingParser):
                 mapping_df['Value'],
             )
         )
-        map_setup(setup_entry, mapping, setup_type, archive)
-        map_sample(sample_entry, mapping, setup_type, logger)
+
+        folder_path = ('/' + file).rsplit('/', 1)[0]
+
+        sample_entry = CE_NESD_Sample()
+        sample_file_name = f'{file}_sample.archive.json'
+        if setup_type in ['3electrode', 'RDE', 'old_template']:
+            sample_entry.datetime = datetime.datetime.now().strftime(
+                '%Y-%m-%d %H:%M:%S.%f'
+            )
+            sample_entry.name = f'{folder_path}/sample'[1:]
+            map_sample(sample_entry, mapping, setup_type, logger)
+        elif setup_type in ['AEM_or_PEM']:
+            sample_entry = CE_NESD_Electrolyser()
+            sample_file_name = f'{file}_electrolyser.archive.json'
+            sample_entry.name = f'{folder_path}/electrolyser'[1:]
+            map_electrolyser(sample_entry, mapping, setup_type, archive, logger)
+        elif setup_type == 'Half-Cell':
+            sample_entry = get_electrode(mapping, 'half-cell', logger)
+            sample_file_name = f'{file}_half_cell.archive.json'
+            sample_entry.name = f'{folder_path}/half-cell'[1:]
+        create_archive(sample_entry, archive, sample_file_name)
+        sample_entry_id = get_entry_id_from_file_name(sample_file_name, archive)
+        entity_list = [
+            get_reference(archive.metadata.upload_id, sample_entry_id),
+        ]
 
         if setup_type in ['3electrode', 'RDE', 'old_template']:
+            setup_entry = CE_NESD_Setup()
+            setup_entry.datetime = datetime.datetime.now().strftime(
+                '%Y-%m-%d %H:%M:%S.%f'
+            )
+            setup_entry.name = f'{folder_path}/electrochemical_setup_and_electrolyte'[
+                1:
+            ]
+            map_setup(setup_entry, mapping, setup_type, archive)
             ref_electrode_file_name = f'{file}_reference_electrode.archive.json'
             reference_electrode_entry = get_reference_electrode(mapping)
             create_archive(reference_electrode_entry, archive, ref_electrode_file_name)
@@ -484,21 +509,14 @@ class CENESDMetadataExcelParser(MatchingParser):
             setup_entry.reference_electrode = get_reference(
                 archive.metadata.upload_id, ref_electrode_entry_id
             )
+            setup_file_name = f'{file}_setup.archive.json'
+            create_archive(setup_entry, archive, setup_file_name)
+            setup_entry_id = get_entry_id_from_file_name(setup_file_name, archive)
+            entity_list.append(
+                get_reference(archive.metadata.upload_id, setup_entry_id)
+            )
 
-        setup_file_name = f'{file}_setup.archive.json'
-        create_archive(setup_entry, archive, setup_file_name)
-        setup_entry_id = get_entry_id_from_file_name(setup_file_name, archive)
-
-        sample_file_name = f'{file}_sample.archive.json'
-        create_archive(sample_entry, archive, sample_file_name)
-        sample_entry_id = get_entry_id_from_file_name(sample_file_name, archive)
-
-        archive.data = ParsedMetadataExcelFile(
-            entity=[
-                get_reference(archive.metadata.upload_id, sample_entry_id),
-                get_reference(archive.metadata.upload_id, setup_entry_id),
-            ]
-        )
+        archive.data = ParsedMetadataExcelFile(entity=entity_list)
         archive.metadata.entry_name = file
 
         if mapping.get('reaction type') == 'OER':
