@@ -28,7 +28,10 @@ m_package = SchemaPackage()
 
 
 class HZB_GeneralProcess(GeneralProcess, EntryData):
+    """Custom metadata schema for any process (e.g., synthesis, measurement, documentation), enabling generic file upload)."""
+
     m_def = Section(
+        links=['http://purl.obolibrary.org/obo/BFO_0000015'],
         a_eln=dict(
             hide=[
                 'lab_id',
