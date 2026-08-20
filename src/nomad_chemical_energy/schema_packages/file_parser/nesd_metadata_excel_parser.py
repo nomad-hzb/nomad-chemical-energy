@@ -55,6 +55,8 @@ def split_catalyst_mxene_phases(material: str) -> tuple[list[str], list[str]]:
     -------
     (non_mxene_phases, mxene_phases)
     """
+    if material is None:
+        return [], []
 
     # Remove percentages, e.g. 75%, 25%, 50%
     s = re.sub(r'\d+(?:\.\d+)?%', '', material)
