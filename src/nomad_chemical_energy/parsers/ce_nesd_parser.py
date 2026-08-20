@@ -335,7 +335,7 @@ class CENESDPalmSensParser(MatchingParser):
 
         if len(data['Measurements']) != 1:
             return
-        technique = data['Measurements'][0]['Title']
+        technique = data.get('Measurements', [{}])[0].get('Title', '').split(' [')[0]
         match technique:
             case 'Open Circuit Potentiometry':
                 entry = CE_NESD_OpenCircuitVoltage(data_file=file)
