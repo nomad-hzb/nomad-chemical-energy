@@ -203,9 +203,7 @@ def map_electrolyser(entry, data_dict, setup_type, archive, logger):
     entry.torque = get_quantity_with_unit(data_dict.get('torque'), 'newton * meter')
     entry.flow_rate = get_quantity_with_unit(data_dict.get('flow rate'), 'mL / minute')
     entry.system_temperature = data_dict.get('system temperature')
-    pump = find_sample_by_id(
-        archive, data_dict.get('peristaltic pump info')
-    )
+    pump = find_sample_by_id(archive, data_dict.get('peristaltic pump info'))
     entry.peristaltic_pump_info = pump if pump is not None else None
     potentiostat = find_sample_by_id(archive, data_dict.get('potentiostat model'))
     entry.equipment = [potentiostat] if potentiostat is not None else None
