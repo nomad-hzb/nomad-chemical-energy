@@ -137,7 +137,6 @@ class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
 class CE_NESD_Electrolyte(Environment, EntryData):
     m_def = Section(
         a_eln=dict(
-            overview=True,
             hide=[
                 'name',
                 'origin',
