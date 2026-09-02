@@ -22,6 +22,7 @@ import os
 import numpy as np
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
+    ACMDElectrode,
     CEACMDSample,
     Chronoamperometry,
     Chronopotentiometry,
@@ -34,7 +35,6 @@ from baseclasses.chemical_energy import (
     Equipment,
     GalvanodynamicSweep,
     LinearSweepVoltammetry,
-    ACMDElectrode,
     OpenCircuitVoltage,
     ReferenceElectrode,
     SampleIDCEACMD,
