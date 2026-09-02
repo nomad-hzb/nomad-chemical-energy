@@ -15,18 +15,18 @@ from nomad.config.models.ui import (
     WidgetTerms,
 )
 
-schema = 'nomad_chemical_energy.schema_packages.ce_nesd_package.CE_NESD_OERAnalysis'
-nesd_oer_app = App(
+schema = 'nomad_chemical_energy.schema_packages.ce_acmd_package.CE_ACMD_OERAnalysis'
+acmd_oer_app = App(
     # Label of the App
     label='Explore OER Analysis',
     # Path used in the URL, must be unique
-    path='nesd-oer',
+    path='acmd-oer',
     # Used to categorize apps in the explore menu
-    category='NESD Data',
+    category='ACMD Data',
     # Brief description used in the app menu
-    description='Provides filters to explore OER entries of the NESD group.',
+    description='Provides filters to explore OER entries of the ACMD group.',
     # Longer description that can also use markdown
-    readme='Provides filters to explore OER entries of the NESD group.',
+    readme='Provides filters to explore OER entries of the ACMD group.',
     # Controls the available search filters. If you want to filter by
     # quantities in a schema package, you need to load the schema package
     # explicitly here. Note that you can use a glob syntax to load the

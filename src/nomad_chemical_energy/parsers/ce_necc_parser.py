@@ -40,7 +40,7 @@ from nomad.metainfo import (
 )
 from nomad.parsing import MatchingParser
 
-from nomad_chemical_energy.parsers.ce_nesd_parser import ParsedBioLogicFile
+from nomad_chemical_energy.parsers.ce_acmd_parser import ParsedBioLogicFile
 from nomad_chemical_energy.schema_packages.ce_necc_package import (
     CE_NECC_EC_GC,
     CE_NECC_GEIS,
