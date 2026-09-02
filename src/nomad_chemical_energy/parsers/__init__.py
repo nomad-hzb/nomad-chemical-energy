@@ -22,55 +22,55 @@ class CENECCBioLogicParserEntryPoint(ParserEntryPoint):
         return CENECCBioLogicParser(**self.model_dump())
 
 
-class CENESDBioLogicParserEntryPoint(ParserEntryPoint):
+class CEACMDBioLogicParserEntryPoint(ParserEntryPoint):
     def load(self):
-        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDBioLogicParser
+        from nomad_chemical_energy.parsers.ce_acmd_parser import CEACMDBioLogicParser
 
-        return CENESDBioLogicParser(**self.model_dump())
+        return CEACMDBioLogicParser(**self.model_dump())
 
 
-class CENESDZahnerParserEntryPoint(ParserEntryPoint):
+class CEACMDZahnerParserEntryPoint(ParserEntryPoint):
     def load(self):
-        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDZahnerParser
+        from nomad_chemical_energy.parsers.ce_acmd_parser import CEACMDZahnerParser
 
-        return CENESDZahnerParser(**self.model_dump())
+        return CEACMDZahnerParser(**self.model_dump())
 
 
-class CENESDCHIBinParserEntryPoint(ParserEntryPoint):
+class CEACMDCHIBinParserEntryPoint(ParserEntryPoint):
     def load(self):
-        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDCHIParser
+        from nomad_chemical_energy.parsers.ce_acmd_parser import CEACMDCHIParser
 
-        return CENESDCHIParser(**self.model_dump())
+        return CEACMDCHIParser(**self.model_dump())
 
 
-class CENESDCHITxtParserEntryPoint(ParserEntryPoint):
+class CEACMDCHITxtParserEntryPoint(ParserEntryPoint):
     def load(self):
-        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDCHIParser
+        from nomad_chemical_energy.parsers.ce_acmd_parser import CEACMDCHIParser
 
-        return CENESDCHIParser(**self.model_dump())
+        return CEACMDCHIParser(**self.model_dump())
 
 
-class CENESDLabviewParserEntryPoint(ParserEntryPoint):
+class CEACMDLabviewParserEntryPoint(ParserEntryPoint):
     def load(self):
-        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDLabviewParser
+        from nomad_chemical_energy.parsers.ce_acmd_parser import CEACMDLabviewParser
 
-        return CENESDLabviewParser(**self.model_dump())
+        return CEACMDLabviewParser(**self.model_dump())
 
 
-class CENESDPalmSensParserEntryPoint(ParserEntryPoint):
+class CEACMDPalmSensParserEntryPoint(ParserEntryPoint):
     def load(self):
-        from nomad_chemical_energy.parsers.ce_nesd_parser import CENESDPalmSensParser
+        from nomad_chemical_energy.parsers.ce_acmd_parser import CEACMDPalmSensParser
 
-        return CENESDPalmSensParser(**self.model_dump())
+        return CEACMDPalmSensParser(**self.model_dump())
 
 
-class CENESDMetadataExcelParserEntryPoint(ParserEntryPoint):
+class CEACMDMetadataExcelParserEntryPoint(ParserEntryPoint):
     def load(self):
-        from nomad_chemical_energy.parsers.ce_nesd_parser import (
-            CENESDMetadataExcelParser,
+        from nomad_chemical_energy.parsers.ce_acmd_parser import (
+            CEACMDMetadataExcelParser,
         )
 
-        return CENESDMetadataExcelParser(**self.model_dump())
+        return CEACMDMetadataExcelParser(**self.model_dump())
 
 
 class CENOMEGamryParserEntryPoint(ParserEntryPoint):
@@ -244,49 +244,49 @@ ce_necc_biologic_parser = CENECCBioLogicParserEntryPoint(
     mainfile_name_re=r'^.*\.mpr',
 )
 
-ce_nesd_biologic_parser = CENESDBioLogicParserEntryPoint(
-    name='CENESDBioLogicParser',
-    description='Parser for CENESD mpr files of BioLogic/EC-Lab potentiostats',
+ce_nesd_biologic_parser = CEACMDBioLogicParserEntryPoint(
+    name='CEACMDBioLogicParser',
+    description='Parser for CEACMD mpr files of BioLogic/EC-Lab potentiostats',
     mainfile_name_re=r'^.*\.mpr',
 )
 
-ce_nesd_zahner_parser = CENESDZahnerParserEntryPoint(
-    name='CENESDZahnerParser',
-    description='Parser for CENESD isw,ism files of Zahner potentiostats',
+ce_nesd_zahner_parser = CEACMDZahnerParserEntryPoint(
+    name='CEACMDZahnerParser',
+    description='Parser for CEACMD isw,ism files of Zahner potentiostats',
     mainfile_name_re=r'^.*\.(isw|ism|isc)',
 )
 
-ce_nesd_chi_bin_parser = CENESDCHIBinParserEntryPoint(
-    name='CENESDCHIBinParser',
-    description='Parser for CENESD bin files of CHI potentiostats',
+ce_nesd_chi_bin_parser = CEACMDCHIBinParserEntryPoint(
+    name='CEACMDCHIBinParser',
+    description='Parser for CEACMD bin files of CHI potentiostats',
     mainfile_name_re=r'^.*\.(bin)',
     mainfile_binary_header=b'\x80\xf2\x1d\x00',
 )
 
-ce_nesd_chi_txt_parser = CENESDCHITxtParserEntryPoint(
-    name='CENESDCHITxtParser',
-    description='Parser for CENESD txt files of CHI potentiostats',
+ce_nesd_chi_txt_parser = CEACMDCHITxtParserEntryPoint(
+    name='CEACMDCHITxtParser',
+    description='Parser for CEACMD txt files of CHI potentiostats',
     mainfile_name_re=r'^.*\.(txt)',
     mainfile_contents_re=r'Instrument Model:  CHI760E',
 )
 
-ce_nesd_labview_parser = CENESDLabviewParserEntryPoint(
-    name='CENESDLabviewParser',
-    description='Parser for CENESD LabVIEW Electrolyser files',
+ce_nesd_labview_parser = CEACMDLabviewParserEntryPoint(
+    name='CEACMDLabviewParser',
+    description='Parser for CEACMD LabVIEW Electrolyser files',
     mainfile_name_re=r'^.*\.tdms',
     mainfile_binary_header_re=r"[\s\S]*TDSm[\s\S]*'Measurements'[\s\S]*'Informations'[\s\S]*",
 )
 
-ce_nesd_palmsens_parser = CENESDPalmSensParserEntryPoint(
-    name='CENESDPalmSensParser',
-    description='Parser for CENESD csv files of PalmSens potentiostats',
+ce_nesd_palmsens_parser = CEACMDPalmSensParserEntryPoint(
+    name='CEACMDPalmSensParser',
+    description='Parser for CEACMD csv files of PalmSens potentiostats',
     # mainfile_name_re=r'^.*\.csv',
     mainfile_name_re=r'^.*\.pssession',
 )
 
-ce_nesd_metadata_parser = CENESDMetadataExcelParserEntryPoint(
-    name='CENESDMetadataExcelParser',
-    description='Parser for CENESD xlsx files containing metadata about electrodes, electrolytes, sample information',
+ce_nesd_metadata_parser = CEACMDMetadataExcelParserEntryPoint(
+    name='CEACMDMetadataExcelParser',
+    description='Parser for CEACMD xlsx files containing metadata about electrodes, electrolytes, sample information',
     mainfile_name_re=r'.+\.xlsx',
     mainfile_mime_re=r'^(application\/vnd\.(openxmlformats-officedocument\.spreadsheetml\.sheet|oasis\.opendocument\.spreadsheet))$',
     mainfile_contents_dict={

@@ -42,22 +42,29 @@ from nomad.metainfo import (
 from nomad.parsing import MatchingParser
 
 from nomad_chemical_energy.schema_packages.ce_nesd_package import (
-    CE_NESD_GEIS,
-    CE_NESD_PEIS,
-    CE_NESD_Chronoamperometry,
-    CE_NESD_Chronopotentiometry,
-    CE_NESD_ConstantCurrentMode,
-    CE_NESD_ConstantVoltageMode,
-    CE_NESD_CyclicVoltammetry,
-    CE_NESD_Electrolyser,
-    CE_NESD_ElectrolyserPerformanceEvaluation,
-    CE_NESD_GalvanodynamicSweep,
-    CE_NESD_LinearSweepVoltammetry,
-    CE_NESD_Measurement,
-    CE_NESD_OERAnalysis,
-    CE_NESD_OpenCircuitVoltage,
-    CE_NESD_Sample,
-    CE_NESD_Setup,
+    CE_ACMD_GEIS,
+    CE_ACMD_PEIS,
+    CE_ACMD_Chronoamperometry,
+    CE_ACMD_Chronopotentiometry,
+    CE_ACMD_ConstantCurrentMode,
+    CE_ACMD_ConstantVoltageMode,
+    CE_ACMD_CyclicVoltammetry,
+    CE_ACMD_Electrolyser,
+    CE_ACMD_ElectrolyserPerformanceEvaluation,
+    CE_ACMD_GalvanodynamicSweep,
+    CE_ACMD_LinearSweepVoltammetry,
+    CE_ACMD_Measurement,
+    CE_ACMD_OERAnalysis,
+    CE_ACMD_OpenCircuitVoltage,
+    CE_ACMD_Sample,
+    CE_ACMD_Setup,
+)
+from nomad_chemical_energy.schema_packages.file_parser.acmd_metadata_excel_parser import (
+    get_electrode,
+    get_reference_electrode,
+    map_electrolyser,
+    map_sample,
+    map_setup,
 )
 from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
     get_header_and_data,
@@ -65,13 +72,6 @@ from nomad_chemical_energy.schema_packages.file_parser.biologic_parser import (
 from nomad_chemical_energy.schema_packages.file_parser.ch_instruments_parser import (
     parse_chi_txt_file,
     parse_metadata_chi_bin_file,
-)
-from nomad_chemical_energy.schema_packages.file_parser.nesd_metadata_excel_parser import (
-    get_electrode,
-    get_reference_electrode,
-    map_electrolyser,
-    map_sample,
-    map_setup,
 )
 from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
     get_data_from_pssession_file,
@@ -142,7 +142,7 @@ class ParsedMetadataExcelFile(EntryData):
     )
 
 
-class CENESDBioLogicParser(MatchingParser):
+class CEACMDBioLogicParser(MatchingParser):
     def is_mainfile(
         self,
         filename: str,
@@ -174,33 +174,34 @@ class CENESDBioLogicParser(MatchingParser):
         technique = metadata.get('settings', {}).get('technique')
         match technique:
             case 'CA':
-                entry = CE_NESD_Chronoamperometry(data_file=file)
+                entry = CE_ACMD_Chronoamperometry(data_file=file)
             case 'coC':
-                entry = CE_NESD_ConstantCurrentMode(data_file=file)
+                entry = CE_ACMD_ConstantCurrentMode(data_file=file)
             case 'coV':
-                entry = CE_NESD_ConstantVoltageMode(data_file=file)
+                entry = CE_ACMD_ConstantVoltageMode(data_file=file)
             case 'CP':
-                entry = CE_NESD_Chronopotentiometry(data_file=file)
+                entry = CE_ACMD_Chronopotentiometry(data_file=file)
             case 'CV':
-                entry = CE_NESD_CyclicVoltammetry(data_file=file)
+                entry = CE_ACMD_CyclicVoltammetry(data_file=file)
             case 'GEIS':
-                entry = CE_NESD_GEIS(data_file=file)
+                entry = CE_ACMD_GEIS(data_file=file)
             case 'LSV':
-                entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
+                entry = CE_ACMD_LinearSweepVoltammetry(data_file=file)
             case 'OCV':
-                entry = CE_NESD_OpenCircuitVoltage(data_file=file)
+                entry = CE_ACMD_OpenCircuitVoltage(data_file=file)
             case 'PEIS':
-                entry = CE_NESD_PEIS(data_file=file)
+                entry = CE_ACMD_PEIS(data_file=file)
             case _:
-                entry = CE_NESD_Measurement(data_file=file)
+                entry = CE_ACMD_Measurement(data_file=file)
 
         electrolyser_id = file.split('/')[-1][:8]
         set_sample_reference(archive, entry, electrolyser_id)
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
-        create_archive(entry, archive, file_name)
-
+        create_archive(
+            entry, archive, file_name, overwrite=True
+        )  # TODO remove overwrite after reprocessing all nesd->acmd uploads
         entry_id = get_entry_id_from_file_name(file_name, archive)
         archive.data = ParsedBioLogicFile(
             activity=[get_reference(archive.metadata.upload_id, entry_id)]
@@ -208,7 +209,7 @@ class CENESDBioLogicParser(MatchingParser):
         archive.metadata.entry_name = file
 
 
-class CENESDZahnerParser(MatchingParser):
+class CEACMDZahnerParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         if not mainfile.endswith(('.isw', '.ism', '.isc')):
             return
@@ -233,25 +234,27 @@ class CENESDZahnerParser(MatchingParser):
         technique = d.get('method')
         match technique:
             case 'ca':
-                entry = CE_NESD_Chronoamperometry(data_file=file)
+                entry = CE_ACMD_Chronoamperometry(data_file=file)
             case 'cv':
-                entry = CE_NESD_CyclicVoltammetry(data_file=file)
+                entry = CE_ACMD_CyclicVoltammetry(data_file=file)
             case 'lsv':
-                entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
+                entry = CE_ACMD_LinearSweepVoltammetry(data_file=file)
             case 'gds':
-                entry = CE_NESD_GalvanodynamicSweep(data_file=file)
+                entry = CE_ACMD_GalvanodynamicSweep(data_file=file)
             case 'geis':
-                entry = CE_NESD_GEIS(data_file=file)
+                entry = CE_ACMD_GEIS(data_file=file)
             case 'peis':
-                entry = CE_NESD_PEIS(data_file=file)
+                entry = CE_ACMD_PEIS(data_file=file)
             case 'cp':
-                entry = CE_NESD_Chronopotentiometry(data_file=file)
+                entry = CE_ACMD_Chronopotentiometry(data_file=file)
 
         electrolyser_id = file.split('/')[-1][:8]
         set_sample_reference(archive, entry, electrolyser_id)
         entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
-        create_archive(entry, archive, file_name)
+        create_archive(
+            entry, archive, file_name, overwrite=True
+        )  # TODO remove overwrite after reprocessing all nesd->acmd uploads
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
         archive.data = ParsedZahnerFile(
@@ -260,7 +263,7 @@ class CENESDZahnerParser(MatchingParser):
         archive.metadata.entry_name = file
 
 
-class CENESDCHIParser(MatchingParser):
+class CEACMDCHIParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         if not mainfile.endswith('.txt') and not mainfile.endswith('.bin'):
             return
@@ -276,25 +279,27 @@ class CENESDCHIParser(MatchingParser):
         technique = m.get('method')
         match technique:
             case 'Chronoamperometry':
-                entry = CE_NESD_Chronoamperometry(data_file=file)
+                entry = CE_ACMD_Chronoamperometry(data_file=file)
             case 'Cyclic Voltammetry':
-                entry = CE_NESD_CyclicVoltammetry(data_file=file)
+                entry = CE_ACMD_CyclicVoltammetry(data_file=file)
             case 'Linear Sweep Voltammetry':
-                entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
+                entry = CE_ACMD_LinearSweepVoltammetry(data_file=file)
             # case 'gds':
-            #     entry = CE_NESD_GalvanodynamicSweep(data_file=file)
+            #     entry = CE_ACMD_GalvanodynamicSweep(data_file=file)
             # case 'geis':
-            #     entry = CE_NESD_GEIS(data_file=file)
+            #     entry = CE_ACMD_GEIS(data_file=file)
             case 'A.C. Impedance':
-                entry = CE_NESD_PEIS(data_file=file)
+                entry = CE_ACMD_PEIS(data_file=file)
             case 'Chronopotentiometry':
-                entry = CE_NESD_Chronopotentiometry(data_file=file)
+                entry = CE_ACMD_Chronopotentiometry(data_file=file)
 
         electrolyser_id = file.split('/')[-1][:8]
         set_sample_reference(archive, entry, electrolyser_id)
         entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
-        create_archive(entry, archive, file_name)
+        create_archive(
+            entry, archive, file_name, overwrite=True
+        )  # TODO remove overwrite after reprocessing all nesd->acmd uploads
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
         archive.data = ParsedCHIFile(
@@ -303,20 +308,22 @@ class CENESDCHIParser(MatchingParser):
         archive.metadata.entry_name = file
 
 
-class CENESDLabviewParser(MatchingParser):
+class CEACMDLabviewParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         file = mainfile.rsplit('raw/', maxsplit=1)[-1]
 
         if not file.endswith('.tdms'):
             return
 
-        entry = CE_NESD_ElectrolyserPerformanceEvaluation(data_file=file)
+        entry = CE_ACMD_ElectrolyserPerformanceEvaluation(data_file=file)
         electrolyser_id = file.split('.')[0][:8]
         set_sample_reference(archive, entry, electrolyser_id)
         entry.datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
         entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
-        create_archive(entry, archive, file_name)
+        create_archive(
+            entry, archive, file_name, overwrite=True
+        )  # TODO remove overwrite after reprocessing all nesd->acmd uploads
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
         archive.data = ParsedLabVIEWFile(
@@ -325,7 +332,7 @@ class CENESDLabviewParser(MatchingParser):
         archive.metadata.entry_name = file
 
 
-class CENESDPalmSensParser(MatchingParser):
+class CEACMDPalmSensParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
         if not mainfile.endswith('.pssession'):
             return
@@ -338,25 +345,27 @@ class CENESDPalmSensParser(MatchingParser):
         technique = data.get('Measurements', [{}])[0].get('Title', '').split(' [')[0]
         match technique:
             case 'Open Circuit Potentiometry':
-                entry = CE_NESD_OpenCircuitVoltage(data_file=file)
+                entry = CE_ACMD_OpenCircuitVoltage(data_file=file)
             case 'Chronoamperometry':
-                entry = CE_NESD_Chronoamperometry(data_file=file)
+                entry = CE_ACMD_Chronoamperometry(data_file=file)
             case 'Cyclic Voltammetry':
-                entry = CE_NESD_CyclicVoltammetry(data_file=file)
+                entry = CE_ACMD_CyclicVoltammetry(data_file=file)
             case 'Linear Sweep Voltammetry':
-                entry = CE_NESD_LinearSweepVoltammetry(data_file=file)
+                entry = CE_ACMD_LinearSweepVoltammetry(data_file=file)
             # case 'gds':
-            #     entry = CE_NESD_GalvanodynamicSweep(data_file=file)
+            #     entry = CE_ACMD_GalvanodynamicSweep(data_file=file)
             case 'Impedance Spectroscopy' | 'Impedance Spectroscopy [1]':
-                entry = CE_NESD_PEIS(data_file=file)
+                entry = CE_ACMD_PEIS(data_file=file)
             case 'Chronopotentiometry':
-                entry = CE_NESD_Chronopotentiometry(data_file=file)
+                entry = CE_ACMD_Chronopotentiometry(data_file=file)
 
         electrolyser_id = file.split('/')[-1][:8]
         set_sample_reference(archive, entry, electrolyser_id)
         entry.name = file.split('.')[0]
         file_name = f'{file}.archive.json'
-        create_archive(entry, archive, file_name)
+        create_archive(
+            entry, archive, file_name, overwrite=True
+        )  # TODO remove overwrite after reprocessing all nesd->acmd uploads
 
         entry_id = get_entry_id_from_file_name(file_name, archive)
         archive.data = ParsedPalmSensFile(
@@ -365,7 +374,7 @@ class CENESDPalmSensParser(MatchingParser):
         archive.metadata.entry_name = file
 
 
-class CENESDMetadataExcelParser(MatchingParser):
+class CEACMDMetadataExcelParser(MatchingParser):
     def to_float_if_possible(self, value):
         if pd.isna(value):
             return None
@@ -468,7 +477,7 @@ class CENESDMetadataExcelParser(MatchingParser):
 
         folder_path = ('/' + file).rsplit('/', 1)[0]
 
-        sample_entry = CE_NESD_Sample()
+        sample_entry = CE_ACMD_Sample()
         sample_file_name = f'{file}_sample.archive.json'
         if setup_type in ['3electrode', 'RDE', 'old_template']:
             sample_entry.datetime = datetime.datetime.now().strftime(
@@ -477,7 +486,7 @@ class CENESDMetadataExcelParser(MatchingParser):
             sample_entry.name = f'{folder_path}/sample'[1:]
             map_sample(sample_entry, mapping, setup_type, logger)
         elif setup_type in ['AEM_or_PEM']:
-            sample_entry = CE_NESD_Electrolyser()
+            sample_entry = CE_ACMD_Electrolyser()
             sample_file_name = f'{file}_electrolyser.archive.json'
             sample_entry.name = f'{folder_path}/electrolyser'[1:]
             map_electrolyser(sample_entry, mapping, setup_type, archive, logger)
@@ -485,14 +494,16 @@ class CENESDMetadataExcelParser(MatchingParser):
             sample_entry = get_electrode(mapping, 'half-cell', logger)
             sample_file_name = f'{file}_half_cell.archive.json'
             sample_entry.name = f'{folder_path}/half-cell'[1:]
-        create_archive(sample_entry, archive, sample_file_name)
+        create_archive(
+            sample_entry, archive, sample_file_name, overwrite=True
+        )  # TODO remove overwrite after reprocessing all nesd->acmd uploads
         sample_entry_id = get_entry_id_from_file_name(sample_file_name, archive)
         entity_list = [
             get_reference(archive.metadata.upload_id, sample_entry_id),
         ]
 
         if setup_type in ['3electrode', 'RDE', 'old_template']:
-            setup_entry = CE_NESD_Setup()
+            setup_entry = CE_ACMD_Setup()
             setup_entry.datetime = datetime.datetime.now().strftime(
                 '%Y-%m-%d %H:%M:%S.%f'
             )
@@ -502,7 +513,12 @@ class CENESDMetadataExcelParser(MatchingParser):
             map_setup(setup_entry, mapping, setup_type, archive)
             ref_electrode_file_name = f'{file}_reference_electrode.archive.json'
             reference_electrode_entry = get_reference_electrode(mapping)
-            create_archive(reference_electrode_entry, archive, ref_electrode_file_name)
+            create_archive(
+                reference_electrode_entry,
+                archive,
+                ref_electrode_file_name,
+                overwrite=True,
+            )  # TODO remove overwrite after reprocessing all nesd->acmd uploads
             ref_electrode_entry_id = get_entry_id_from_file_name(
                 ref_electrode_file_name, archive
             )
@@ -510,7 +526,9 @@ class CENESDMetadataExcelParser(MatchingParser):
                 archive.metadata.upload_id, ref_electrode_entry_id
             )
             setup_file_name = f'{file}_setup.archive.json'
-            create_archive(setup_entry, archive, setup_file_name)
+            create_archive(
+                setup_entry, archive, setup_file_name, overwrite=True
+            )  # TODO remove overwrite after reprocessing all nesd->acmd uploads
             setup_entry_id = get_entry_id_from_file_name(setup_file_name, archive)
             entity_list.append(
                 get_reference(archive.metadata.upload_id, setup_entry_id)
@@ -523,5 +541,8 @@ class CENESDMetadataExcelParser(MatchingParser):
             analysis_name = f'{folder_path}/oer_analysis'[1:]
             analysis_file_name = f'{analysis_name}.archive.json'
             create_archive(
-                CE_NESD_OERAnalysis(name=analysis_name), archive, analysis_file_name
-            )
+                CE_ACMD_OERAnalysis(name=analysis_name),
+                archive,
+                analysis_file_name,
+                overwrite=True,
+            )  # TODO remove overwrite after reprocessing all nesd->acmd uploads

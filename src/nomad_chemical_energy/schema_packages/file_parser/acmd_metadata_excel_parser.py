@@ -37,9 +37,9 @@ from nomad.datamodel.metainfo.basesections import (
 from nomad.units import ureg
 
 from nomad_chemical_energy.schema_packages.ce_nesd_package import (
-    CE_NESD_Electrode,
-    CE_NESD_Electrolyte,
-    CE_NESD_ReferenceElectrode,
+    CE_ACMD_Electrode,
+    CE_ACMD_Electrolyte,
+    CE_ACMD_ReferenceElectrode,
 )
 
 
@@ -214,7 +214,7 @@ def map_electrolyser(entry, data_dict, setup_type, archive, logger):
 
 def get_electrode(data_dict, electrode_type, logger):
     prefix = f'{electrode_type} ' if electrode_type in ['anode', 'cathode'] else ''
-    electrode = CE_NESD_Electrode()
+    electrode = CE_ACMD_Electrode()
     electrode.catalyst = data_dict.get(f'{prefix}catalyst') or data_dict.get(
         'catalyst material'
     )
@@ -275,7 +275,7 @@ def get_electrode(data_dict, electrode_type, logger):
 
 
 def get_environment(data_dict, electrolyte_type='electrolyte'):
-    entry = CE_NESD_Electrolyte()
+    entry = CE_ACMD_Electrolyte()
     entry.solvent = PubChemPureSubstanceSectionCustom(name='H2O', load_data=False)
     entry.substances = [
         SubstanceWithConcentration(
@@ -302,7 +302,7 @@ def get_environment(data_dict, electrolyte_type='electrolyte'):
 
 
 def get_reference_electrode(data_dict):
-    entry = CE_NESD_ReferenceElectrode()
+    entry = CE_ACMD_ReferenceElectrode()
     entry.name = data_dict.get('reference electrode: type')
     entry.standard_potential = data_dict.get(
         'reference electrode: standard potential at 25 °c'

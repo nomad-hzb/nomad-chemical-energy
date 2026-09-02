@@ -22,7 +22,7 @@ class CENECCPackageEntryPoint(SchemaPackageEntryPoint):
         return m_package
 
 
-class CENESDPackageEntryPoint(SchemaPackageEntryPoint):
+class CEACMDPackageEntryPoint(SchemaPackageEntryPoint):
     def load(self):
         from nomad_chemical_energy.schema_packages.ce_nesd_package import m_package
 
@@ -110,9 +110,9 @@ ce_necc_package = CENECCPackageEntryPoint(
     description='Package for HZB group CE-NECC',
 )
 
-ce_nesd_package = CENESDPackageEntryPoint(
-    name='CE_NESD',
-    description='Package for HZB group CE-NESD',
+ce_acmd_package = CEACMDPackageEntryPoint(
+    name='CE_ACMD',
+    description='Package for HZB group CE-ACMD',
 )
 
 ce_nsli_package = CENSLIPackageEntryPoint(

@@ -9,13 +9,13 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import find_sample_in
 
 def test_recursive_sample_search(monkeypatch):
     """
-    The NESD group has an implicit directory structure for each upload.
+    The ACMD group has an implicit directory structure for each upload.
     For each entry, the function should locate the sample that is stored closest to that entry in the folder structure.
     If no sample is found in any of the parent directories, the function should return an empty list.
     """
-    one_sample_file = 'tests/data/archives/nesd_test_directory/material1/sample1/palmsens_ca.pssession'
-    multi_sample_file = 'tests/data/archives/nesd_test_directory/material1/sample2/palmsens_ca.pssession'
-    no_sample_file = 'tests/data/archives/nesd_test_directory/material2/sample1/palmsens_ca.pssession'
+    one_sample_file = 'tests/data/archives/acmd_test_directory/material1/sample1/palmsens_ca.pssession'
+    multi_sample_file = 'tests/data/archives/acmd_test_directory/material1/sample2/palmsens_ca.pssession'
+    no_sample_file = 'tests/data/archives/acmd_test_directory/material2/sample1/palmsens_ca.pssession'
     one_sample_archive = parse(one_sample_file)[0]
     multi_sample_archive = parse(multi_sample_file)[0]
     no_sample_archive = parse(no_sample_file)[0]

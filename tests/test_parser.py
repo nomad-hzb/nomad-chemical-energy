@@ -42,7 +42,7 @@ from nomad.client import normalize_all, parse
         'test1234.test.txt',
         'test double PTFETape 3 100724000001.txt',
         'testO2.oxy.xlsx',
-        'labview_metadata_nesd.tdms',
+        'acmd_labview_metadata.tdms',
         'xas_kmc3_example.001',
         'xas_kmc3_new_header.0003',
         'kmc3_biologic_CA_example.mpr',
@@ -127,7 +127,7 @@ def get_multiple_archives(file_base):
 
 
 def test_biologic_eclab_constC_parser():
-    file = 'CstC_nesd.mpr'
+    file = 'acmd_CstC.mpr'
     archive = get_archive(file)
     assert archive.data
     assert archive.data.properties
@@ -139,7 +139,7 @@ def test_biologic_eclab_constC_parser():
 
 
 def test_biologic_eclab_constV_parser():
-    file = 'CstV_nesd.mpr'
+    file = 'acmd_CstV.mpr'
     archive = get_archive(file)
     assert archive.data
     assert archive.data.properties
@@ -151,7 +151,7 @@ def test_biologic_eclab_constV_parser():
 
 
 def test_biologic_eclab_GEIS_parser():
-    file = 'GEIS_nesd.mpr'
+    file = 'acmd_GEIS.mpr'
     archive = get_archive(file)
     assert archive.data
     assert archive.data.description == 'abc'
@@ -165,7 +165,7 @@ def test_biologic_eclab_GEIS_parser():
 
 
 def test_biologic_eclab_LSV_parser():
-    file = 'LSV_nesd.mpr'
+    file = 'acmd_LSV.mpr'
     archive = get_archive(file)
     assert archive.data
     assert archive.data.properties
@@ -177,7 +177,7 @@ def test_biologic_eclab_LSV_parser():
 
 
 def test_biologic_eclab_PEIS_parser():
-    file = 'PEIS_nesd.mpr'
+    file = 'acmd_PEIS.mpr'
     archive = get_archive(file)
     assert archive.data
     assert archive.data.description == 'abc'
@@ -264,8 +264,8 @@ def test_kmc3_insitu_biologic_parser():
     assert round(archive.data.voltage[2].magnitude, 5) == -0.44958
 
 
-def test_nesd_metadata_excel_parser():
-    file = 'nesd_metadata_example.xlsx'
+def test_acmd_metadata_excel_parser():
+    file = 'acmd_metadata_example.xlsx'
     archive_list = get_multiple_archives(file)
     assert len(archive_list) == 3
 
@@ -292,8 +292,8 @@ def get_archives():
     return _get_archives
 
 
-def test_nesd_metadata_excel_3_electrode_parser(get_archives):
-    file = 'nesd_metadata_3_electrode.xlsx'
+def test_acmd_metadata_excel_3_electrode_parser(get_archives):
+    file = 'acmd_metadata_3_electrode.xlsx'
     archives = get_archives(file)
     assert len(archives) == 3
     reference_electrode_archive = archives['reference_electrode']
@@ -375,8 +375,8 @@ def test_nesd_metadata_excel_3_electrode_parser(get_archives):
     )
 
 
-def test_nesd_metadata_excel_RDE_parser(get_archives):
-    file = 'nesd_metadata_RDE.xlsx'
+def test_acmd_metadata_excel_RDE_parser(get_archives):
+    file = 'acmd_metadata_RDE.xlsx'
     archives = get_archives(file)
     assert len(archives) == 3
     reference_electrode_archive = archives['reference_electrode']
@@ -460,8 +460,8 @@ def test_nesd_metadata_excel_RDE_parser(get_archives):
     )
 
 
-def test_nesd_metadata_excel_AEM_parser():
-    file = 'nesd_metadata_AEM.xlsx'
+def test_acmd_metadata_excel_AEM_parser():
+    file = 'acmd_metadata_AEM.xlsx'
     archive_list = get_multiple_archives(file)
     assert len(archive_list) == 1
     electrolyser_archive = archive_list[0]
@@ -619,8 +619,8 @@ def test_nesd_metadata_excel_AEM_parser():
     )
 
 
-def test_nesd_metadata_excel_half_cell_parser():
-    file = 'nesd_metadata_GDE_half_cell.xlsx'
+def test_acmd_metadata_excel_half_cell_parser():
+    file = 'acmd_metadata_GDE_half_cell.xlsx'
     archive_list = get_multiple_archives(file)
     assert len(archive_list) == 1
     electrode_archive = archive_list[0]
@@ -691,15 +691,15 @@ def test_nesd_metadata_excel_half_cell_parser():
     )
 
 
-def test_labview_nesd_parser():
-    file = 'labview_metadata_nesd.tdms'
+def test_labview_acmd_parser():
+    file = 'acmd_labview_metadata.tdms'
     archive = get_archive(file)
     assert archive.data
     assert len(archive.data.time) == 344
     assert archive.data.name == '20241202_091736_Softwaretest001_001'
 
 
-def test_zahner_isw_nesd_parser():
+def test_zahner_isw_acmd_parser():
     file = '22-cp-1700mv-10min.isw'
     archive = get_archive(file)
     assert archive.data
@@ -707,7 +707,7 @@ def test_zahner_isw_nesd_parser():
     assert len(archive.data.time) == 601
 
 
-def test_zahner_isw_2_nesd_parser():
+def test_zahner_isw_2_acmd_parser():
     file = '21-cp-625ma-5min.isw'
     archive = get_archive(file)
     assert archive.data
@@ -715,7 +715,7 @@ def test_zahner_isw_2_nesd_parser():
     assert len(archive.data.time) == 301
 
 
-def test_zahner_isw_3_nesd_parser():
+def test_zahner_isw_3_acmd_parser():
     file = '25-currentscan3.isw'
     archive = get_archive(file)
     assert archive.data
@@ -723,7 +723,7 @@ def test_zahner_isw_3_nesd_parser():
     assert len(archive.data.time) == 282
 
 
-def test_zahner_ism_nesd_parser():
+def test_zahner_ism_acmd_parser():
     file = 'geis-100ma.ism'
     archive = get_archive(file)
     assert archive.data
@@ -731,7 +731,7 @@ def test_zahner_ism_nesd_parser():
     assert len(archive.data.measurements[0].data.frequency) == 33
 
 
-def test_zahner_ism_2_nesd_parser():
+def test_zahner_ism_2_acmd_parser():
     file = '02_peis_ocv.ism'
     archive = get_archive(file)
     assert archive.data
@@ -739,7 +739,7 @@ def test_zahner_ism_2_nesd_parser():
     assert len(archive.data.measurements[0].data.frequency) == 66
 
 
-def test_zahner_isc_nesd_parser():
+def test_zahner_isc_acmd_parser():
     file = 'pt-wire-cv-.isc'
     archive = get_archive(file)
     assert archive.data
@@ -748,7 +748,7 @@ def test_zahner_isc_nesd_parser():
     assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.6
 
 
-def test_chi_bin_ca_nesd_parser():
+def test_chi_bin_ca_acmd_parser():
     file = 'chi_chronoamperometry.bin'
     archive = get_archive(file)
     assert archive.data
@@ -761,7 +761,7 @@ def test_chi_bin_ca_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_chi_bin_cp_nesd_parser():
+def test_chi_bin_cp_acmd_parser():
     file = 'chi_chronopotentiometry.bin'
     archive = get_archive(file)
     assert archive.data
@@ -774,7 +774,7 @@ def test_chi_bin_cp_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_chi_bin_cv_nesd_parser():
+def test_chi_bin_cv_acmd_parser():
     file = 'chi_cyclic_voltammetry.bin'
     archive = get_archive(file)
     assert archive.data
@@ -784,7 +784,7 @@ def test_chi_bin_cv_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_chi_bin_eis_nesd_parser():
+def test_chi_bin_eis_acmd_parser():
     file = 'chi_impedance.bin'
     archive = get_archive(file)
     assert archive.data
@@ -795,7 +795,7 @@ def test_chi_bin_eis_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_chi_bin_lsv_nesd_parser():
+def test_chi_bin_lsv_acmd_parser():
     file = 'chi_linear_sweep_voltammetry.bin'
     archive = get_archive(file)
     assert archive.data
@@ -807,7 +807,7 @@ def test_chi_bin_lsv_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_chi_txt_ca_nesd_parser():
+def test_chi_txt_ca_acmd_parser():
     file = 'chi_chronoamperometry.txt'
     archive = get_archive(file)
     assert archive.data
@@ -820,7 +820,7 @@ def test_chi_txt_ca_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_chi_txt_cp_nesd_parser():
+def test_chi_txt_cp_acmd_parser():
     file = 'chi_chronopotentiometry.txt'
     archive = get_archive(file)
     assert archive.data
@@ -830,7 +830,7 @@ def test_chi_txt_cp_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_chi_txt_lsv_nesd_parser():
+def test_chi_txt_lsv_acmd_parser():
     file = 'LSV.txt'
     archive = get_archive(file)
     assert archive.data
@@ -840,7 +840,7 @@ def test_chi_txt_lsv_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_chi_txt_eis_nesd_parser():
+def test_chi_txt_eis_acmd_parser():
     file = 'EIS -0,48 V.txt'
     archive = get_archive(file)
     assert archive.data
@@ -850,7 +850,7 @@ def test_chi_txt_eis_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_chi_txt_cv_nesd_parser():
+def test_chi_txt_cv_acmd_parser():
     file = 'CV-1T.txt'
     archive = get_archive(file)
     assert archive.data
@@ -860,7 +860,7 @@ def test_chi_txt_cv_nesd_parser():
     assert archive.data.station == 'CHI760E'
 
 
-def test_palmense_lsv_nesd_parser():
+def test_palmense_lsv_acmd_parser():
     file = '05_N2_LSV_10mV_1600rpm.pssession'
     archive = get_archive(file)
     assert archive.data
@@ -870,7 +870,7 @@ def test_palmense_lsv_nesd_parser():
     assert round(archive.data.voltage[0].magnitude, 5) == -0.09996
 
 
-def test_palmense_ocp_nesd_parser():
+def test_palmense_ocp_acmd_parser():
     file = '01_N2_OCP.pssession'
     archive = get_archive(file)
     assert archive.data
@@ -880,7 +880,7 @@ def test_palmense_ocp_nesd_parser():
     assert round(archive.data.voltage[0].magnitude, 5) == 0.96293
 
 
-def test_palmense_cv_nesd_parser():
+def test_palmense_cv_acmd_parser():
     file = '04_N2_CV_50mV.pssession'
     archive = get_archive(file)
     assert archive.data
@@ -890,7 +890,7 @@ def test_palmense_cv_nesd_parser():
     assert round(archive.data.cycles[0].voltage[0].magnitude, 5) == 0.02496
 
 
-def test_palmense_peis_nesd_parser():
+def test_palmense_peis_acmd_parser():
     file = '11_PEIS_700mV.pssession'
     archive = get_archive(file)
     assert archive.data
@@ -900,7 +900,7 @@ def test_palmense_peis_nesd_parser():
     assert round(archive.data.measurements[0].data.frequency[0].magnitude, 5) == 200000
 
 
-def test_palmense_cp_nesd_parser():
+def test_palmense_cp_acmd_parser():
     file = '05_N2_CP_10mAcm2_24h.pssession'
     archive = get_archive(file)
     assert archive.data
@@ -910,7 +910,7 @@ def test_palmense_cp_nesd_parser():
     assert round(archive.data.voltage[0].magnitude, 5) == 0.65457
 
 
-def test_palmense_ca_nesd_parser():
+def test_palmense_ca_acmd_parser():
     file = 'palmsens_ca.pssession'
     archive = get_archive(file)
     assert archive.data

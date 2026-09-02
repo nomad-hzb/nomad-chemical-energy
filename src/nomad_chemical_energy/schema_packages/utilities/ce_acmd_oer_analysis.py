@@ -34,17 +34,17 @@ from nomad.metainfo import Quantity, Reference, Section, SubSection
 from nomad.units import ureg
 
 
-class NESD_OERReference(SectionReference):
+class ACMD_OERReference(SectionReference):
     reference = Quantity(
         type=Reference(PotentiostatMeasurement.m_def),
         a_eln=dict(
             component='ReferenceEditQuantity',
-            label='NESD OER Measurement',
+            label='ACMD OER Measurement',
         ),
     )
 
 
-class NESD_OERAnalysisResult(PlotSection, AnalysisResult):
+class ACMD_OERAnalysisResult(PlotSection, AnalysisResult):
     m_def = Section(a_eln=dict(overview=True))
     charge_density = Quantity(
         links=['https://w3id.org/nfdi4cat/voc4cat_0007253'],
@@ -227,14 +227,14 @@ class NESD_OERAnalysisResult(PlotSection, AnalysisResult):
         super().normalize(archive, logger)
 
 
-class NESD_OERAnalysis(Analysis):
+class ACMD_OERAnalysis(Analysis):
     m_def = Section(label_quantity='name')
 
     inputs = Analysis.inputs.m_copy()
-    inputs.section_def = NESD_OERReference
+    inputs.section_def = ACMD_OERReference
 
     outputs = Analysis.outputs.m_copy()
-    outputs.section_def = NESD_OERAnalysisResult
+    outputs.section_def = ACMD_OERAnalysisResult
 
     def get_entries_from_folder(self, data_archive, upload_id, folder_path, entry_type):
         from nomad.app.v1.models import MetadataPagination
@@ -275,6 +275,7 @@ class NESD_OERAnalysis(Analysis):
 
     def get_ir_drop_correction(self, eis_refs):
         # TODO maybe revisit this and select not only first EIS ref but also check for 0V
+        # idea: probably best to take file with lowest voltage instead of first file
         try:
             eis_entry = eis_refs[0].reference
             z_real_values = eis_entry.measurements[0].data.z_real
@@ -364,7 +365,7 @@ class NESD_OERAnalysis(Analysis):
             if not samples:
                 samples = lsv.samples
 
-        result_entry = NESD_OERAnalysisResult(
+        result_entry = ACMD_OERAnalysisResult(
             name=f'{("/" + cv.name).rsplit("/", 1)[0]}/OER_analysis'[1:],
             reaction_type='OER',
             charge_density=charge_density,
@@ -391,22 +392,22 @@ class NESD_OERAnalysis(Analysis):
 
         return result_entry
 
-    def get_nesd_oer_ref_list(self, archive, folder, entry_type):
+    def get_acmd_oer_ref_list(self, archive, folder, entry_type):
         ref_list = self.get_entries_from_folder(
             archive, archive.metadata.upload_id, folder, entry_type
         )
-        refs = [NESD_OERReference(name=name, reference=ref) for [name, ref] in ref_list]
+        refs = [ACMD_OERReference(name=name, reference=ref) for [name, ref] in ref_list]
         return refs
 
     def normalize(self, archive, logger):
         folder = ('/' + archive.metadata.mainfile).rsplit('/', 1)[0][1:]
-        cv_refs = self.get_nesd_oer_ref_list(
-            archive, folder, 'CE_NESD_CyclicVoltammetry'
+        cv_refs = self.get_acmd_oer_ref_list(
+            archive, folder, 'CE_ACMD_CyclicVoltammetry'
         )
-        lsv_refs = self.get_nesd_oer_ref_list(
-            archive, folder, 'CE_NESD_LinearSweepVoltammetry'
+        lsv_refs = self.get_acmd_oer_ref_list(
+            archive, folder, 'CE_ACMD_LinearSweepVoltammetry'
         )
-        eis_refs = self.get_nesd_oer_ref_list(archive, folder, 'CE_NESD_PEIS')
+        eis_refs = self.get_acmd_oer_ref_list(archive, folder, 'CE_ACMD_PEIS')
         self.inputs = cv_refs + lsv_refs + eis_refs
 
         if self.inputs is not None and len(self.inputs) > 0:
@@ -438,17 +439,17 @@ class NESD_OERAnalysis(Analysis):
         super().normalize(archive, logger)
 
 
-class NESD_OERAnalysisReference(SectionReference):
+class ACMD_OERAnalysisReference(SectionReference):
     reference = Quantity(
-        type=Reference(NESD_OERAnalysis.m_def),
+        type=Reference(ACMD_OERAnalysis.m_def),
         a_eln=dict(
             component='ReferenceEditQuantity',
-            label='NESD OER Analysis',
+            label='ACMD OER Analysis',
         ),
     )
 
 
-class NESD_OERComparisonResult(AnalysisResult):
+class ACMD_OERComparisonResult(AnalysisResult):
     charge_densities = Quantity(
         links=['https://w3id.org/nfdi4cat/voc4cat_0007253'],
         type=np.dtype(np.float64),
@@ -490,10 +491,10 @@ class NESD_OERComparisonResult(AnalysisResult):
         repeats=True,
     )
     selected_electrode_charge_density = SubSection(
-        section_def=NESD_OERReference,
+        section_def=ACMD_OERReference,
     )
     selected_electrode_overpotential = SubSection(
-        section_def=NESD_OERReference,
+        section_def=ACMD_OERReference,
     )
 
     def calculate_statistics(self, quantity, quantity_name):
@@ -514,11 +515,11 @@ class NESD_OERComparisonResult(AnalysisResult):
         super().normalize(archive, logger)
 
 
-class NESD_OERCompareReplicates(Analysis):
+class ACMD_OERCompareReplicates(Analysis):
     m_def = Section(label_quantity='name')
 
     inputs = Analysis.inputs.m_copy()
-    inputs.section_def = NESD_OERAnalysisReference
+    inputs.section_def = ACMD_OERAnalysisReference
 
     outputs = Analysis.outputs.m_copy()
-    outputs.section_def = NESD_OERComparisonResult
+    outputs.section_def = ACMD_OERComparisonResult

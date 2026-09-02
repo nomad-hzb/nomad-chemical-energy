@@ -1,5 +1,6 @@
 from nomad.config.models.plugins import AppEntryPoint
 
+from nomad_chemical_energy.apps.acmd_oer_app import acmd_oer_app
 from nomad_chemical_energy.apps.amcc_reproducibility_app import amcc_reproducibility_app
 from nomad_chemical_energy.apps.catlab_combinatorial_app import catlab_combinatorial_app
 from nomad_chemical_energy.apps.catlab_pixel_app import catlab_pixel_app
@@ -7,7 +8,6 @@ from nomad_chemical_energy.apps.documentation_tools_app import documentation_too
 from nomad_chemical_energy.apps.eln_app import eln_app
 from nomad_chemical_energy.apps.necc_compare_app import necc_compare_app
 from nomad_chemical_energy.apps.necc_find_app import necc_find_experiments_app
-from nomad_chemical_energy.apps.nesd_oer_app import nesd_oer_app
 from nomad_chemical_energy.apps.nome_oer_cp_app import nome_oer_cp_app
 from nomad_chemical_energy.apps.nome_sample_app import nome_sample_app
 from nomad_chemical_energy.apps.voila_finder_app import voila_finder_app
@@ -42,10 +42,10 @@ nome_oer_cp_analysis_app = AppEntryPoint(
     app=nome_oer_cp_app,
 )
 
-nesd_oer_app = AppEntryPoint(
+acmd_oer_app = AppEntryPoint(
     name='ExploreOER',
-    description='Provides filters to explore OER analysis entries of the NESD group.',
-    app=nesd_oer_app,
+    description='Provides filters to explore OER analysis entries of the ACMD group.',
+    app=acmd_oer_app,
 )
 
 amcc_reproducibility_app = AppEntryPoint(

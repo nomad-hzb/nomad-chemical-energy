@@ -22,7 +22,8 @@ import os
 import numpy as np
 from baseclasses import BaseMeasurement
 from baseclasses.chemical_energy import (
-    CENESDSample,
+    ACMDElectrode,
+    CEACMDSample,
     Chronoamperometry,
     Chronopotentiometry,
     CyclicVoltammetry,
@@ -34,10 +35,9 @@ from baseclasses.chemical_energy import (
     Equipment,
     GalvanodynamicSweep,
     LinearSweepVoltammetry,
-    NESDElectrode,
     OpenCircuitVoltage,
     ReferenceElectrode,
-    SampleIDCENESD,
+    SampleIDCEACMD,
 )
 from baseclasses.helper.archive_builder.labview_archive import (
     get_electrolyser_properties,
@@ -61,9 +61,9 @@ from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
     map_eis_data,
     map_voltammetry_data,
 )
-from nomad_chemical_energy.schema_packages.utilities.ce_nesd_oer_analysis import (
-    NESD_OERAnalysis,
-    NESD_OERCompareReplicates,
+from nomad_chemical_energy.schema_packages.utilities.ce_acmd_oer_analysis import (
+    ACMD_OERAnalysis,
+    ACMD_OERCompareReplicates,
 )
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
     make_bode_plot,
@@ -82,7 +82,7 @@ m_package = SchemaPackage()
 # %% ####################### Entities
 
 
-class CE_NESD_Sample(CENESDSample, EntryData):
+class CE_ACMD_Sample(CEACMDSample, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['users', 'elemental_composition', 'chemical_composition_or_formulas'],
@@ -99,7 +99,7 @@ class CE_NESD_Sample(CENESDSample, EntryData):
     )
 
 
-class CE_NESD_Electrode(NESDElectrode, EntryData):
+class CE_ACMD_Electrode(ACMDElectrode, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['elemental_composition'],
@@ -107,7 +107,7 @@ class CE_NESD_Electrode(NESDElectrode, EntryData):
     )
 
 
-class CE_NESD_ReferenceElectrode(ReferenceElectrode, EntryData):
+class CE_ACMD_ReferenceElectrode(ReferenceElectrode, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['components', 'elemental_composition'],
@@ -115,7 +115,7 @@ class CE_NESD_ReferenceElectrode(ReferenceElectrode, EntryData):
     )
 
 
-class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
+class CE_ACMD_Electrolyser(ElectrolyserProperties, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['components', 'elemental_composition'],
@@ -134,7 +134,7 @@ class CE_NESD_Electrolyser(ElectrolyserProperties, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NESD_Electrolyte(Environment, EntryData):
+class CE_ACMD_Electrolyte(Environment, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -149,7 +149,7 @@ class CE_NESD_Electrolyte(Environment, EntryData):
     )
 
 
-class CE_NESD_Setup(ElectroChemicalSetup, EntryData):
+class CE_ACMD_Setup(ElectroChemicalSetup, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -174,11 +174,11 @@ class CE_NESD_Setup(ElectroChemicalSetup, EntryData):
     )
 
     # TODO what should ID look like?
-    setup_id = SubSection(section_def=SampleIDCENESD)
+    setup_id = SubSection(section_def=SampleIDCEACMD)
 
     environment = SubSection(
         links=['https://w3id.org/nfdi4cat/voc4cat_0007223'],
-        section_def=CE_NESD_Electrolyte,
+        section_def=CE_ACMD_Electrolyte,
         label='Electrolyte',
     )
 
@@ -192,7 +192,7 @@ class CE_NESD_Setup(ElectroChemicalSetup, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NESD_Equipment(Equipment, EntryData):
+class CE_ACMD_Equipment(Equipment, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['users', 'origin', 'elemental_composition', 'components'],
@@ -204,7 +204,7 @@ class CE_NESD_Equipment(Equipment, EntryData):
 # %% ####################### Generic Entries
 
 
-class CE_NESD_Measurement(BaseMeasurement, EntryData):
+class CE_ACMD_Measurement(BaseMeasurement, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['lab_id', 'location', 'steps', 'instruments', 'results'],
@@ -244,7 +244,7 @@ def find_electrolyser_in_folder(archive, datafile):
 
 
 def find_setup_in_folder(archive, datafile):
-    # this function only finds setups that are created via the NESD metadata excel file (xlsx_setup ending)
+    # this function only finds setups that are created via the ACMD metadata excel file (xlsx_setup ending)
     folder = os.path.dirname(datafile)
     setup_files = []
     for item in archive.m_context.upload_files.raw_listdir(folder):
@@ -257,7 +257,7 @@ def find_setup_in_folder(archive, datafile):
 
 
 def find_sample_in_folder(archive, datafile):
-    # this function only finds samples that are created via the NESD metadata excel file (xlsx_sample ending)
+    # this function only finds samples that are created via the ACMD metadata excel file (xlsx_sample ending)
     folder = os.path.dirname(datafile)
     sample_files = []
     for item in archive.m_context.upload_files.raw_listdir(folder):
@@ -287,7 +287,7 @@ def set_sample(archive, entry):
             entry.samples.label = 'samples'
 
 
-class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
+class CE_ACMD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -403,7 +403,7 @@ class CE_NESD_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
         ]
 
 
-class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
+class CE_ACMD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -517,7 +517,7 @@ class CE_NESD_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
         ]
 
 
-class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData, PlotSection):
+class CE_ACMD_ConstantCurrentMode(Chronopotentiometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -580,7 +580,7 @@ class CE_NESD_ConstantCurrentMode(Chronopotentiometry, EntryData, PlotSection):
         super().normalize(archive, logger)
 
 
-class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData, PlotSection):
+class CE_ACMD_ConstantVoltageMode(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -643,7 +643,7 @@ class CE_NESD_ConstantVoltageMode(Chronoamperometry, EntryData, PlotSection):
         super().normalize(archive, logger)
 
 
-class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
+class CE_ACMD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -763,7 +763,7 @@ class CE_NESD_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
         ]
 
 
-class CE_NESD_ElectrolyserPerformanceEvaluation(
+class CE_ACMD_ElectrolyserPerformanceEvaluation(
     ElectrolyserPerformanceEvaluation, EntryData, PlotSection
 ):
     m_def = Section(
@@ -798,13 +798,13 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
                     # caution: samples has the "electrolyser properties" label in the GUI
                     if not self.samples:
                         # if filename starts with id this is already used for reference
-                        # otherwise create a new CE_NESD_Electrolyser and reference this one
+                        # otherwise create a new CE_ACMD_Electrolyser and reference this one
                         file_name = archive.metadata.mainfile.split('.')[0]
                         electrolyser_file_name = (
                             f'{file_name}_electrolyser.archive.json'
                         )
                         electrolyser = get_electrolyser_properties(
-                            metadata, CE_NESD_Electrolyser()
+                            metadata, CE_ACMD_Electrolyser()
                         )
                         create_archive(
                             electrolyser,
@@ -826,7 +826,7 @@ class CE_NESD_ElectrolyserPerformanceEvaluation(
         super().normalize(archive, logger)
 
 
-class CE_NESD_GEIS(
+class CE_ACMD_GEIS(
     ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection
 ):
     m_def = Section(
@@ -911,7 +911,7 @@ class CE_NESD_GEIS(
         ]
 
 
-class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSection):
+class CE_ACMD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1035,7 +1035,7 @@ class CE_NESD_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData, PlotSect
         ]
 
 
-class CE_NESD_GalvanodynamicSweep(GalvanodynamicSweep, EntryData, PlotSection):
+class CE_ACMD_GalvanodynamicSweep(GalvanodynamicSweep, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1111,7 +1111,7 @@ class CE_NESD_GalvanodynamicSweep(GalvanodynamicSweep, EntryData, PlotSection):
         ]
 
 
-class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
+class CE_ACMD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1191,7 +1191,7 @@ class CE_NESD_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
         ]
 
 
-class CE_NESD_PEIS(
+class CE_ACMD_PEIS(
     ElectrochemicalImpedanceSpectroscopyMultiple, EntryData, PlotSection
 ):
     m_def = Section(
@@ -1303,7 +1303,7 @@ class CE_NESD_PEIS(
 # %%####################################### Analysis
 
 
-class CE_NESD_OERAnalysis(NESD_OERAnalysis, EntryData):
+class CE_ACMD_OERAnalysis(ACMD_OERAnalysis, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['location', 'lab_id', 'description', 'method', 'steps'],
@@ -1312,7 +1312,7 @@ class CE_NESD_OERAnalysis(NESD_OERAnalysis, EntryData):
     )
 
 
-class CE_NESD_OERCompareReplicates(NESD_OERCompareReplicates, EntryData):
+class CE_ACMD_OERCompareReplicates(ACMD_OERCompareReplicates, EntryData):
     m_def = Section(
         a_eln=dict(
             hide=['location', 'lab_id', 'description', 'method', 'steps'],
