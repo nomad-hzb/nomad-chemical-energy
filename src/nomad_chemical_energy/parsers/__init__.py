@@ -290,7 +290,7 @@ ce_nesd_metadata_parser = CEACMDMetadataExcelParserEntryPoint(
     mainfile_name_re=r'.+\.xlsx',
     mainfile_mime_re=r'^(application\/vnd\.(openxmlformats-officedocument\.spreadsheetml\.sheet|oasis\.opendocument\.spreadsheet))$',
     mainfile_contents_dict={
-        'ACMD Metadata': {'__has_all_keys': ['Field', 'Value', 'Unit']},
+        'NESD Metadata': {'__has_all_keys': ['Field', 'Value', 'Unit']},
     },
 )
 

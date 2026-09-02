@@ -457,7 +457,7 @@ class CEACMDMetadataExcelParser(MatchingParser):
 
         with archive.m_context.raw_file(file, 'rb') as f:
             xls_file = pd.ExcelFile(f)
-            excel_data = pd.read_excel(xls_file, sheet_name='ACMD Metadata')
+            excel_data = pd.read_excel(xls_file, sheet_name='NESD Metadata')
             excel_data['Value'] = excel_data['Value'].apply(self.to_float_if_possible)
             excel_data['Field'] = excel_data['Field'].str.lower().str.strip()
             general_df, setup_type, setup_df = self.split_experimental_techniques(

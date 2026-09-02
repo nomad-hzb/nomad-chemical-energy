@@ -151,7 +151,7 @@ def test_biologic_eclab_constV_parser():
 
 
 def test_biologic_eclab_GEIS_parser():
-    file = 'GEIS_nesd.mpr'
+    file = 'acmd_GEIS.mpr'
     archive = get_archive(file)
     assert archive.data
     assert archive.data.description == 'abc'
