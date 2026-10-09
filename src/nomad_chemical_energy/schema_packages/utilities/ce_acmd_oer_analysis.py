@@ -174,13 +174,18 @@ class ACMD_AnalysisResult(PlotSection, AnalysisResult):
             z_imaginary_values = eis_data.measurements[0].data.z_imaginary
 
             fig.add_trace(
-                go.Scatter(x=z_real_values.to(ureg.ohm).magnitude, y=z_imaginary_values.to(ureg.ohm).magnitude, mode='markers', name=eis_entry.name)
+                go.Scatter(
+                    x=z_real_values.to(ureg.ohm).magnitude,
+                    y=z_imaginary_values.to(ureg.ohm).magnitude,
+                    mode='markers',
+                    name=eis_entry.name,
+                )
             )
 
         fig.update_layout(
             title_text='EIS',
-            xaxis_title=f"Z' [Ohm]",
-            yaxis_title=f'-Z" [Ohm]',
+            xaxis_title="Z' [Ohm]",
+            yaxis_title='-Z" [Ohm]',
             template='plotly_white',
             hovermode='closest',
             dragmode='zoom',
@@ -386,7 +391,9 @@ class ACMD_Analysis(Analysis):
         refs = [ACMD_EC_Reference(name=name, reference=ref) for [name, ref] in ref_list]
         return refs
 
-    def get_interpolated_overpotential(self, lsv, overpotential, current_density_threshold):
+    def get_interpolated_overpotential(
+        self, lsv, overpotential, current_density_threshold
+    ):
         return np.interp(
             current_density_threshold,
             lsv.current_density.to('mA/cm²').magnitude,
@@ -426,16 +433,30 @@ class ACMD_HERAnalysis(ACMD_Analysis):
     def get_her_analysis_result(self, lsv_refs, eis_refs):
         if not lsv_refs:
             return
-        overpotential, overpotential_at_10, overpotential_at_50, overpotential_at_100, overpotential_at_250 = None, None, None, None, None
+        (
+            overpotential,
+            overpotential_at_10,
+            overpotential_at_50,
+            overpotential_at_100,
+            overpotential_at_250,
+        ) = None, None, None, None, None
         samples = None
 
         lsv = self.get_lsv(lsv_refs)
         if lsv:
             overpotential = self.get_overpotential(lsv)
-            overpotential_at_10 = self.get_interpolated_overpotential(lsv, overpotential, -10)
-            overpotential_at_50 = self.get_interpolated_overpotential(lsv, overpotential, -50)
-            overpotential_at_100 = self.get_interpolated_overpotential(lsv, overpotential, -100)
-            overpotential_at_250 = self.get_interpolated_overpotential(lsv, overpotential, -250)
+            overpotential_at_10 = self.get_interpolated_overpotential(
+                lsv, overpotential, -10
+            )
+            overpotential_at_50 = self.get_interpolated_overpotential(
+                lsv, overpotential, -50
+            )
+            overpotential_at_100 = self.get_interpolated_overpotential(
+                lsv, overpotential, -100
+            )
+            overpotential_at_250 = self.get_interpolated_overpotential(
+                lsv, overpotential, -250
+            )
             if not samples:
                 samples = lsv.samples
 
@@ -456,9 +477,7 @@ class ACMD_HERAnalysis(ACMD_Analysis):
                 lsv.current_density,
             )
         if eis_refs:
-            result_entry.set_eis_plot(
-                eis_refs
-            )
+            result_entry.set_eis_plot(eis_refs)
         if lsv:
             result_entry.set_tafel_slopes(
                 lsv.current_density, lsv.voltage_rhe_compensated
@@ -530,7 +549,9 @@ class ACMD_OERAnalysis(ACMD_Analysis):
         lsv = self.get_lsv(lsv_refs)
         if lsv:
             overpotential = self.get_overpotential(lsv)
-            overpotential_at_10 = self.get_interpolated_overpotential(lsv, overpotential, 10)
+            overpotential_at_10 = self.get_interpolated_overpotential(
+                lsv, overpotential, 10
+            )
             if not samples:
                 samples = lsv.samples
 
@@ -555,9 +576,7 @@ class ACMD_OERAnalysis(ACMD_Analysis):
                 lsv.current_density,
             )
         if eis_refs:
-            result_entry.set_eis_plot(
-                eis_refs
-            )
+            result_entry.set_eis_plot(eis_refs)
         if lsv:
             result_entry.set_tafel_slopes(
                 lsv.current_density, lsv.voltage_rhe_compensated
@@ -590,7 +609,7 @@ class ACMD_OERAnalysis(ACMD_Analysis):
 
 class ACMD_AnalysisReference(SectionReference):
     reference = Quantity(
-        type=Reference(ACMD_Analysis.m_def),    # TODO check if this in displayed without ACMD_OER_Analysis.def
+        type=Reference(ACMD_Analysis.m_def),
         a_eln=dict(
             component='ReferenceEditQuantity',
             label='ACMD Analysis',

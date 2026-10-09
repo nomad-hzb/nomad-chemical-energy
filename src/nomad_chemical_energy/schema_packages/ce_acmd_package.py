@@ -62,9 +62,9 @@ from nomad_chemical_energy.schema_packages.file_parser.palmsense_parser import (
     map_voltammetry_data,
 )
 from nomad_chemical_energy.schema_packages.utilities.ce_acmd_oer_analysis import (
+    ACMD_Analysis_CompareReplicates,
     ACMD_HERAnalysis,
     ACMD_OERAnalysis,
-    ACMD_Analysis_CompareReplicates,
 )
 from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
     make_bode_plot,
@@ -1311,6 +1311,7 @@ class CE_ACMD_OERAnalysis(ACMD_OERAnalysis, EntryData):
             properties=dict(order=['name']),
         )
     )
+
 
 class CE_ACMD_HERAnalysis(ACMD_HERAnalysis, EntryData):
     m_def = Section(
