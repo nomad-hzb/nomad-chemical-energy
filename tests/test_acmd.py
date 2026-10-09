@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from baseclasses import CompositeSystemReference
 from nomad.client import parse
 
-from nomad_chemical_energy.schema_packages.ce_nesd_package import find_sample_in_folder
+from nomad_chemical_energy.schema_packages.ce_acmd_package import find_sample_in_folder
 
 
 def test_recursive_sample_search(monkeypatch):

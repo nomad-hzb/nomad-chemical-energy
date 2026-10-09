@@ -41,7 +41,7 @@ from nomad.metainfo import (
 )
 from nomad.parsing import MatchingParser
 
-from nomad_chemical_energy.schema_packages.ce_nesd_package import (
+from nomad_chemical_energy.schema_packages.ce_acmd_package import (
     CE_ACMD_GEIS,
     CE_ACMD_PEIS,
     CE_ACMD_Chronoamperometry,
@@ -54,6 +54,7 @@ from nomad_chemical_energy.schema_packages.ce_nesd_package import (
     CE_ACMD_GalvanodynamicSweep,
     CE_ACMD_LinearSweepVoltammetry,
     CE_ACMD_Measurement,
+    CE_ACMD_HERAnalysis,
     CE_ACMD_OERAnalysis,
     CE_ACMD_OpenCircuitVoltage,
     CE_ACMD_Sample,
@@ -546,3 +547,11 @@ class CEACMDMetadataExcelParser(MatchingParser):
                 analysis_file_name,
                 overwrite=True,
             )  # TODO remove overwrite after reprocessing all nesd->acmd uploads
+        elif mapping.get('reaction type') == 'HER':
+            analysis_name = f'{folder_path}/her_analysis'[1:]
+            analysis_file_name = f'{analysis_name}.archive.json'
+            create_archive(
+                CE_ACMD_HERAnalysis(name=analysis_name),
+                archive,
+                analysis_file_name,
+            )
