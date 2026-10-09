@@ -36,7 +36,7 @@ from nomad.datamodel.metainfo.basesections import (
 )
 from nomad.units import ureg
 
-from nomad_chemical_energy.schema_packages.ce_nesd_package import (
+from nomad_chemical_energy.schema_packages.ce_acmd_package import (
     CE_ACMD_Electrode,
     CE_ACMD_Electrolyte,
     CE_ACMD_ReferenceElectrode,
@@ -172,7 +172,7 @@ def map_sample(entry, data_dict, setup_type, logger):
         (data_dict.get('solvent volumes', '') or ''), logger
     )
     mass = data_dict.get('total mass of hybrid catalyst on electrode after drying')
-    deposition_notes = data_dict.get('notes (deposition method)', '')
+    deposition_notes = data_dict.get('notes (deposition method)', '') or ''
     entry.deposition = Deposition(
         catalyst_layer_deposition_method=data_dict.get(
             'catalyst layer deposition method'

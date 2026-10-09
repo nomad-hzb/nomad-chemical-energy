@@ -34,17 +34,17 @@ from nomad.metainfo import Quantity, Reference, Section, SubSection
 from nomad.units import ureg
 
 
-class ACMD_OERReference(SectionReference):
+class ACMD_EC_Reference(SectionReference):
     reference = Quantity(
         type=Reference(PotentiostatMeasurement.m_def),
         a_eln=dict(
             component='ReferenceEditQuantity',
-            label='ACMD OER Measurement',
+            label='ACMD EC Measurement',
         ),
     )
 
 
-class ACMD_OERAnalysisResult(PlotSection, AnalysisResult):
+class ACMD_AnalysisResult(PlotSection, AnalysisResult):
     m_def = Section(a_eln=dict(overview=True))
     charge_density = Quantity(
         links=['https://w3id.org/nfdi4cat/voc4cat_0007253'],
@@ -164,8 +164,39 @@ class ACMD_OERAnalysisResult(PlotSection, AnalysisResult):
             self.initialize_figures()
         self.figures[1].figure = fig.to_plotly_json()
 
-    def set_eis_plot(self):
-        pass
+    def set_eis_plot(self, eis_refs):
+
+        fig = go.Figure()
+
+        for eis_entry in eis_refs[1:]:
+            eis_data = eis_entry.reference
+            z_real_values = eis_data.measurements[0].data.z_real
+            z_imaginary_values = eis_data.measurements[0].data.z_imaginary
+
+            fig.add_trace(
+                go.Scatter(
+                    x=z_real_values.to(ureg.ohm).magnitude,
+                    y=z_imaginary_values.to(ureg.ohm).magnitude,
+                    mode='markers',
+                    name=eis_entry.name,
+                )
+            )
+
+        fig.update_layout(
+            title_text='EIS',
+            xaxis_title="Z' [Ohm]",
+            yaxis_title='-Z" [Ohm]',
+            template='plotly_white',
+            hovermode='closest',
+            dragmode='zoom',
+            xaxis=dict(fixedrange=False),
+            yaxis=dict(fixedrange=False),
+            showlegend=True,
+        )
+
+        if not self.figures:
+            self.initialize_figures()
+        self.figures[2].figure = fig.to_plotly_json()
 
     def set_tafel_slopes(self, current_density, potential):
         x_vals = np.log10(current_density.magnitude)
@@ -227,14 +258,48 @@ class ACMD_OERAnalysisResult(PlotSection, AnalysisResult):
         super().normalize(archive, logger)
 
 
-class ACMD_OERAnalysis(Analysis):
+class ACMD_OERAnalysisResult(ACMD_AnalysisResult):
+    m_def = Section(a_eln=dict(overview=True, hide=['charge_density']))
+
+    def normalize(self, archive, logger):
+        if self.figures is None:
+            self.initialize_figures()
+        super().normalize(archive, logger)
+
+
+class ACMD_HERAnalysisResult(ACMD_AnalysisResult):
+    m_def = Section(a_eln=dict(overview=True, hide=['charge_density']))
+
+    overpotential_at_50mA_cm2 = Quantity(
+        type=np.dtype(np.float64),
+        description='overpotential at -50 mA/cm²',
+        unit=('V'),
+    )
+    overpotential_at_100mA_cm2 = Quantity(
+        type=np.dtype(np.float64),
+        description='overpotential at -100 mA/cm²',
+        unit=('V'),
+    )
+    overpotential_at_250mA_cm2 = Quantity(
+        type=np.dtype(np.float64),
+        description='overpotential at -250 mA/cm²',
+        unit=('V'),
+    )
+
+    def normalize(self, archive, logger):
+        self.reaction_type = 'HER'
+        if self.figures is None:
+            self.initialize_figures()
+        elif len(self.figures) > 3:
+            self.figures = self.figures[1:4]
+        super().normalize(archive, logger)
+
+
+class ACMD_Analysis(Analysis):
     m_def = Section(label_quantity='name')
 
     inputs = Analysis.inputs.m_copy()
-    inputs.section_def = ACMD_OERReference
-
-    outputs = Analysis.outputs.m_copy()
-    outputs.section_def = ACMD_OERAnalysisResult
+    inputs.section_def = ACMD_EC_Reference
 
     def get_entries_from_folder(self, data_archive, upload_id, folder_path, entry_type):
         from nomad.app.v1.models import MetadataPagination
@@ -319,6 +384,133 @@ class ACMD_OERAnalysis(Analysis):
                     overwrite=True,
                 )
 
+    def get_acmd_ec_ref_list(self, archive, folder, entry_type):
+        ref_list = self.get_entries_from_folder(
+            archive, archive.metadata.upload_id, folder, entry_type
+        )
+        refs = [ACMD_EC_Reference(name=name, reference=ref) for [name, ref] in ref_list]
+        return refs
+
+    def get_interpolated_overpotential(
+        self, lsv, overpotential, current_density_threshold
+    ):
+        return np.interp(
+            current_density_threshold,
+            lsv.current_density.to('mA/cm²').magnitude,
+            overpotential.to(ureg.V).magnitude,
+        )
+
+    def normalize(self, archive, logger):
+        if self.inputs is not None and len(self.inputs) > 0:
+            for sample in self.inputs[0].reference.samples:
+                if sample.reference.components is not None:
+                    if not archive.results:
+                        archive.results = Results()
+                    if not archive.results.material:
+                        archive.results.material = Material()
+                    try:
+                        from nomad.atomutils import Formula
+
+                        formulas = ''.join(
+                            component.pure_substance.molecular_formula
+                            for component in sample.reference.components
+                        )
+                        Formula(formulas).populate(section=archive.results.material)
+                    except Exception as e:
+                        logger.warn('Could not analyse material', exc_info=e)
+        super().normalize(archive, logger)
+
+
+class ACMD_HERAnalysis(ACMD_Analysis):
+    m_def = Section(label_quantity='name')
+
+    outputs = Analysis.outputs.m_copy()
+    outputs.section_def = ACMD_HERAnalysisResult
+
+    def get_overpotential(self, lsv):
+        return lsv.voltage_rhe_compensated.to(ureg.V)
+
+    def get_her_analysis_result(self, lsv_refs, eis_refs):
+        if not lsv_refs:
+            return
+        (
+            overpotential,
+            overpotential_at_10,
+            overpotential_at_50,
+            overpotential_at_100,
+            overpotential_at_250,
+        ) = None, None, None, None, None
+        samples = None
+
+        lsv = self.get_lsv(lsv_refs)
+        if lsv:
+            overpotential = self.get_overpotential(lsv)
+            overpotential_at_10 = self.get_interpolated_overpotential(
+                lsv, overpotential, -10
+            )
+            overpotential_at_50 = self.get_interpolated_overpotential(
+                lsv, overpotential, -50
+            )
+            overpotential_at_100 = self.get_interpolated_overpotential(
+                lsv, overpotential, -100
+            )
+            overpotential_at_250 = self.get_interpolated_overpotential(
+                lsv, overpotential, -250
+            )
+            if not samples:
+                samples = lsv.samples
+
+        result_entry = ACMD_HERAnalysisResult(
+            name=f'{("/" + lsv.name).rsplit("/", 1)[0]}/OER_analysis'[1:],
+            reaction_type='OER',
+            overpotential=overpotential,
+            overpotential_at_10mA_cm2=overpotential_at_10,
+            overpotential_at_50mA_cm2=overpotential_at_50,
+            overpotential_at_100mA_cm2=overpotential_at_100,
+            overpotential_at_250mA_cm2=overpotential_at_250,
+            samples=samples,
+        )
+        result_entry.samples[0].name = result_entry.samples[0].reference.name
+        if overpotential is not None:
+            result_entry.set_overpotential_plot(
+                overpotential,
+                lsv.current_density,
+            )
+        if eis_refs:
+            result_entry.set_eis_plot(eis_refs)
+        if lsv:
+            result_entry.set_tafel_slopes(
+                lsv.current_density, lsv.voltage_rhe_compensated
+            )
+
+        return result_entry
+
+    def normalize(self, archive, logger):
+        folder = ('/' + archive.metadata.mainfile).rsplit('/', 1)[0][1:]
+        lsv_refs = self.get_acmd_ec_ref_list(
+            archive, folder, 'CE_ACMD_LinearSweepVoltammetry'
+        )
+        eis_refs = self.get_acmd_ec_ref_list(archive, folder, 'CE_ACMD_PEIS')
+        self.inputs = lsv_refs + eis_refs
+
+        if self.inputs is not None and len(self.inputs) > 0:
+            ir_drop_correction = self.get_ir_drop_correction(eis_refs)
+            if ir_drop_correction is not None:
+                self.set_resistance_in_inputs(ir_drop_correction, archive, logger)
+                output = self.get_her_analysis_result(lsv_refs, eis_refs)
+                if output:
+                    self.outputs = [output]
+                    for oer_output in self.outputs:
+                        oer_output.normalize(archive, logger)
+        super().normalize(archive, logger)
+
+
+class ACMD_OERAnalysis(ACMD_Analysis):
+    m_def = Section(label_quantity='name')
+
+    outputs = Analysis.outputs.m_copy()
+    outputs.section_def = ACMD_OERAnalysisResult
+
     def get_charge_density(self, cv_cycle, scan_rate):
         scan_rate = scan_rate.to('V/s').magnitude
         voltage = cv_cycle.voltage_rhe_compensated.to(ureg.V).magnitude
@@ -341,7 +533,7 @@ class ACMD_OERAnalysis(Analysis):
         )
         return overpotential
 
-    def get_oer_analysis_result(self, cv_refs, lsv_refs):
+    def get_oer_analysis_result(self, cv_refs, lsv_refs, eis_refs):
         if not cv_refs and not lsv_refs:
             return
         overpotential, charge_density, overpotential_at_10 = None, None, None
@@ -357,10 +549,8 @@ class ACMD_OERAnalysis(Analysis):
         lsv = self.get_lsv(lsv_refs)
         if lsv:
             overpotential = self.get_overpotential(lsv)
-            overpotential_at_10 = np.interp(
-                10,
-                lsv.current_density.to('mA/cm²').magnitude,
-                overpotential.to(ureg.V).magnitude,
+            overpotential_at_10 = self.get_interpolated_overpotential(
+                lsv, overpotential, 10
             )
             if not samples:
                 samples = lsv.samples
@@ -385,6 +575,8 @@ class ACMD_OERAnalysis(Analysis):
                 overpotential,
                 lsv.current_density,
             )
+        if eis_refs:
+            result_entry.set_eis_plot(eis_refs)
         if lsv:
             result_entry.set_tafel_slopes(
                 lsv.current_density, lsv.voltage_rhe_compensated
@@ -392,46 +584,22 @@ class ACMD_OERAnalysis(Analysis):
 
         return result_entry
 
-    def get_acmd_oer_ref_list(self, archive, folder, entry_type):
-        ref_list = self.get_entries_from_folder(
-            archive, archive.metadata.upload_id, folder, entry_type
-        )
-        refs = [ACMD_OERReference(name=name, reference=ref) for [name, ref] in ref_list]
-        return refs
-
     def normalize(self, archive, logger):
         folder = ('/' + archive.metadata.mainfile).rsplit('/', 1)[0][1:]
-        cv_refs = self.get_acmd_oer_ref_list(
+        cv_refs = self.get_acmd_ec_ref_list(
             archive, folder, 'CE_ACMD_CyclicVoltammetry'
         )
-        lsv_refs = self.get_acmd_oer_ref_list(
+        lsv_refs = self.get_acmd_ec_ref_list(
             archive, folder, 'CE_ACMD_LinearSweepVoltammetry'
         )
-        eis_refs = self.get_acmd_oer_ref_list(archive, folder, 'CE_ACMD_PEIS')
+        eis_refs = self.get_acmd_ec_ref_list(archive, folder, 'CE_ACMD_PEIS')
         self.inputs = cv_refs + lsv_refs + eis_refs
 
         if self.inputs is not None and len(self.inputs) > 0:
-            for sample in self.inputs[0].reference.samples:
-                if sample.reference.components is not None:
-                    if not archive.results:
-                        archive.results = Results()
-                    if not archive.results.material:
-                        archive.results.material = Material()
-                    try:
-                        from nomad.atomutils import Formula
-
-                        formulas = ''.join(
-                            component.pure_substance.molecular_formula
-                            for component in sample.reference.components
-                        )
-                        Formula(formulas).populate(section=archive.results.material)
-                    except Exception as e:
-                        logger.warn('Could not analyse material', exc_info=e)
-
             ir_drop_correction = self.get_ir_drop_correction(eis_refs)
             if ir_drop_correction is not None:
                 self.set_resistance_in_inputs(ir_drop_correction, archive, logger)
-                output = self.get_oer_analysis_result(cv_refs, lsv_refs)
+                output = self.get_oer_analysis_result(cv_refs, lsv_refs, eis_refs)
                 if output:
                     self.outputs = [output]
                     for oer_output in self.outputs:
@@ -439,12 +607,12 @@ class ACMD_OERAnalysis(Analysis):
         super().normalize(archive, logger)
 
 
-class ACMD_OERAnalysisReference(SectionReference):
+class ACMD_AnalysisReference(SectionReference):
     reference = Quantity(
-        type=Reference(ACMD_OERAnalysis.m_def),
+        type=Reference(ACMD_Analysis.m_def),
         a_eln=dict(
             component='ReferenceEditQuantity',
-            label='ACMD OER Analysis',
+            label='ACMD Analysis',
         ),
     )
 
@@ -491,10 +659,10 @@ class ACMD_OERComparisonResult(AnalysisResult):
         repeats=True,
     )
     selected_electrode_charge_density = SubSection(
-        section_def=ACMD_OERReference,
+        section_def=ACMD_EC_Reference,
     )
     selected_electrode_overpotential = SubSection(
-        section_def=ACMD_OERReference,
+        section_def=ACMD_EC_Reference,
     )
 
     def calculate_statistics(self, quantity, quantity_name):
@@ -515,11 +683,11 @@ class ACMD_OERComparisonResult(AnalysisResult):
         super().normalize(archive, logger)
 
 
-class ACMD_OERCompareReplicates(Analysis):
+class ACMD_Analysis_CompareReplicates(Analysis):
     m_def = Section(label_quantity='name')
 
     inputs = Analysis.inputs.m_copy()
-    inputs.section_def = ACMD_OERAnalysisReference
+    inputs.section_def = ACMD_AnalysisReference
 
     outputs = Analysis.outputs.m_copy()
     outputs.section_def = ACMD_OERComparisonResult
