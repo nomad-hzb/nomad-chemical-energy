@@ -70,6 +70,8 @@ def create_id(archive, lab_id_base):
 
 
 class CatLab_XYSample(CatalysisXYSample, EntryData):
+    """Custom metadata schema for individual pixels (x,y) within a (thin-film) material library sample at  HZB Thin-Film Catalysts and Reactors group."""
+
     m_def = Section(
         a_eln=dict(
             hide=['users', 'components'],
@@ -95,7 +97,10 @@ class CatLab_XYSample(CatalysisXYSample, EntryData):
 
 
 class CatLab_Sample(CatalysisSample, EntryData):
+    """Custom metadata schema for Catalysis Samples at HZB Thin-Film Catalysts and Reactors group."""
+
     m_def = Section(
+        links=['https://w3id.org/nfdi4cat/voc4cat_0005056'],
         a_eln=dict(
             hide=['users'],
             properties=dict(
@@ -142,7 +147,13 @@ class CatLab_Library(CatalysisLibrary, EntryData):
 
 
 class CatLab_Sputtering(MultiTargetSputtering, EntryData):
+    """Custom metadata schema for Sputtering deposition sample synthesis at HZB Thin-Film Catalysts and Reactors group."""
+
     m_def = Section(
+        links=[
+            'https://w3id.org/nfdi4cat/voc4cat_0000020',
+            'http://purl.obolibrary.org/obo/CHMO_0001364',
+        ],
         a_eln=dict(
             hide=[
                 'users',
@@ -161,7 +172,7 @@ class CatLab_Sputtering(MultiTargetSputtering, EntryData):
                     'lab_id',
                 ]
             ),
-        )
+        ),
     )
 
 
