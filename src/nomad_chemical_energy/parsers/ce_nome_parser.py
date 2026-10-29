@@ -175,7 +175,7 @@ class GamryParser(MatchingParser):
             if 'CHRONOP' in method or ('CP' in method and 'OCP' not in method):
                 measurements.append((eid, file_name, CE_NOME_Chronopotentiometry()))
 
-            if 'CHRONOC' in method or 'CC' in method:
+            if 'CHRONOC' in method or 'CC' in method or 'CHRONOCOUL' in method:
                 measurements.append((eid, file_name, CE_NOME_Chronocoulometry()))
 
             if 'CORPOT' in method or 'OCP' in method:
