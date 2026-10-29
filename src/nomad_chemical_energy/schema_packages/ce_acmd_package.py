@@ -29,6 +29,7 @@ from baseclasses.chemical_energy import (
     CyclicVoltammetry,
     ElectrochemicalImpedanceSpectroscopyMultiple,
     ElectroChemicalSetup,
+    Electrode,
     ElectrolyserPerformanceEvaluation,
     ElectrolyserProperties,
     Environment,
@@ -198,6 +199,23 @@ class CE_ACMD_Equipment(Equipment, EntryData):
         a_eln=dict(
             hide=['users', 'origin', 'elemental_composition', 'components'],
             properties=dict(order=['name', 'lab_id', 'producer', 'location']),
+        )
+    )
+
+
+class CE_ACMD_CounterElectrode(Electrode, EntryData):
+    m_def = Section(
+        a_eln=dict(
+            hide=['users', 'origin', 'elemental_composition', 'components'],
+            properties=dict(
+                order=[
+                    'name',
+                    'lab_id',
+                    'chemical_composition_or_formulas',
+                    'producer',
+                    'location',
+                ]
+            ),
         )
     )
 
