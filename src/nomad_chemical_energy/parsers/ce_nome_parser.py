@@ -138,8 +138,7 @@ class ParsedGeneralNomeFile(EntryData):
 
 class GamryParser(MatchingParser):
     def parse(self, mainfile: str, archive: EntryArchive, logger):
-        # Log a hello world, just to get us started. TODO remove from an actual
-        # parser.
+
         from nomad_chemical_energy.schema_packages.file_parser.gamry_parser import (
             get_header_and_data,
         )
@@ -167,7 +166,7 @@ class GamryParser(MatchingParser):
             if 'LSV' in method:
                 measurements.append((eid, file_name, CE_NOME_LinearSweepVoltammetry()))
 
-            if 'LSG' in method:
+            if 'LSG' in method or 'GALVDYN' in method:
                 measurements.append((eid, file_name, CE_NOME_GalvanodynamicSweep()))
 
             if 'CHRONOA' in method or 'CA' in method:
@@ -176,7 +175,7 @@ class GamryParser(MatchingParser):
             if 'CHRONOP' in method or ('CP' in method and 'OCP' not in method):
                 measurements.append((eid, file_name, CE_NOME_Chronopotentiometry()))
 
-            if 'CHRONOC' in method or 'CC' in method:
+            if 'CHRONOC' in method or 'CC' in method or 'CHRONOCOUL' in method:
                 measurements.append((eid, file_name, CE_NOME_Chronocoulometry()))
 
             if 'CORPOT' in method or 'OCP' in method:
