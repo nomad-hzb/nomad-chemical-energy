@@ -36,6 +36,10 @@ from nomad.datamodel.data import EntryData
 from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 from nomad.metainfo import Datetime, Quantity, SchemaPackage, Section, SubSection
 
+from nomad_chemical_energy.schema_packages.utilities.plotly_figure_helpers import (
+    make_xrd_library_plot,
+)
+
 m_package = SchemaPackage()
 
 # %% ####################### Entities
@@ -553,20 +557,6 @@ def set_single_xrd_measurement_metadata(row):
 class XRDMetalJetSingleLibraryMeasurement(SingleLibraryMeasurement):
     m_def = Section(
         label_quantity='name',
-        a_plot=[
-            {
-                'x': 'q_nm_inv',
-                'y': 'intensity',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-                'config': {
-                    'scrollZoom': True,
-                    'staticPlot': False,
-                },
-            }
-        ],
     )
 
     datetime = Quantity(type=Datetime)
@@ -654,7 +644,7 @@ def xrd_read(file_object):
     return df
 
 
-class TFC_XRDMetalJetLibrary(XRDLibrary, EntryData):
+class TFC_XRDMetalJetLibrary(XRDLibrary, EntryData, PlotSection):
     m_def = Section(
         label='XRD Measurement Library',
         a_eln=dict(
@@ -665,20 +655,6 @@ class TFC_XRDMetalJetLibrary(XRDLibrary, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'x': 'measurements/:/q_nm_inv',
-                'y': 'measurements/:/intensity',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-                'config': {
-                    'scrollZoom': True,
-                    'staticPlot': False,
-                },
-            }
-        ],
     )
 
     data_folder = Quantity(type=str, a_eln=dict(component='StringEditQuantity'))
@@ -737,6 +713,10 @@ class TFC_XRDMetalJetLibrary(XRDLibrary, EntryData):
             self.material_names = material_name
 
         super().normalize(archive, logger)
+        fig1 = make_xrd_library_plot(self.measurements)
+        self.figures = [
+            PlotlyFigure(label='XRD', figure=fig1.to_plotly_json()),
+        ]
 
 
 # %%######################## Generic Entries

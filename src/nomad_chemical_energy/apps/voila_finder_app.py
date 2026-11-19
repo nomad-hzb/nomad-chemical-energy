@@ -86,7 +86,7 @@ voila_finder_app = App(
         Column(quantity='entry_id'),
         Column(quantity='upload_id'),
         Column(quantity=f'data.notebook_file#{schema_name}'),
-        #Column(quantity=f'data.tags#{schema_name}'),
+        # Column(quantity=f'data.tags#{schema_name}'),
     ],
     rows=Rows(
         actions=RowActions(

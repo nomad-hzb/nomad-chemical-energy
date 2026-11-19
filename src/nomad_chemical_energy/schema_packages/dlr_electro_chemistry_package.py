@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+import json
 import os
 
 import pandas as pd
@@ -26,15 +27,26 @@ from baseclasses.chemical_energy import (
     VoltammetryCycleWithPlot,
 )
 from nomad.datamodel.data import EntryData
+from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 
 # from nomad.units import ureg
 from nomad.metainfo import SchemaPackage, Section
+
+from nomad_chemical_energy.schema_packages.utilities.plotly_figure_helpers import (
+    make_bode_plot,
+    make_current_density_over_voltage_rhe_cv_plot,
+    make_current_over_voltage_cv_plot,
+    make_nyquist_plot,
+    make_voltage_plot,
+)
 
 m_package = SchemaPackage()
 
 
 class DLR_ElectrochemicalImpedanceSpectroscopy(
-    ElectrochemicalImpedanceSpectroscopy, EntryData
+    ElectrochemicalImpedanceSpectroscopy,
+    EntryData,
+    PlotSection,
 ):
     m_def = Section(
         a_eln=dict(
@@ -60,27 +72,6 @@ class DLR_ElectrochemicalImpedanceSpectroscopy(
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Nyquist Plot',
-                'x': 'z_real',
-                'y': 'z_imaginary',
-                'layout': {
-                    'yaxis': {'fixedrange': False, 'title': '-Im(Z) (Ω)'},
-                    'xaxis': {'fixedrange': False, 'title': 'Re(Z) (Ω)'},
-                },
-            },
-            {
-                'label': 'Bode Plot',
-                'x': ['frequency', 'frequency'],
-                'y': ['./z_modulus', './z_angle'],
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False, 'type': 'log'},
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -106,9 +97,17 @@ class DLR_ElectrochemicalImpedanceSpectroscopy(
                     get_eis_data(data, self)
 
         super().normalize(archive, logger)
+        fig1 = make_nyquist_plot(z_real=self.z_real, z_imaginary=self.z_imaginary)
+        fig2 = make_bode_plot(
+            frequency=self.frequency, z_modulus=self.z_modulus, z_angle=self.z_angle
+        )
+        self.figures = [
+            PlotlyFigure(label='Nyquist Plot', figure=json.loads(fig1.to_json())),
+            PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
+        ]
 
 
-class DLR_CyclicVoltammetry(CyclicVoltammetry, EntryData):
+class DLR_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -145,28 +144,6 @@ class DLR_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Current Density over Voltage RHE',
-                'x': 'cycles/:/voltage_rhe_compensated',
-                'y': 'cycles/:/current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-            {
-                'label': 'Current over Voltage',
-                'x': 'cycles/:/voltage',
-                'y': 'cycles/:/current',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -191,9 +168,21 @@ class DLR_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                         self.cycles.append(cycle)
 
         super().normalize(archive, logger)
+        fig1 = make_current_density_over_voltage_rhe_cv_plot(self.cycles)
+        fig2 = make_current_over_voltage_cv_plot(self.cycles)
+        self.figures = [
+            PlotlyFigure(
+                label='Current Density over Voltage RHE',
+                figure=json.loads(fig1.to_json()),
+            ),
+            PlotlyFigure(
+                label='Current over Voltage',
+                figure=json.loads(fig2.to_json()),
+            ),
+        ]
 
 
-class DLR_Chronopotentiometry(Chronopotentiometry, EntryData):
+class DLR_Chronopotentiometry(Chronopotentiometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -223,21 +212,6 @@ class DLR_Chronopotentiometry(Chronopotentiometry, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Voltage',
-                'x': 'time',
-                'y': 'voltage',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-                'config': {
-                    'scrollZoom': True,
-                    'staticPlot': False,
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -254,6 +228,10 @@ class DLR_Chronopotentiometry(Chronopotentiometry, EntryData):
                     get_voltammetry_data(data, self)
 
         super().normalize(archive, logger)
+        fig1 = make_voltage_plot(self.time, self.voltage)
+        self.figures = [
+            PlotlyFigure(label='Voltage over Time', figure=json.loads(fig1.to_json())),
+        ]
 
 
 m_package.__init_metainfo__()

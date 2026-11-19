@@ -38,6 +38,14 @@ def set_monkey_patch(monkeypatch):
         mockreturn_search,
     )
     monkeypatch.setattr(
+        'nomad_chemical_energy.schema_packages.ce_acmd_package.set_sample',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
+        'nomad_chemical_energy.schema_packages.ce_acmd_package.find_setup_in_folder',
+        mockreturn_search,
+    )
+    monkeypatch.setattr(
         'nomad_chemical_energy.schema_packages.ce_acmd_package.create_archive',
         mockreturn_search,
     )
