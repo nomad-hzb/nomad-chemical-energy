@@ -67,7 +67,7 @@ from nomad_chemical_energy.schema_packages.utilities.ce_acmd_oer_analysis import
     ACMD_HERAnalysis,
     ACMD_OERAnalysis,
 )
-from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
+from nomad_chemical_energy.schema_packages.utilities.plotly_figure_helpers import (
     make_bode_plot,
     make_current_density_over_voltage_rhe_cv_plot,
     make_current_density_over_voltage_rhe_plot,

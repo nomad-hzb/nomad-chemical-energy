@@ -16,18 +16,24 @@
 # limitations under the License.
 #
 
+import json
 
 from baseclasses import BaseMeasurement
 from baseclasses.catalysis import CatalysisLibrary, CatalysisSample, CatalysisXYSample
 from baseclasses.helper.utilities import export_lab_id
 from baseclasses.vapour_based_deposition import MultiTargetSputtering, PECVDeposition
 from nomad.datamodel.data import EntryData
+from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 
 # from nomad.units import ureg
 from nomad.metainfo import Quantity, SchemaPackage, Section
 
 # from nomad_measurements.catalytic_measurement.catalytic_measurement import ReactionConditions
 from unidecode import unidecode
+
+from nomad_chemical_energy.schema_packages.utilities.plotly_figure_helpers import (
+    make_xy_plot,
+)
 
 m_package = SchemaPackage()
 
@@ -69,7 +75,7 @@ def create_id(archive, lab_id_base):
     return f'{lab_id_base}{project_sample_number:04d}'
 
 
-class CatLab_XYSample(CatalysisXYSample, EntryData):
+class CatLab_XYSample(CatalysisXYSample, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=['users', 'components'],
@@ -80,18 +86,20 @@ class CatLab_XYSample(CatalysisXYSample, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'x': 'xray_diffraction/scattering_vector',
-                'y': 'xray_diffraction/intensity',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_xy_plot(
+            getattr(self.xray_diffraction, 'scattering_vector', None),
+            getattr(self.xray_diffraction, 'intensity', None),
+            'XRD',
+            'Scattering Vector',
+            'Intensity',
+        )
+        self.figures = [
+            PlotlyFigure(label='XRD', figure=json.loads(fig1.to_json())),
+        ]
 
 
 class CatLab_Sample(CatalysisSample, EntryData):

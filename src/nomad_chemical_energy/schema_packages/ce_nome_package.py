@@ -66,9 +66,19 @@ from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 # from nomad.units import ureg
 from nomad.metainfo import Quantity, SchemaPackage, Section, SubSection
 
-from nomad_chemical_energy.schema_packages.utilities.potentiostat_plots import (
+from nomad_chemical_energy.schema_packages.utilities.plotly_figure_helpers import (
+    make_bode_plot,
+    make_charge_current_density_plot,
+    make_current_density_over_voltage_rhe_cv_plot,
+    make_current_density_over_voltage_rhe_plot,
     make_current_density_plot,
+    make_current_over_voltage_cv_plot,
+    make_current_over_voltage_plot,
     make_current_plot,
+    make_flow_rate_plot,
+    make_nyquist_plot,
+    make_oxygen_plot,
+    make_voltage_plot,
 )
 
 m_package = SchemaPackage()
@@ -764,7 +774,9 @@ class Bessy2_KMC3_XASTransmission(XASWithSDD, EntryData):
 
 
 class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
-    ElectrochemicalImpedanceSpectroscopy, EntryData
+    ElectrochemicalImpedanceSpectroscopy,
+    EntryData,
+    PlotSection,
 ):
     m_def = Section(
         a_eln=dict(
@@ -790,27 +802,6 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Nyquist Plot',
-                'x': 'z_real',
-                'y': 'z_imaginary',
-                'layout': {
-                    'yaxis': {'fixedrange': False, 'title': '-Im(Z) (Ω)'},
-                    'xaxis': {'fixedrange': False, 'title': 'Re(Z) (Ω)'},
-                },
-            },
-            {
-                'label': 'Bode Plot',
-                'x': ['frequency', 'frequency'],
-                'y': ['./z_modulus', './z_angle'],
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False, 'type': 'log'},
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -833,6 +824,14 @@ class CE_NOME_ElectrochemicalImpedanceSpectroscopy(
                     if not self.properties:
                         self.properties = get_eis_properties(metadata)
         super().normalize(archive, logger)
+        fig1 = make_nyquist_plot(z_real=self.z_real, z_imaginary=self.z_imaginary)
+        fig2 = make_bode_plot(
+            frequency=self.frequency, z_modulus=self.z_modulus, z_angle=self.z_angle
+        )
+        self.figures = [
+            PlotlyFigure(label='Nyquist Plot', figure=json.loads(fig1.to_json())),
+            PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
+        ]
 
 
 def get_curve_tag(methods, function):
@@ -866,7 +865,11 @@ class CE_NOME_VoilaNotebook(VoilaNotebook, EntryData):
         super().normalize(archive, logger)
 
 
-class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
+class CE_NOME_CyclicVoltammetry(
+    CyclicVoltammetry,
+    EntryData,
+    PlotSection,
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -903,28 +906,6 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Current Density over Voltage RHE',
-                'x': 'cycles/:/voltage_rhe_compensated',
-                'y': 'cycles/:/current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-            {
-                'label': 'Current over Voltage',
-                'x': 'cycles/:/voltage',
-                'y': 'cycles/:/current',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -949,9 +930,24 @@ class CE_NOME_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                         self.properties = get_cv_properties(metadata)
 
         super().normalize(archive, logger)
+        fig1 = make_current_density_over_voltage_rhe_cv_plot(self.cycles)
+        fig2 = make_current_over_voltage_cv_plot(self.cycles)
+        self.figures = [
+            PlotlyFigure(
+                label='Current Density over Voltage RHE',
+                figure=json.loads(fig1.to_json()),
+            ),
+            PlotlyFigure(
+                label='Current over Voltage', figure=json.loads(fig2.to_json())
+            ),
+        ]
 
 
-class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
+class CE_NOME_LinearSweepVoltammetry(
+    LinearSweepVoltammetry,
+    EntryData,
+    PlotSection,
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -982,28 +978,6 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Current Density over Voltage RHE',
-                'x': 'voltage_rhe_compensated',
-                'y': 'current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-            {
-                'label': 'Current over Voltage',
-                'x': 'voltage',
-                'y': 'current',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1026,9 +1000,26 @@ class CE_NOME_LinearSweepVoltammetry(LinearSweepVoltammetry, EntryData):
                         self.properties = get_lsv_properties(metadata)
 
         super().normalize(archive, logger)
+        fig1 = make_current_density_over_voltage_rhe_plot(
+            self.current_density, self.voltage_rhe_compensated
+        )
+        fig2 = make_current_over_voltage_plot(self.current, self.voltage)
+        self.figures = [
+            PlotlyFigure(
+                label='Current Density over Voltage RHE',
+                figure=json.loads(fig1.to_json()),
+            ),
+            PlotlyFigure(
+                label='Current over Voltage', figure=json.loads(fig2.to_json())
+            ),
+        ]
 
 
-class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
+class CE_NOME_GalvanodynamicSweep(
+    GalvanodynamicSweep,
+    EntryData,
+    PlotSection,
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1059,28 +1050,6 @@ class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Current Density over Voltage RHE',
-                'x': 'voltage_rhe_compensated',
-                'y': 'current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-            {
-                'label': 'Current over Voltage',
-                'x': 'voltage',
-                'y': 'current',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1103,6 +1072,19 @@ class CE_NOME_GalvanodynamicSweep(GalvanodynamicSweep, EntryData):
                         self.properties = get_lsg_properties(metadata)
 
         super().normalize(archive, logger)
+        fig1 = make_current_density_over_voltage_rhe_plot(
+            self.current_density, self.voltage_rhe_compensated
+        )
+        fig2 = make_current_over_voltage_plot(self.current, self.voltage)
+        self.figures = [
+            PlotlyFigure(
+                label='Current Density over Voltage RHE',
+                figure=json.loads(fig1.to_json()),
+            ),
+            PlotlyFigure(
+                label='Current over Voltage', figure=json.loads(fig2.to_json())
+            ),
+        ]
 
 
 class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
@@ -1193,7 +1175,11 @@ class CE_NOME_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
         ]
 
 
-class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
+class CE_NOME_Chronopotentiometry(
+    Chronopotentiometry,
+    EntryData,
+    PlotSection,
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1223,21 +1209,6 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Voltage',
-                'x': 'time',
-                'y': 'voltage',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-                'config': {
-                    'scrollZoom': True,
-                    'staticPlot': False,
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1259,9 +1230,13 @@ class CE_NOME_Chronopotentiometry(Chronopotentiometry, EntryData):
                     if not self.properties:
                         self.properties = get_cp_properties(metadata)
         super().normalize(archive, logger)
+        fig1 = make_voltage_plot(self.time, self.voltage)
+        self.figures = [
+            PlotlyFigure(label='Voltage over Time', figure=json.loads(fig1.to_json())),
+        ]
 
 
-class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
+class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1290,18 +1265,6 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Charge and current density',
-                'x': 'time',
-                'y': ['./current_density', './charge_density'],
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1323,9 +1286,22 @@ class CE_NOME_Chronocoulometry(Chronocoulometry, EntryData):
                     if not self.properties:
                         self.properties = get_cc_properties(metadata)
         super().normalize(archive, logger)
+        fig1 = make_charge_current_density_plot(
+            self.time, self.current_density, self.charge_density
+        )
+        self.figures = [
+            PlotlyFigure(
+                label='Charge and Current Density',
+                figure=json.loads(fig1.to_json()),
+            ),
+        ]
 
 
-class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
+class CE_NOME_OpenCircuitVoltage(
+    OpenCircuitVoltage,
+    EntryData,
+    PlotSection,
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1355,17 +1331,6 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Voltage',
-                'x': 'time',
-                'y': 'voltage',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1387,6 +1352,10 @@ class CE_NOME_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                     if not self.properties:
                         self.properties = get_ocv_properties(metadata)
         super().normalize(archive, logger)
+        fig1 = make_voltage_plot(self.time, self.voltage)
+        self.figures = [
+            PlotlyFigure(label='Voltage over Time', figure=json.loads(fig1.to_json())),
+        ]
 
 
 class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
@@ -1447,7 +1416,7 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
             fig = go.Figure()
             for measurement in self.measurements:
                 measurement.normalize(archive, logger)
-                fig.add_traces(
+                fig.add_trace(
                     go.Scatter(
                         name=measurement.name,
                         x=measurement.wavelength,
@@ -1455,7 +1424,7 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
                         mode='lines',
                     )
                 )
-                fig.add_traces(
+                fig.add_trace(
                     go.Scatter(
                         name='peaks',
                         x=[measurement.peak_wavelength],
@@ -1476,7 +1445,7 @@ class CE_NOME_UVvismeasurement(UVvisMeasurement, EntryData, PlotSection):
         super().normalize(archive, logger)
 
 
-class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
+class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1500,17 +1469,6 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Oxygen',
-                'x': 'time',
-                'y': 'oxygen',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1545,9 +1503,13 @@ class CE_NOME_PhaseFluorometryOxygen(PhaseFluorometryOxygen, EntryData):
                 raise e
 
         super().normalize(archive, logger)
+        fig1 = make_oxygen_plot(self.time, self.oxygen)
+        self.figures = [
+            PlotlyFigure(label='Oxygen over Time', figure=json.loads(fig1.to_json())),
+        ]
 
 
-class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
+class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -1571,17 +1533,6 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Flow Rate Measured',
-                'x': 'time',
-                'y': ['flow_rate_measured', 'flow_rate_set'],
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -1603,6 +1554,12 @@ class CE_NOME_PumpRateMeasurement(PumpRateMeasurement, EntryData):
             except Exception as e:
                 logger.error(e)
         super().normalize(archive, logger)
+        fig1 = make_flow_rate_plot(
+            self.time, self.flow_rate_measured, self.flow_rate_set
+        )
+        self.figures = [
+            PlotlyFigure(label='Flow Rate', figure=json.loads(fig1.to_json())),
+        ]
 
 
 class CE_NOME_TIF_Image(BaseMeasurement, EntryData):

@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+import json
 import os
 
 from baseclasses.characterizations import XRD, XRDData
@@ -26,9 +27,21 @@ from baseclasses.chemical_energy import (
     OpenCircuitVoltage,
 )
 from nomad.datamodel.data import EntryData
+from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 
 # from nomad.units import ureg
 from nomad.metainfo import SchemaPackage, Section
+
+from nomad_chemical_energy.schema_packages.utilities.plotly_figure_helpers import (
+    make_bode_plot,
+    make_current_density_over_voltage_cv_plot,
+    make_current_density_over_voltage_rhe_cv_plot,
+    make_current_over_voltage_cv_plot,
+    make_nyquist_plot,
+    make_voltage_plot,
+    make_xrd_data_plot,
+    make_xrd_measurements_plot,
+)
 
 m_package = SchemaPackage()
 
@@ -87,7 +100,7 @@ class Wannsee_EM_M001_SEM_Merlin(SEM_Microscope_Merlin, EntryData):
 
 
 # %%
-class Wannsee_D8_XRD_Bruker(XRD, EntryData):
+class Wannsee_D8_XRD_Bruker(XRD, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -107,24 +120,18 @@ class Wannsee_D8_XRD_Bruker(XRD, EntryData):
             ],
             properties=dict(order=['name', 'data_file', 'samples', 'solution']),
         ),
-        a_plot=[
-            {
-                'x': ['measurements/:/angle', 'shifted_data/:/angle'],
-                'y': ['measurements/:/intensity', 'shifted_data/:/intensity'],
-                'layout': {
-                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
         self.identifier = 'HZB_WANNSEE'
         super().normalize(archive, logger)
+        fig1 = make_xrd_measurements_plot(self.measurements, self.shifted_data)
+        self.figures = [
+            PlotlyFigure(label='XRD', figure=json.loads(fig1.to_json())),
+        ]
 
 
-class Wannsee_XRD_XY(XRD, EntryData):
+class Wannsee_XRD_XY(XRD, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -144,16 +151,6 @@ class Wannsee_XRD_XY(XRD, EntryData):
             ],
             properties=dict(order=['name', 'data_file', 'samples', 'solution']),
         ),
-        a_plot=[
-            {
-                'x': ['data/angle'],
-                'y': ['data/intensity'],
-                'layout': {
-                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
 
     def normalize(self, archive, logger):
@@ -175,9 +172,13 @@ class Wannsee_XRD_XY(XRD, EntryData):
                     print(data)
                     self.data = XRDData(angle=data[0], intensity=data[1])
         super().normalize(archive, logger)
+        fig1 = make_xrd_data_plot(self.data)
+        self.figures = [
+            PlotlyFigure(label='XRD', figure=json.loads(fig1.to_json())),
+        ]
 
 
-class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
+class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -206,28 +207,22 @@ class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
                 order=['name', 'data_file', 'environment', 'setup', 'samples']
             ),
         ),
-        a_plot=[
-            {
-                'x': 'cycles/:/voltage',
-                'y': 'cycles/:/current',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-            {
-                'label': 'Current Density over Voltage RHE',
-                'x': 'cycles/:/voltage_rhe_compensated',
-                'y': 'cycles/:/current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_current_over_voltage_cv_plot(self.cycles)
+        fig2 = make_current_density_over_voltage_rhe_cv_plot(self.cycles)
+        self.figures = [
+            PlotlyFigure(
+                label='Current over Voltage',
+                figure=json.loads(fig1.to_json()),
+            ),
+            PlotlyFigure(
+                label='Current Density over Voltage RHE',
+                figure=json.loads(fig2.to_json()),
+            ),
+        ]
 
     # def normalize(self, archive, logger):
     #     if self.data_file:
@@ -246,7 +241,11 @@ class Wannsee_B307_CyclicVoltammetry_ECLab(CyclicVoltammetry, EntryData):
     #           self).normalize(archive, logger)
 
 
-class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
+class Wannsee_B307_CyclicVoltammetry_CorrWare(
+    CyclicVoltammetry,
+    EntryData,
+    PlotSection,
+):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -275,28 +274,22 @@ class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
                 order=['name', 'data_file', 'environment', 'setup', 'samples']
             ),
         ),
-        a_plot=[
-            {
-                'x': 'cycles/:/voltage',
-                'y': 'cycles/:/current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-            {
-                'label': 'Current Density over Voltage RHE',
-                'x': 'cycles/:/voltage_rhe_compensated',
-                'y': 'cycles/:/current_density',
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_current_density_over_voltage_cv_plot(self.cycles)
+        fig2 = make_current_density_over_voltage_rhe_cv_plot(self.cycles)
+        self.figures = [
+            PlotlyFigure(
+                label='Current Density over Voltage',
+                figure=json.loads(fig1.to_json()),
+            ),
+            PlotlyFigure(
+                label='Current Density over Voltage RHE',
+                figure=json.loads(fig2.to_json()),
+            ),
+        ]
 
     # def normalize(self, archive, logger):
     #     if self.data_file:
@@ -317,7 +310,9 @@ class Wannsee_B307_CyclicVoltammetry_CorrWare(CyclicVoltammetry, EntryData):
 
 
 class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
-    ElectrochemicalImpedanceSpectroscopy, EntryData
+    ElectrochemicalImpedanceSpectroscopy,
+    EntryData,
+    PlotSection,
 ):
     m_def = Section(
         a_eln=dict(
@@ -337,28 +332,18 @@ class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
                 order=['name', 'data_file', 'environment', 'setup', 'samples']
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Nyquist Plot',
-                'x': 'z_real',
-                'y': 'z_imaginary',
-                'layout': {
-                    'yaxis': {'fixedrange': False, 'title': '-Im(Z) (Ω)'},
-                    'xaxis': {'fixedrange': False, 'title': 'Re(Z) (Ω)'},
-                },
-            },
-            {
-                'label': 'Bode Plot',
-                'x': ['frequency', 'frequency'],
-                'y': ['./z_modulus', './z_angle'],
-                'layout': {
-                    'showlegend': True,
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False, 'type': 'log'},
-                },
-            },
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_nyquist_plot(z_real=self.z_real, z_imaginary=self.z_imaginary)
+        fig2 = make_bode_plot(
+            frequency=self.frequency, z_modulus=self.z_modulus, z_angle=self.z_angle
+        )
+        self.figures = [
+            PlotlyFigure(label='Nyquist Plot', figure=json.loads(fig1.to_json())),
+            PlotlyFigure(label='Bode Plot', figure=json.loads(fig2.to_json())),
+        ]
 
     # def normalize(self, archive, logger):
     #     if self.data_file:
@@ -382,7 +367,7 @@ class Wannsee_B307_ElectrochemicalImpedanceSpectroscopy_ECLab(
     #         logger)
 
 
-class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
+class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -407,18 +392,14 @@ class Wannsee_B307_OpenCircuitVoltage_ECLab(OpenCircuitVoltage, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'label': 'Voltage',
-                'x': 'time',
-                'y': 'voltage',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_voltage_plot(self.time, self.voltage)
+        self.figures = [
+            PlotlyFigure(label='Voltage over Time', figure=json.loads(fig1.to_json())),
+        ]
 
     # def normalize(self, archive, logger):
     #     if self.data_file:

@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+import json
 
 # from nomad.units import ureg
 from baseclasses.characterizations import (
@@ -35,7 +36,12 @@ from baseclasses.characterizations import (
 # from nomad_measurements.xrd import XRayDiffraction
 from baseclasses.characterizations.electron_microscopy import SEM_Microscope_Merlin
 from nomad.datamodel.data import EntryData
+from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 from nomad.metainfo import SchemaPackage, Section
+
+from nomad_chemical_energy.schema_packages.utilities.plotly_figure_helpers import (
+    make_xrd_data_plot,
+)
 
 m_package = SchemaPackage()
 
@@ -188,7 +194,7 @@ class HZB_XRF_Library(XRFLibrary, EntryData):
         super().normalize(archive, logger)
 
 
-class HZB_XRD(XRD, EntryData):
+class HZB_XRD(XRD, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -205,17 +211,14 @@ class HZB_XRD(XRD, EntryData):
             ],
             properties=dict(order=['name', 'data_file', 'samples']),
         ),
-        a_plot=[
-            {
-                'x': ['data/angle'],
-                'y': ['data/intensity'],
-                'layout': {
-                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_xrd_data_plot(self.data)
+        self.figures = [
+            PlotlyFigure(label='XRD', figure=json.loads(fig1.to_json())),
+        ]
 
     # def normalize(self, archive, logger):
 

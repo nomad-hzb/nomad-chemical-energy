@@ -17,6 +17,8 @@
 #
 
 
+import json
+
 # from nomad.units import ureg
 from baseclasses.characterizations import (
     SPV,
@@ -48,12 +50,22 @@ from baseclasses.wet_chemical_deposition import (
     WetChemicalDeposition,
 )
 from nomad.datamodel.data import EntryData
+from nomad.datamodel.metainfo.plot import PlotlyFigure, PlotSection
 from nomad.metainfo import (
     Quantity,
     Reference,
     SchemaPackage,
     Section,
     SubSection,
+)
+
+from nomad_chemical_energy.schema_packages.utilities.plotly_figure_helpers import (
+    make_current_over_voltage_plot,
+    make_current_plot,
+    make_raman_plot,
+    make_voltage_plot,
+    make_xrd_data_plot,
+    make_xy_plot,
 )
 
 from .utilities.ce_nsli_id import CENSLIIdentifier
@@ -322,7 +334,7 @@ class CE_NSLI_SEM(SEM_Microscope_Merlin, EntryData):
     )
 
 
-class CE_NSLI_XRD_XY(XRD, EntryData):
+class CE_NSLI_XRD_XY(XRD, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -351,17 +363,14 @@ class CE_NSLI_XRD_XY(XRD, EntryData):
                 ]
             ),
         ),
-        a_plot=[
-            {
-                'x': ['data/angle'],
-                'y': ['data/intensity'],
-                'layout': {
-                    'yaxis': {'fixedrange': False, 'title': 'Counts'},
-                    'xaxis': {'fixedrange': False},
-                },
-            },
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_xrd_data_plot(self.data)
+        self.figures = [
+            PlotlyFigure(label='XRD', figure=json.loads(fig1.to_json())),
+        ]
 
     sample_preparation = Quantity(
         type=Reference(WetChemicalDeposition.m_def),
@@ -401,7 +410,7 @@ class CE_NSLI_XRD_XY(XRD, EntryData):
 # %%####################################### Measurements
 
 
-class CE_NSLI_CyclicVoltammetry(CyclicVoltammetry, EntryData):
+class CE_NSLI_CyclicVoltammetry(CyclicVoltammetry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -416,21 +425,20 @@ class CE_NSLI_CyclicVoltammetry(CyclicVoltammetry, EntryData):
                 'electrolyte',
             ]
         ),
-        a_plot=[
-            {
-                'label': 'Current',
-                'x': 'voltage',
-                'y': 'current',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
 
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_current_over_voltage_plot(self.current, self.voltage)
+        self.figures = [
+            PlotlyFigure(
+                label='Current over Voltage',
+                figure=json.loads(fig1.to_json()),
+            ),
+        ]
 
-class CE_NSLI_Chronoamperometry(Chronoamperometry, EntryData):
+
+class CE_NSLI_Chronoamperometry(Chronoamperometry, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -445,25 +453,17 @@ class CE_NSLI_Chronoamperometry(Chronoamperometry, EntryData):
                 'electrolyte',
             ]
         ),
-        a_plot=[
-            {
-                'label': 'Current',
-                'x': 'time',
-                'y': 'current',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-                'config': {
-                    'scrollZoom': True,
-                    'staticPlot': False,
-                },
-            }
-        ],
     )
 
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_current_plot(self.current, self.time)
+        self.figures = [
+            PlotlyFigure(label='Current over Time', figure=json.loads(fig1.to_json())),
+        ]
 
-class CE_NSLI_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
+
+class CE_NSLI_OpenCircuitVoltage(OpenCircuitVoltage, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(
             hide=[
@@ -478,18 +478,14 @@ class CE_NSLI_OpenCircuitVoltage(OpenCircuitVoltage, EntryData):
                 'electrolyte',
             ]
         ),
-        a_plot=[
-            {
-                'label': 'Voltage',
-                'x': 'time',
-                'y': 'voltage',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-            }
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_voltage_plot(self.time, self.voltage)
+        self.figures = [
+            PlotlyFigure(label='Voltage over Time', figure=json.loads(fig1.to_json())),
+        ]
 
 
 class CE_NSLI_ConstantPotential(ConstantPotential, EntryData):
@@ -498,36 +494,38 @@ class CE_NSLI_ConstantPotential(ConstantPotential, EntryData):
     )
 
 
-class CE_NSLI_RamanSpectroscopy(Raman, EntryData):
+class CE_NSLI_RamanSpectroscopy(Raman, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']),
-        a_plot=[
-            {
-                'label': 'Intensity',
-                'x': ['raman_shift', 'peaks_raman'],
-                'y': ['intensity', 'peaks_intensity'],
-                'layout': {'yaxis': {'type': 'lin'}},
-                'lines': [
-                    {'mode': 'lines', 'marker': {'color': 'rgb(40, 80, 130)'}},
-                    {'mode': 'markers', 'line': {'color': 'rgb(100, 0, 0)'}},
-                ],
-            }
-        ],
     )
 
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_raman_plot(
+            self.raman_shift, self.intensity, self.peaks_raman, self.peaks_intensity
+        )
+        self.figures = [
+            PlotlyFigure(label='Raman Spectrum', figure=json.loads(fig1.to_json())),
+        ]
 
-class CE_NSLI_InfraredSpectroscopy(InfraredSpectroscopy, EntryData):
+
+class CE_NSLI_InfraredSpectroscopy(InfraredSpectroscopy, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']),
-        a_plot=[
-            {
-                'label': 'Absorbance',
-                'x': 'wave_number',
-                'y': 'absorbance',
-                'layout': {'yaxis': {'type': 'lin'}},
-            }
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_xy_plot(
+            self.wave_number,
+            self.absorbance,
+            'Absorbance',
+            'Wave Number',
+            'Absorbance',
+        )
+        self.figures = [
+            PlotlyFigure(label='Absorbance', figure=json.loads(fig1.to_json())),
+        ]
 
 
 class CE_NSLI_XAS(XAS, EntryData):
@@ -560,22 +558,22 @@ class CE_NSLI_XPEEM(XPEEM, EntryData):
     )
 
 
-class CE_NSLI_Photocurrent(PhotoCurrent, EntryData):
+class CE_NSLI_Photocurrent(PhotoCurrent, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']),
-        a_plot=[
-            {
-                'label': 'Energy',
-                'x': 'energy',
-                'y': 'voltage',
-                'layout': {
-                    'yaxis': {'fixedrange': False},
-                    'xaxis': {'fixedrange': False},
-                },
-                'config': {'scrollZoom': True},
-            }
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_xy_plot(
+            self.energy, self.voltage, 'Voltage over Energy', 'Energy', 'Voltage'
+        )
+        self.figures = [
+            PlotlyFigure(
+                label='Voltage over Energy',
+                figure=json.loads(fig1.to_json()),
+            ),
+        ]
 
     # def normalize(self, archive, logger):
     #     super(CE_NSLI_Photocurrent, self).normalize(archive, logger)
@@ -626,19 +624,26 @@ class CE_NSLI_Photocurrent(PhotoCurrent, EntryData):
     #     self.electro_measurements = electro_measurements_list
 
 
-class CE_NSLI_SPV(SPV, EntryData):
+class CE_NSLI_SPV(SPV, EntryData, PlotSection):
     m_def = Section(
         a_eln=dict(hide=['lab_id', 'solution', 'users', 'location', 'end_time']),
-        a_plot=[
-            {
-                'label': 'Voltage',
-                'x': 'wavelength',
-                'y': 'volt',
-                'layout': {'yaxis': {'type': 'lin'}},
-                'config': {'editable': True, 'scrollZoom': True},
-            }
-        ],
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+        fig1 = make_xy_plot(
+            self.wavelength,
+            self.volt,
+            'Voltage over Wavelength',
+            'Wavelength',
+            'Voltage',
+        )
+        self.figures = [
+            PlotlyFigure(
+                label='Voltage over Wavelength',
+                figure=json.loads(fig1.to_json()),
+            ),
+        ]
 
 
 # %%####################################### Generic Entries

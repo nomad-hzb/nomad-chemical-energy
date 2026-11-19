@@ -88,6 +88,7 @@ def test_nome_ocp_parser():
     archive = get_archive(file)
     assert archive.data
     assert 'Open' in str(archive.data.m_def)
+    assert len(archive.data.figures) == 1
 
 
 def test_normalize_all(parsed_archive):
@@ -136,6 +137,7 @@ def test_biologic_eclab_constC_parser():
     assert (
         round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
     )
+    assert len(archive.data.figures) == 0
 
 
 def test_biologic_eclab_constV_parser():
@@ -148,6 +150,7 @@ def test_biologic_eclab_constV_parser():
     assert (
         round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
     )
+    assert len(archive.data.figures) == 0
 
 
 def test_biologic_eclab_GEIS_parser():
@@ -162,6 +165,7 @@ def test_biologic_eclab_GEIS_parser():
     assert (
         round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
     )
+    assert len(archive.data.figures) == 2
 
 
 def test_biologic_eclab_LSV_parser():
@@ -174,6 +178,7 @@ def test_biologic_eclab_LSV_parser():
     assert (
         round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
     )
+    assert len(archive.data.figures) == 2
 
 
 def test_biologic_eclab_PEIS_parser():
@@ -188,6 +193,7 @@ def test_biologic_eclab_PEIS_parser():
     assert (
         round(archive.data.setup_parameters.active_material_mass.magnitude, 3) == 0.001
     )
+    assert len(archive.data.figures) == 2
 
 
 def test_gamry_EIS_parser():
@@ -199,6 +205,7 @@ def test_gamry_EIS_parser():
     assert archive.data.z_real[0]
     assert archive.data.atmosphere[0].temperature.magnitude == 25
     assert archive.data.properties.initial_frequency.magnitude == 2 * 1e6
+    assert len(archive.data.figures) == 2
 
 
 def test_gamry_CV_parser():
@@ -209,6 +216,7 @@ def test_gamry_CV_parser():
     assert archive.data.cycles[0].voltage[0]
     assert archive.data.atmosphere[0].temperature.magnitude == 25
     assert archive.data.properties.limit_potential_1.magnitude == 0.5
+    assert len(archive.data.figures) == 2
 
 
 def test_gamry_RRDE_parser():
@@ -223,6 +231,7 @@ def test_gamry_RRDE_parser():
     assert ca_archive.data.method == 'Chronoamperometry'
     assert ca_archive.data.function == 'Generator'
     assert round(ca_archive.data.current[-1].magnitude, 4) == -0.0028
+    assert len(ca_archive.data.figures) == 2
     assert cv_archive.data
     assert cv_archive.data.properties
     assert cv_archive.data.method == 'Cyclic Voltammetry'
@@ -231,6 +240,7 @@ def test_gamry_RRDE_parser():
     assert cv_archive.data.cycles[-1].time[-1].magnitude == 59.4007
     assert cv_archive.data.atmosphere[0].temperature.magnitude == 25
     assert cv_archive.data.properties.limit_potential_1.magnitude == -1.0402
+    assert len(cv_archive.data.figures) == 2
 
 
 def test_kmc3_parser():
@@ -241,6 +251,7 @@ def test_kmc3_parser():
     assert round(archive.data.energy[0].magnitude, 4) == 6.4140
     assert len(archive.data.sdd_parameters[0].fluo) == 526
     assert round(archive.data.sdd_parameters[1].slope, 4) == 0.9958
+    assert len(archive.data.figures) == 1
 
 
 def test_kmc3_parser_new_header():
@@ -252,6 +263,7 @@ def test_kmc3_parser_new_header():
     assert len(archive.data.sdd_parameters[0].fluo) == 483
     assert round(archive.data.sdd_parameters[1].slope, 5) == 1.00108
     assert archive.data.quality_annotation == 'ICR within specified bounds'
+    assert len(archive.data.figures) == 1
 
 
 def test_kmc3_insitu_biologic_parser():
@@ -262,6 +274,7 @@ def test_kmc3_insitu_biologic_parser():
     assert len(archive.data.time) == 600
     assert round(archive.data.current[0].magnitude, 5) == -1.84409
     assert round(archive.data.voltage[2].magnitude, 5) == -0.44958
+    assert len(archive.data.figures) == 2
 
 
 def test_acmd_metadata_excel_parser():
@@ -705,6 +718,7 @@ def test_zahner_isw_acmd_parser():
     assert archive.data
     assert 'chronoamperometry' in str(archive.data.m_def).lower()
     assert len(archive.data.time) == 601
+    assert len(archive.data.figures) == 2
 
 
 def test_zahner_isw_2_acmd_parser():
@@ -713,6 +727,7 @@ def test_zahner_isw_2_acmd_parser():
     assert archive.data
     assert 'chronopotentiometry' in str(archive.data.m_def).lower()
     assert len(archive.data.time) == 301
+    assert len(archive.data.figures) == 1
 
 
 def test_zahner_isw_3_acmd_parser():
@@ -721,6 +736,7 @@ def test_zahner_isw_3_acmd_parser():
     assert archive.data
     assert 'galvanodynamicsweep' in str(archive.data.m_def).lower()
     assert len(archive.data.time) == 282
+    assert len(archive.data.figures) == 2
 
 
 def test_zahner_ism_acmd_parser():
@@ -729,6 +745,7 @@ def test_zahner_ism_acmd_parser():
     assert archive.data
     assert 'geis' in str(archive.data.m_def).lower()
     assert len(archive.data.measurements[0].data.frequency) == 33
+    assert len(archive.data.figures) == 2
 
 
 def test_zahner_ism_2_acmd_parser():
@@ -737,6 +754,7 @@ def test_zahner_ism_2_acmd_parser():
     assert archive.data
     assert 'peis' in str(archive.data.m_def).lower()
     assert len(archive.data.measurements[0].data.frequency) == 66
+    assert len(archive.data.figures) == 2
 
 
 def test_zahner_isc_acmd_parser():
@@ -746,6 +764,7 @@ def test_zahner_isc_acmd_parser():
     assert 'cyclicvolt' in str(archive.data.m_def).lower()
     assert len(archive.data.cycles[0].current) == 446
     assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.6
+    assert len(archive.data.figures) == 2
 
 
 def test_chi_bin_ca_acmd_parser():
@@ -759,6 +778,7 @@ def test_chi_bin_ca_acmd_parser():
     assert round(archive.data.current[0].to('A').magnitude, 8) == -0.00001007
     assert round(archive.data.properties.step_1_potential.magnitude, 3) == 0.001
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 2
 
 
 def test_chi_bin_cp_acmd_parser():
@@ -772,6 +792,7 @@ def test_chi_bin_cp_acmd_parser():
     assert round(archive.data.voltage[0].magnitude, 4) == 0.3532
     assert round(archive.data.properties.step_2_current.magnitude, 4) == 0.0007
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 1
 
 
 def test_chi_bin_cv_acmd_parser():
@@ -782,6 +803,7 @@ def test_chi_bin_cv_acmd_parser():
     assert len(archive.data.cycles[0].current) == 2100
     assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.65
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 2
 
 
 def test_chi_bin_eis_acmd_parser():
@@ -793,6 +815,7 @@ def test_chi_bin_eis_acmd_parser():
     assert round(archive.data.measurements[0].data.z_real[0].magnitude, 4) == 1.5701
     assert round(archive.data.measurements[0].ac_voltage.magnitude, 1) == 5.0
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 2
 
 
 def test_chi_bin_lsv_acmd_parser():
@@ -805,6 +828,7 @@ def test_chi_bin_lsv_acmd_parser():
     assert round(archive.data.voltage[0].magnitude, 5) == 0.4
     assert round(archive.data.properties.scan_rate.to('V/s').magnitude, 3) == 0.001
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 2
 
 
 def test_chi_txt_ca_acmd_parser():
@@ -818,6 +842,7 @@ def test_chi_txt_ca_acmd_parser():
     assert round(archive.data.current[0].to('A').magnitude, 8) == -0.00001007
     assert round(archive.data.properties.step_1_potential.magnitude, 3) == 0.001
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 2
 
 
 def test_chi_txt_cp_acmd_parser():
@@ -828,6 +853,7 @@ def test_chi_txt_cp_acmd_parser():
     assert 'chronopotentiometry' in str(archive.data.m_def).lower()
     assert round(archive.data.voltage[0].magnitude, 4) == 0.3532
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 1
 
 
 def test_chi_txt_lsv_acmd_parser():
@@ -838,6 +864,7 @@ def test_chi_txt_lsv_acmd_parser():
     assert 'linear' in str(archive.data.m_def).lower()
     assert round(archive.data.voltage[0].magnitude, 5) == -0.2
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 2
 
 
 def test_chi_txt_eis_acmd_parser():
@@ -848,6 +875,7 @@ def test_chi_txt_eis_acmd_parser():
     assert len(archive.data.measurements[0].data.frequency) == 73
     assert round(archive.data.measurements[0].ac_voltage.magnitude, 1) == 5.0
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 2
 
 
 def test_chi_txt_cv_acmd_parser():
@@ -858,6 +886,7 @@ def test_chi_txt_cv_acmd_parser():
     assert len(archive.data.cycles[0].current) == 1400
     assert round(archive.data.properties.limit_potential_1.magnitude, 5) == 0.2
     assert archive.data.station == 'CHI760E'
+    assert len(archive.data.figures) == 2
 
 
 def test_palmense_lsv_acmd_parser():
@@ -868,6 +897,7 @@ def test_palmense_lsv_acmd_parser():
     assert round(archive.data.datetime.timestamp(), 0) == 1752740575
     assert len(archive.data.current) == 121
     assert round(archive.data.voltage[0].magnitude, 5) == -0.09996
+    assert len(archive.data.figures) == 2
 
 
 def test_palmense_ocp_acmd_parser():
@@ -878,6 +908,7 @@ def test_palmense_ocp_acmd_parser():
     assert round(archive.data.datetime.timestamp(), 0) == 1752739293
     assert len(archive.data.voltage) == 61
     assert round(archive.data.voltage[0].magnitude, 5) == 0.96293
+    assert len(archive.data.figures) == 1
 
 
 def test_palmense_cv_acmd_parser():
@@ -888,6 +919,7 @@ def test_palmense_cv_acmd_parser():
     assert round(archive.data.datetime.timestamp(), 0) == 1752739815
     assert len(archive.data.cycles) == 3
     assert round(archive.data.cycles[0].voltage[0].magnitude, 5) == 0.02496
+    assert len(archive.data.figures) == 2
 
 
 def test_palmense_peis_acmd_parser():
@@ -898,6 +930,7 @@ def test_palmense_peis_acmd_parser():
     assert round(archive.data.datetime.timestamp(), 0) == 1752741445
     assert len(archive.data.measurements[0].data.frequency) == 64
     assert round(archive.data.measurements[0].data.frequency[0].magnitude, 5) == 200000
+    assert len(archive.data.figures) == 2
 
 
 def test_palmense_cp_acmd_parser():
@@ -908,6 +941,7 @@ def test_palmense_cp_acmd_parser():
     assert round(archive.data.datetime.timestamp(), 0) == 1752495542
     assert len(archive.data.voltage) == 1441
     assert round(archive.data.voltage[0].magnitude, 5) == 0.65457
+    assert len(archive.data.figures) == 1
 
 
 def test_palmense_ca_acmd_parser():
@@ -918,6 +952,7 @@ def test_palmense_ca_acmd_parser():
     assert round(archive.data.datetime.timestamp(), 0) == 1738771707
     assert len(archive.data.voltage) == 101
     assert round(archive.data.current[0].magnitude, 5) == 0.00179
+    assert len(archive.data.figures) == 2
 
 
 def test_tfc_sputtering_parser():
@@ -931,6 +966,7 @@ def test_tfc_sputtering_parser():
     assert archive.data.process_properties[0].sputter_pressure.magnitude == 0.0167
     assert archive.data.targets[0].name == '1) Al'
     assert archive.data.observables[0].temperature.magnitude == 25
+    assert len(archive.data.figures) == 1
 
 
 def test_necc_ecgc_excel():
