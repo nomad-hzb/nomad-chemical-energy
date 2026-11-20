@@ -40,14 +40,10 @@ eln_app = App(
             'material': FilterMenu(label='Material', level=0),
             'elements': FilterMenu(label='Elements / Formula', level=1, size='xl'),
             'eln': FilterMenu(label='Electronic Lab Notebook', level=0),
-            'custom_quantities': FilterMenu(
-                label='User Defined Quantities', size=FilterMenuSizeEnum.L, level=0
-            ),
             'author': FilterMenu(
                 label='Author / Origin / Dataset', size=FilterMenuSizeEnum.M, level=0
             ),
             'metadata': FilterMenu(label='Visibility / IDs / Schema', level=0),
-            'optimade': FilterMenu(label='Optimade', level=0, size='m'),
         }
     ),
     # Controls which columns are shown in the results table

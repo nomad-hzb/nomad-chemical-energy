@@ -5,9 +5,7 @@ from nomad.config.models.ui import (
     Dashboard,
     Filters,
     Menu,
-    MenuItemCustomQuantities,
     MenuItemHistogram,
-    MenuItemOptimade,
     MenuItemPeriodicTable,
     MenuItemTerms,
     WidgetHistogram,
@@ -261,20 +259,6 @@ necc_find_experiments_app = App(
                     MenuItemTerms(search_quantity='authors.name'),
                     MenuItemHistogram(x={'search_quantity': 'upload_create_time'}),
                     MenuItemTerms(search_quantity='datasets.dataset_name'),
-                ],
-            ),
-            Menu(
-                title='User Defined Quantities',
-                size='xl',
-                items=[
-                    MenuItemCustomQuantities(),
-                ],
-            ),
-            Menu(
-                title='Optimade',
-                size='xl',
-                items=[
-                    MenuItemOptimade(),
                 ],
             ),
         ],

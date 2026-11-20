@@ -72,12 +72,8 @@ amcc_reproducibility_app = App(
             'material': FilterMenu(label='Material', level=0),
             'elements': FilterMenu(label='Elements / Formula', level=1, size='xl'),
             'eln': FilterMenu(label='Electronic Lab Notebook', level=0),
-            'custom_quantities': FilterMenu(
-                label='User Defined Quantities', level=0, size='l'
-            ),
             'author': FilterMenu(label='Author / Origin / Dataset', level=0, size='m'),
             'metadata': FilterMenu(label='Visibility / IDs / Schema', level=0),
-            'optimade': FilterMenu(label='Optimade', level=0, size='m'),
         }
     ),
     # Controls the default dashboard shown in the search interface
