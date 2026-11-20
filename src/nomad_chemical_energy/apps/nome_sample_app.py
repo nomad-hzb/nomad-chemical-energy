@@ -93,11 +93,6 @@ nome_sample_app = App(
                 label='Electronic Lab Notebook',
                 level=0,
             ),
-            'custom_quantities': FilterMenu(
-                label='User Defined Quantities',
-                level=0,
-                size=FilterMenuSizeEnum.L,
-            ),
             'author': FilterMenu(
                 label='Author',
                 size=FilterMenuSizeEnum.M,
@@ -105,11 +100,6 @@ nome_sample_app = App(
             'metadata': FilterMenu(
                 label='Visibility / IDs',
                 level=0,
-            ),
-            'optimade': FilterMenu(
-                label='Optimade',
-                level=0,
-                size=FilterMenuSizeEnum.M,
             ),
         }
     ),
